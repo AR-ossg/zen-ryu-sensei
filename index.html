@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Zen Warrior AI 4.0</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Enso.svg/512px-Enso.svg.png">
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Enso.svg/512px-Enso.svg.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <div id="app-container">
+    
+    <!-- Initial/Inception Modal -->
+    <div id="init-modal" class="modal-overlay">
+      <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+        <h2 style="font-family:'Cinzel',serif; color:var(--accent-gold); margin-bottom:10px;">⛩️ Conecta tu Espíritu</h2>
+        <p style="margin-bottom: 20px; font-size:0.9rem; color:#ccc;">El Máster evaluará tu base actual y forjará tu progresión hacia la iluminación.</p>
+        <input type="text" id="init-name" placeholder="Tu Nombre">
+        
+        <div class="stats-input" style="border-top:1px solid #333; padding-top:15px; margin-top:10px;">
+          <label style="flex-direction:column; align-items:flex-start; margin-bottom: 5px;">
+            <span style="display:block; margin-bottom:3px; color:#fff;">Fuerza Estimada</span>
+            <span style="font-size:0.75rem; color:#aaa;">¿Cuántas flexiones seguidas logras hacer?</span>
+            <input type="number" id="init-str" value="5" min="0" style="width:100%">
+          </label>
+          <label style="flex-direction:column; align-items:flex-start; margin-bottom: 5px;">
+            <span style="display:block; margin-bottom:3px; color:#fff;">Velocidad y Ritmo</span>
+            <span style="font-size:0.75rem; color:#aaa;">¿Cuántos burpees harías en 1 minuto?</span>
+            <input type="number" id="init-spd" value="10" min="0" style="width:100%">
+          </label>
+          <label style="flex-direction:column; align-items:flex-start; margin-bottom: 5px;">
+            <span style="display:block; margin-bottom:3px; color:#fff;">Flexibilidad</span>
+            <span style="font-size:0.75rem; color:#aaa;">Del 1 al 10, ¿qué tan flexible eres?</span>
+            <input type="number" id="init-flex" value="3" min="1" max="10" style="width:100%">
+          </label>
+          <label style="flex-direction:column; align-items:flex-start; margin-bottom: 5px;">
+            <span style="display:block; margin-bottom:3px; color:#fff;">Resistencia Constante</span>
+            <span style="font-size:0.75rem; color:#aaa;">¿Cuántos minutos aguantas en plancha?</span>
+            <input type="number" id="init-end" value="1" min="0" step="0.5" style="width:100%">
+          </label>
+        </div>
+        
+        <div style="text-align:left; border-top:1px solid #333; padding-top:15px; margin-top:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+             <label style="font-size:0.8rem; color:var(--accent-gold); font-weight:bold;">🛡️ Tu Propia API Key Obligatoria:</label>
+             <button class="btn-secondary" style="width:auto; padding: 4px 8px; font-size:0.7rem;" onclick="document.getElementById('api-manual-modal').style.display='flex'">Explicación ⚡</button>
+          </div>
+          <input type="password" id="init-api-key" placeholder="Obligatorio pegar tu llave AIzaSy...">
+        </div>
+
+        <button id="btn-start" class="btn-primary" style="margin-top:20px;">Forjar Juramento</button>
+      </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="app-header">
+      <div class="header-info">
+        <h1 id="player-title">Zen Warrior</h1>
+        <div class="player-rank">
+          <span id="player-name">Desconocido</span> - Nivel <span id="player-level">1</span> <br>
+          <span id="player-rank-title" style="color:var(--accent-gold); font-size:1.1rem; font-family:'Cinzel',serif;">Semilla Inactiva</span><br>
+          <span style="color:#888; font-size: 0.8rem;">Sesiones Realizadas: <span id="player-sessions" style="color:#fff;">0</span></span>
+        </div>
+      </div>
+      <div class="xp-bar-container">
+        <div id="xp-bar" class="xp-bar-fill"></div>
+        <span id="xp-text">0 / 400 XP</span>
+      </div>
+    </header>
+
+    <!-- VIEW 1: HOME -->
+    <main id="home-view">
+      
+      <!-- Quote of the Day -->
+      <div class="pergamino-home" style="margin-top: 5px; padding: 15px; border-radius: 8px;">
+         <div id="maestro-quote" style="font-size: 1.1rem; font-style: italic; text-align: center; color: var(--accent-red); font-family: 'Cinzel', serif;">
+            "Sincronizando con el Chi universal..."
+         </div>
+      </div>
+
+      <!-- Avatar Section (10 Stages) -->
+      <section id="avatar-container">
+        <div id="avatar" class="avatar-egg glow-pulse">🌰</div>
+      </section>
+
+      <!-- Stats Section -->
+      <section id="stats-container" class="glass-card">
+        <div class="stat">
+          <span class="stat-icon">💪</span> <span id="stat-str">0.0</span>
+          <div style="font-size: 0.65rem; color: #999; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px;">Fuerza</div>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">⚡</span> <span id="stat-spd">0.0</span>
+          <div style="font-size: 0.65rem; color: #999; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px;">Rapidez</div>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🧘</span> <span id="stat-flex">0.0</span>
+          <div style="font-size: 0.65rem; color: #999; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px;">Flexib.</div>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🛡️</span> <span id="stat-end">0.0</span>
+          <div style="font-size: 0.65rem; color: #999; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px;">Aguante</div>
+        </div>
+      </section>
+
+      <!-- Controles Principales -->
+      <div class="action-buttons" style="margin-top: 20px;">
+        <button id="btn-start-routine" class="btn-primary" style="font-size: 1.25rem; padding: 15px; text-transform:uppercase;">Iniciar Combate AI</button>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+           <button id="btn-manual" class="btn-secondary" onclick="document.getElementById('pwa-modal').style.display='flex'">Instalar App</button>
+           <button id="btn-config-api" class="btn-secondary" onclick="openApiConfig()">API Key</button>
+        </div>
+      </div>
+
+      <!-- Dojo Radio Externos -->
+      <aside id="dojo-radio">
+        <h3>Frecuencias de Enfoque</h3>
+        <div class="radio-controls">
+          <button class="radio-btn" data-url="https://cdn.freesound.org/previews/467/467316_16058-hq.mp3">🧘 Meditativo</button>
+          <button class="radio-btn" data-url="https://cdn.freesound.org/previews/217/217575_2132540-hq.mp3">🔥 Fuego</button>
+          <button class="radio-btn" data-url="https://cdn.freesound.org/previews/519/519067_11264728-hq.mp3">⚔️ Combate</button>
+          <button id="radio-stop" class="radio-btn stop">⏹️</button>
+        </div>
+        <audio id="audio-player" src="" preload="none" loop></audio>
+      </aside>
+    </main>
+
+    <!-- VIEW 2: WORKOUT / ROUTINE -->
+    <main id="routine-view" style="display: none;">
+      <section id="scroll-container" class="pergamino">
+        <div id="loader" style="display: none; font-size: 1.2rem; text-align:center;">El Maestro está extrayendo un Enfoque Aleatorio y diseñando tu penitencia progresiva...</div>
+        
+        <div id="exercises-list"></div>
+
+        <div class="action-buttons" style="margin-top: 25px;">
+          <button id="btn-finish-routine" class="btn-complete" style="display:none; width:100%; font-size:1.1rem; margin-bottom:10px; background: linear-gradient(135deg, var(--accent-green), #1c7430);">✔️ Guardar Progreso y Salir</button>
+          <button id="btn-cancel-routine" class="btn-secondary" style="width:100%;">Abandonar la Arena</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL: Temporizador Inteligente -->
+    <div id="timer-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <h2>⏱️ Reloj de Esfuerzo</h2>
+        <div id="timer-display">00:00</div>
+        <div class="timer-controls" style="justify-content: center;">
+          <button id="timer-start" class="btn-primary" style="width: auto;">Empezar</button>
+          <button id="timer-stop" class="btn-secondary" style="width: auto;">Detener</button>
+          <button id="timer-close" class="btn-secondary" style="width: auto;">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Notificación -->
+    <div id="notification-modal" class="modal-overlay" style="display:none; z-index: 9999;">
+      <div class="modal-content">
+        <h2 id="noti-title" style="color:var(--accent-gold); margin-bottom: 15px; font-family:'Cinzel', serif;">Templo</h2>
+        <p id="noti-msg" style="font-size:1rem; color:#fff; line-height:1.5; margin-bottom: 25px;"></p>
+        <button id="noti-close" class="btn-primary">Acatar Sabiduría</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Info del Ejercicio -->
+    <div id="info-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-content" style="max-height: 80vh; overflow-y:auto;">
+        <h2 id="info-title" style="color: var(--accent-gold); margin-bottom: 10px; font-size:1.3rem;"></h2>
+        <p id="info-desc" style="font-size: 0.95rem; margin-bottom: 15px; color:#ddd; font-style:italic; line-height: 1.4; border-left:3px solid var(--accent-red); padding-left:10px; text-align: left;"></p>
+        <div id="info-img-container" style="margin-bottom: 15px;"></div>
+        <button id="info-close" class="btn-primary">Aclarado Sensei</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Instrucciones API KEY -->
+    <div id="api-manual-modal" class="modal-overlay" style="display:none; z-index:10005;">
+      <div class="modal-content" style="text-align: left; max-height: 85vh; overflow-y:auto;">
+        <h2 style="color:var(--accent-gold); margin-bottom: 15px; text-align:center;">🗝️ Obtener Clave</h2>
+        <p style="font-size:0.9rem; color:#ccc; line-height: 1.5; margin-bottom:15px;">
+          Tener tu propia clave evita que colisiones con otros alumnos y asegura que la IA te responda siempre gratis de por vida.<br><br>
+          1. Ve en un navegador a <b>aistudio.google.com/app/apikey</b><br>
+          2. Inicia sesión con Google.<br>
+          3. Haz clic en el botón azul enorme <b>"Create API key"</b>.<br>
+          4. Cópiala (Empieza con <i>AIzaSy...</i>) y pégala aquí. ¡Es 100% gratuita!
+        </p>
+        <button class="btn-primary" onclick="window.open('https://aistudio.google.com/app/apikey', '_blank')">Abrir AI Studio (Enlace externo)</button>
+        <button class="btn-secondary" style="margin-top:10px;" onclick="document.getElementById('api-manual-modal').style.display='none'">Regresar</button>
+      </div>
+    </div>
+
+    <!-- PWA INSTALL -->
+    <div id="pwa-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        <h2 style="color:var(--accent-gold); margin-bottom: 10px;">Instalación PWA</h2>
+        <div style="text-align: left; font-size:0.9rem; color:#ccc; line-height: 1.5; margin-bottom: 20px;">
+          <p>Lleva tu entrenamiento nativamente:</p><br>
+          <p>📱 <b>Android:</b> Menú (3 puntos) -> "Añadir a pantalla de inicio".</p><br>
+          <p>🍎 <b>iOS:</b> Botón central Compartir -> "Añadir a la pantalla de inicio".</p>
+        </div>
+        <button class="btn-secondary" onclick="document.getElementById('pwa-modal').style.display='none'">Volver</button>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIG API POST-INIT -->
+    <div id="post-api-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        <h2 style="color:var(--accent-gold); margin-bottom: 10px;">Llave del Conocimiento</h2>
+        <input type="password" id="post-api-key" placeholder="AIzaSy...">
+        <button class="btn-primary" onclick="saveSettingsAPI()">Guardar Llave</button>
+        <button class="btn-secondary" style="margin-top:10px;" onclick="document.getElementById('post-api-modal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+      });
+    }
+  </script>
+</body>
+</html>

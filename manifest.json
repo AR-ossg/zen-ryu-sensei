@@ -1,0 +1,17 @@
+{
+  "name": "Zen Warrior AI",
+  "short_name": "ZenWarrior",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ffd700",
+  "description": "El Dojo PWA que moldea tu disciplina mediante IA.",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Enso.svg/512px-Enso.svg.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
