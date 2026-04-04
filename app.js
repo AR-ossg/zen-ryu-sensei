@@ -53,12 +53,19 @@
     }
   }
 
+  // PWA INSTALL LOGIC
   let deferredPrompt;
+  const isIos = () => {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    return /iphone|ipad|ipod/.test(userAgent);
+  };
+  const isStandalone = () => ('standalone' in window.navigator && window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     let btnInstall = document.getElementById('install-banner');
-    if(btnInstall) {
+    if(btnInstall && !isStandalone()) {
       btnInstall.style.display = 'block';
       btnInstall.addEventListener('click', async () => {
          if(navigator.vibrate) navigator.vibrate(50);
@@ -67,6 +74,22 @@
          const { outcome } = await deferredPrompt.userChoice;
          deferredPrompt = null;
       });
+    }
+  });
+
+  // iOS Safari Custom Overlay Handler
+  window.addEventListener('load', () => {
+    if (isIos() && !isStandalone()) {
+      let btnInstall = document.getElementById('install-banner');
+      if(btnInstall) {
+        btnInstall.style.display = 'block';
+        btnInstall.querySelector('.mission-title').innerText = "INSTALAR APP (IOS)";
+        btnInstall.querySelector('.mission-stats span').innerText = "TOCA COMPARTIR LUEGO 'AÑADIR A INICIO'";
+        btnInstall.addEventListener('click', () => {
+           if(navigator.vibrate) navigator.vibrate(50);
+           showNotification("Safari bloquea la instalación nativa. Como guerrero debes hacerlo manualmente:\n\n1. En tu navegador, toca el ícono de 'Compartir' (el cuadrado con la flecha hacia arriba).\n2. En el menú, desplázate y pulsa 'Añadir a la pantalla de inicio'.", "Instalación en iPhone📱");
+        });
+      }
     }
   });
 

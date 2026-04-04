@@ -1,11 +1,11 @@
-const CACHE_NAME = 'zen-warrior-v5';
+const CACHE_NAME = 'zen-warrior-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './database.js',
-  './icon.svg',
+  './icon.png',
   './manifest.json'
 ];
 
