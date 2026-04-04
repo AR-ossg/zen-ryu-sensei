@@ -9,6 +9,8 @@
     workoutCount: 0
   };
 
+  let workoutHistory = [];
+
   const rankTitles = [
     { max: 4, title: "Semilla Inactiva", icon: "🌰" },
     { max: 9, title: "Brote de Bambú", icon: "🌱" },
@@ -32,10 +34,15 @@
 
   function savePlayer() {
     localStorage.setItem("zenWarriorPwaSave", JSON.stringify(player));
+    localStorage.setItem("zenWarriorHistory", JSON.stringify(workoutHistory));
   }
 
   function loadPlayer() {
     let saved = localStorage.getItem("zenWarriorPwaSave");
+    let hx = localStorage.getItem("zenWarriorHistory");
+    if (hx) {
+      try { workoutHistory = JSON.parse(hx); } catch(e) {}
+    }
     if (saved) {
       player = JSON.parse(saved);
       document.getElementById('onboarding-wizard').style.display = 'none';
@@ -44,6 +51,35 @@
       document.getElementById('onboarding-wizard').style.display = 'flex';
       document.getElementById('step-1').className = 'wizard-step active-step';
     }
+  }
+
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    let btnInstall = document.getElementById('install-banner');
+    if(btnInstall) {
+      btnInstall.style.display = 'block';
+      btnInstall.addEventListener('click', async () => {
+         if(navigator.vibrate) navigator.vibrate(50);
+         btnInstall.style.display = 'none';
+         deferredPrompt.prompt();
+         const { outcome } = await deferredPrompt.userChoice;
+         deferredPrompt = null;
+      });
+    }
+  });
+
+  function switchView(viewToShow, viewToHide) {
+    if (!document.startViewTransition) {
+       document.getElementById(viewToHide).className = 'hidden-view';
+       document.getElementById(viewToShow).className = 'active-view';
+       return;
+    }
+    document.startViewTransition(() => {
+       document.getElementById(viewToHide).className = 'hidden-view';
+       document.getElementById(viewToShow).className = 'active-view';
+    });
   }
 
   // ONBOARDING WIZARD
@@ -232,6 +268,12 @@
     });
     document.getElementById('codex-list').innerHTML = html;
     document.getElementById('codex-sessions').innerText = player.workoutCount;
+    
+    let hxHtml = workoutHistory.map(h => `<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">${h.date}</span><br><span style="color:#fff;">${h.type}</span></div>`).join('');
+    if(workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
+    let hxContainer = document.getElementById('codex-history');
+    if(hxContainer) hxContainer.innerHTML = hxHtml;
+
     document.getElementById('codex-modal').style.display = 'flex';
   }
 
@@ -333,8 +375,7 @@
   };
 
   function initRoutineGeneration(type) {
-    document.getElementById('home-view').className = 'hidden-view';
-    document.getElementById('routine-view').className = 'active-view';
+    switchView('routine-view', 'home-view');
     document.getElementById('btn-finish-routine').style.display = 'none';
     document.getElementById('exercises-list').innerHTML = '';
     generateOfflineRoutine(type);
@@ -350,8 +391,7 @@
        updateUI();
        showNotification("Un guerrero conoce sus límites. Te has retirado del Examen de Ascenso. Has perdido experiencia, pero mañana regresarás más fuerte.", "Retorno a las Sombras");
     }
-    document.getElementById('routine-view').className = 'hidden-view';
-    document.getElementById('home-view').className = 'active-view';
+    switchView('home-view', 'routine-view');
   });
 
   document.getElementById('btn-finish-routine').addEventListener('click', () => {
@@ -365,10 +405,15 @@
     } else {
        showNotification("Ha sido una sesión exigente. Has forjado tu espíritu y sumado una Victoria Histórica a tu perfil.", "✅ Reposo del Guerrero");
     }
+    
+    if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+    let typeName = window.isExamRoutine ? "Examen Marcial" : (currentRoutine[0]?.domain === 'mobility' ? "Flexibilidad Activa" : "Acondicionamiento Físico");
+    workoutHistory.unshift({ date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), type: typeName });
+    if(workoutHistory.length > 50) workoutHistory.pop();
+
     player.workoutCount++;
     savePlayer();
-    document.getElementById('routine-view').className = 'hidden-view';
-    document.getElementById('home-view').className = 'active-view';
+    switchView('home-view', 'routine-view');
     document.getElementById('exercises-list').innerHTML = '';
     updateUI();
   });
@@ -442,6 +487,7 @@
   }
 
   window.completeTask = function(index, statAlias) {
+    if(navigator.vibrate) navigator.vibrate(50);
     let s = "str";
     if (statAlias.toLowerCase().includes("spd")) s = "spd";
     if (statAlias.toLowerCase().includes("flex")) s = "flex";
@@ -599,6 +645,7 @@
            clearInterval(timerInterval);
            timerSeconds = 0;
            playGong();
+           if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
            showNotification("¡EL TIEMPO SE HA AGOTADO! DESCANSAR.", "Cronos");
         }
       } else {
