@@ -58,36 +58,32 @@
 
   let deferredPrompt = null;
   
-  const isIos = () => {
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    return /iphone|ipad|ipod/.test(userAgent);
-  };
-
+  // Capturamos el evento de Android para el 1-clic
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    let btnInstall = document.getElementById('btn-install-pwa');
-    if (btnInstall && !isStandalone()) {
-      btnInstall.style.display = 'block';
-    }
   });
 
   window.addEventListener('load', () => {
     let btnInstall = document.getElementById('btn-install-pwa');
-    if (btnInstall) {
-      if (isIos() && !isStandalone()) {
-         btnInstall.style.display = 'block';
-      }
+    
+    // Siempre lo mostramos si NO estamos en la app instalada (standalone)
+    if (btnInstall && !isStandalone()) {
+      btnInstall.style.display = 'block';
       
       btnInstall.addEventListener('click', async () => {
         if(navigator.vibrate) navigator.vibrate(50);
+        
         if (deferredPrompt) {
-           btnInstall.style.display = 'none';
+           // Si Android nos dio el prompt nativo, lo usamos (1-clic)
            deferredPrompt.prompt();
-           await deferredPrompt.userChoice;
+           const { outcome } = await deferredPrompt.userChoice;
+           if (outcome === 'accepted') {
+               btnInstall.style.display = 'none';
+           }
            deferredPrompt = null;
         } else {
-           // Fallback brillante para iOS
+           // Si es iOS o Android no proporcionó prompt nativo, mostramos instrucciones
            document.getElementById('pwa-modal').style.display = 'flex';
         }
       });
