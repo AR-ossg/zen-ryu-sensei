@@ -66,10 +66,11 @@
 
   window.addEventListener('load', () => {
     let btnInstall = document.getElementById('btn-install-pwa');
+    let gate = document.getElementById('install-gate');
     
     // Siempre lo mostramos si NO estamos en la app instalada (standalone)
-    if (btnInstall && !isStandalone()) {
-      btnInstall.style.display = 'block';
+    if (btnInstall && gate && !isStandalone()) {
+      gate.style.display = 'flex';
       
       btnInstall.addEventListener('click', async () => {
         if(navigator.vibrate) navigator.vibrate(50);
@@ -79,7 +80,7 @@
            deferredPrompt.prompt();
            const { outcome } = await deferredPrompt.userChoice;
            if (outcome === 'accepted') {
-               btnInstall.style.display = 'none';
+               gate.style.display = 'none';
            }
            deferredPrompt = null;
         } else {
