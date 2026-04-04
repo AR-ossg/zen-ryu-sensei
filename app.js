@@ -53,43 +53,44 @@
     }
   }
 
-  // PWA INSTALL LOGIC
-  let deferredPrompt;
+  // PWA INSTALL LOGIC (UNIVERSAL)
+  const isStandalone = () => ('standalone' in window.navigator && window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+
+  let deferredPrompt = null;
+  
   const isIos = () => {
     const userAgent = window.navigator.userAgent.toLowerCase();
     return /iphone|ipad|ipod/.test(userAgent);
   };
-  const isStandalone = () => ('standalone' in window.navigator && window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    let btnInstall = document.getElementById('install-banner');
-    if(btnInstall && !isStandalone()) {
+    let btnInstall = document.getElementById('btn-install-pwa');
+    if (btnInstall && !isStandalone()) {
       btnInstall.style.display = 'block';
-      btnInstall.addEventListener('click', async () => {
-         if(navigator.vibrate) navigator.vibrate(50);
-         btnInstall.style.display = 'none';
-         deferredPrompt.prompt();
-         const { outcome } = await deferredPrompt.userChoice;
-         deferredPrompt = null;
-      });
     }
   });
 
-  // iOS Safari Custom Overlay Handler
   window.addEventListener('load', () => {
-    if (isIos() && !isStandalone()) {
-      let btnInstall = document.getElementById('install-banner');
-      if(btnInstall) {
-        btnInstall.style.display = 'block';
-        btnInstall.querySelector('.mission-title').innerText = "INSTALAR APP (IOS)";
-        btnInstall.querySelector('.mission-stats span').innerText = "TOCA COMPARTIR LUEGO 'AÑADIR A INICIO'";
-        btnInstall.addEventListener('click', () => {
-           if(navigator.vibrate) navigator.vibrate(50);
-           showNotification("Safari bloquea la instalación nativa. Como guerrero debes hacerlo manualmente:\n\n1. En tu navegador, toca el ícono de 'Compartir' (el cuadrado con la flecha hacia arriba).\n2. En el menú, desplázate y pulsa 'Añadir a la pantalla de inicio'.", "Instalación en iPhone📱");
-        });
+    let btnInstall = document.getElementById('btn-install-pwa');
+    if (btnInstall) {
+      if (isIos() && !isStandalone()) {
+         btnInstall.style.display = 'block';
       }
+      
+      btnInstall.addEventListener('click', async () => {
+        if(navigator.vibrate) navigator.vibrate(50);
+        if (deferredPrompt) {
+           btnInstall.style.display = 'none';
+           deferredPrompt.prompt();
+           await deferredPrompt.userChoice;
+           deferredPrompt = null;
+        } else {
+           // Fallback brillante para iOS
+           document.getElementById('pwa-modal').style.display = 'flex';
+        }
+      });
     }
   });
 
@@ -132,10 +133,15 @@
     }
 
     player.name = document.getElementById('ob-name').value;
-    player.stats.str = parseInt(document.getElementById('ob-str').value) || 5;
-    player.stats.spd = parseInt(document.getElementById('ob-spd').value) || 10;
-    player.stats.flex = parseInt(document.getElementById('ob-flex').value) || 3;
-    player.stats.end = parseFloat(document.getElementById('ob-end').value) || 1;
+    let vStr = parseInt(document.getElementById('ob-str').value);
+    let vSpd = parseInt(document.getElementById('ob-spd').value);
+    let vFlex = parseInt(document.getElementById('ob-flex').value);
+    let vEnd = parseFloat(document.getElementById('ob-end').value);
+
+    player.stats.str = isNaN(vStr) ? 5 : vStr;
+    player.stats.spd = isNaN(vSpd) ? 10 : vSpd;
+    player.stats.flex = isNaN(vFlex) ? 3 : vFlex;
+    player.stats.end = isNaN(vEnd) ? 1 : vEnd;
     
     // Calcular nivel base aproximado matemático (Escalado de 1 a 10 aprox)
     let bLvl = Math.floor((player.stats.str*0.1 + player.stats.spd*0.05 + player.stats.flex*0.3 + player.stats.end*2));
@@ -260,8 +266,8 @@
     let imgContainer = document.getElementById('info-img-container');
     if (imgUrl && (imgUrl.startsWith('http') || imgUrl.startsWith('./'))) {
       imgContainer.innerHTML = `
-        <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">
-        <div style="font-size:0.65rem; color:#666; text-align:center; margin-top:8px; font-family:'Inter';">Animación biomecánica provista bajo licencia abierta</div>
+        <img src="${imgUrl}" class="zoomable-image" onclick="this.classList.toggle('zoomed-image')" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">
+        <div style="font-size:0.65rem; color:#666; text-align:center; margin-top:8px; font-family:'Inter';">Cámaras del Códice - Toca la imagen para Ampliar/Reducir.</div>
       `;
     } else {
       imgContainer.innerHTML = `<div style="width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>`;
