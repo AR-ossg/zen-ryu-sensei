@@ -59,8 +59,14 @@ body {
 .stats-header { font-size: 0.6rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; display:flex; align-items:center; gap:8px; font-weight: 700;}
 .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-gold); display:block; box-shadow: 0 0 5px var(--accent-gold);}
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 18px;}
-.hud-stat { display: flex; flex-direction: column; justify-content: center; font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; align-items: center; border:1px solid #222; background:rgba(0,0,0,0.4); padding:8px 2px; border-radius:8px;}
+.hud-stat { display: flex; flex-direction: column; justify-content: center; font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; align-items: center; border:1px solid #222; background:rgba(0,0,0,0.4); padding:8px 2px; border-radius:8px; text-align: center;}
 .hud-val { color: #fff; font-weight: 700; font-family: monospace; font-size: 1.1rem; color: var(--accent-gold); margin-top:5px; text-shadow:0 0 5px rgba(255,215,0,0.5);}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .hud-stat { padding: 12px 5px; font-size: 0.75rem; }
+  .hud-val { font-size: 1.3rem; }
+}
 
 .xp-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 6px; font-weight: 700;}
 .xp-bar-container { background: #000; height: 8px; border-radius: 4px; border: 1px solid #333; overflow: hidden; }
