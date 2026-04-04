@@ -134,15 +134,24 @@
   window.openInfoModal = function(name, desc, imgUrl) {
     document.getElementById('info-title').innerText = name;
     
-    let listHtml = desc.replace(/(\d+\.)/g, '<br><br><span style="color:var(--accent-gold); font-size:1.1rem; font-weight:bold;">$1</span> ');
-    if (listHtml.startsWith('<br><br>')) listHtml = listHtml.substring(8);
+    let items = desc.split(/\d+\.\s*/).filter(i => i.trim() !== '');
+    let listHtml = '';
+    if (items.length > 1) {
+      listHtml = '<ol style="padding-left: 20px; font-family: \'Inter\', sans-serif;">';
+      items.forEach(item => {
+          listHtml += `<li style="margin-bottom: 12px; color: #ccc;">${item.trim()}</li>`;
+      });
+      listHtml += '</ol>';
+    } else {
+      listHtml = `<p style="line-height:1.5; color:#ccc;">${desc}</p>`;
+    }
     document.getElementById('info-desc').innerHTML = listHtml;
     
     let imgContainer = document.getElementById('info-img-container');
     if (imgUrl && imgUrl.startsWith('http')) {
       imgContainer.innerHTML = `<img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">`;
     } else {
-      imgContainer.innerHTML = '';
+      imgContainer.innerHTML = `<div style="width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>`;
     }
     document.getElementById('info-modal').style.display = 'flex';
   }
@@ -173,25 +182,27 @@
   }
 
   // ORÁCULO OFFLINE (MOTOR PROCEDIMENTAL)
-  function generateOfflineRoutine() {
+  function generateOfflineRoutine(type = 'conditioning') {
     document.getElementById('loader').style.display = 'block';
     
     setTimeout(() => {
-      // 1. Filtrar base de datos según el nivel del jugador
-      let validExercises = EXERCISE_DB.filter(ex => player.level >= ex.lvl_min && player.level <= ex.lvl_max);
+      // 1. Filtrar base de datos según el nivel del jugador y el tipo (domain)
+      let validExercises = EXERCISE_DB.filter(ex => player.level >= ex.lvl_min && player.level <= ex.lvl_max && ex.domain === type);
       
-      // Si por alguna razón no hay validos (muy raro), tomamos todos.
-      if(validExercises.length < 5) validExercises = EXERCISE_DB;
+      // Si por alguna razón no hay validos, relajar el nivel
+      if(validExercises.length < 5) validExercises = EXERCISE_DB.filter(ex => ex.domain === type);
+      if(validExercises.length === 0) validExercises = EXERCISE_DB; // Failsafe extremo
 
-      // 2. Seleccionar 5 aleatorios
+      // 2. Seleccionar 4 o 5 aleatorios dependiendo del tipo
       let shuffled = validExercises.sort(() => 0.5 - Math.random());
-      let selected = shuffled.slice(0, 5);
+      let selected = shuffled.slice(0, type === 'mobility' ? 4 : 5);
 
       // 3. Escalar matemáticamente
       let routine = selected.map(ex => {
         // Fórmula de escala = baseVal + (Nivel - lvl_min) * scale
         let factor = (player.level - ex.lvl_min) * ex.scale;
         let finalVal = Math.floor(Math.max(ex.baseVal, ex.baseVal + factor));
+        let numSets = type === 'mobility' ? 2 : (player.level > 20 ? 4 : 3);
         
         return {
           id: ex.id,
@@ -200,16 +211,13 @@
           t: ex.t,
           val: finalVal,
           s: ex.s,
-          sets: player.level > 20 ? 4 : 3,
+          sets: numSets,
           desc: ex.desc,
           m: ex.m,
           alt: ex.alt
         };
       });
 
-      let randomQuote = zenQuotes[Math.floor(Math.random() * zenQuotes.length)];
-      document.getElementById('maestro-quote').innerText = '"' + randomQuote + '"';
-      
       currentRoutine = routine; // Se guarda en variable global para mutaciones
       document.getElementById('loader').style.display = 'none';
       renderExercises(routine);
@@ -217,16 +225,16 @@
     }, 600); // Simulamos "Carga Neural" para efecto inmersivo
   }
 
-  const startRoutineHandler = () => {
+  const startRoutineHandler = (type = 'conditioning') => {
     document.getElementById('home-view').className = 'hidden-view';
     document.getElementById('routine-view').className = 'active-view';
     document.getElementById('btn-finish-routine').style.display = 'none';
     document.getElementById('exercises-list').innerHTML = '';
-    generateOfflineRoutine();
+    generateOfflineRoutine(type);
   };
 
-  if(document.getElementById('btn-start-routine-card')) document.getElementById('btn-start-routine-card').addEventListener('click', startRoutineHandler);
-  if(document.getElementById('btn-start-routine-nav')) document.getElementById('btn-start-routine-nav').addEventListener('click', startRoutineHandler);
+  if(document.getElementById('btn-start-conditioning')) document.getElementById('btn-start-conditioning').addEventListener('click', () => startRoutineHandler('conditioning'));
+  if(document.getElementById('btn-start-mobility')) document.getElementById('btn-start-mobility').addEventListener('click', () => startRoutineHandler('mobility'));
 
   document.getElementById('btn-cancel-routine').addEventListener('click', () => {
     document.getElementById('routine-view').className = 'hidden-view';
@@ -249,7 +257,7 @@
        let current = currentRoutine[index];
        current.n = `${exObj.alt.n} (${exObj.alt.real})`;
        current.desc = exObj.alt.desc;
-       current.m = ""; // removemos imagen si cambia, u opcionalmente podríamos tener una.
+       current.m = exObj.alt.m || ""; 
        current.alt = null; // ya fue mutado
        renderExercises(currentRoutine); // re-render completo rápido
        showNotification("El Oráculo ha adaptado la técnica a tus circunstancias.", "Mutación Física");
@@ -267,7 +275,7 @@
       let numericVal = parseInt(ex.val) || 0;
       let timerBtn = isTime && numericVal > 0 
         ? `<button class="btn-secondary" style="width:auto;" onclick="openTimer(${numericVal})">⏱️ Temp. ${numericVal}s</button>`
-        : `<button class="btn-secondary" style="width:auto;" onclick="openTimer(0)">⏱️ Cronómetro</button>`;
+        : `<button class="btn-secondary" style="width:auto;" onclick="openTimer(60)">⏱️ Descanso 60s</button>`;
       
       let safeImg = ex.m && ex.m.startsWith('http') ? ex.m : '';
       let safeDesc = (ex.desc || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -305,7 +313,7 @@
       let finBtn = document.getElementById('btn-finish-routine');
       finBtn.style.display = 'block';
       finBtn.classList.add('pulse-glow');
-      finBtn.innerText = "🏆 RECLAMAR VICTORIA SECRETA";
+      finBtn.innerText = "🏆 FINALIZAR ENTRENAMIENTO";
       setTimeout(() => finBtn.scrollIntoView({behavior: 'smooth', block: 'end'}), 300);
     }
   }
@@ -355,8 +363,8 @@
   let isCountdown = false;
 
   window.openTimer = function(seconds) {
-    timerSeconds = seconds;
-    isCountdown = seconds > 0;
+    timerSeconds = parseInt(seconds, 10) || 0;
+    isCountdown = timerSeconds > 0;
     updateTimerDisplay();
     document.getElementById('timer-modal').style.display = 'flex';
   }
@@ -369,7 +377,7 @@
         if (timerSeconds <= 0) {
            clearInterval(timerInterval);
            timerSeconds = 0;
-           showNotification("¡EL TIEMPO SE HA AGOTADO! DESCANSA.", "Cronos");
+           showNotification("¡EL TIEMPO SE HA AGOTADO! DESCANSAR.", "Cronos");
         }
       } else {
         timerSeconds++;
@@ -388,6 +396,10 @@
     let s = (timerSeconds % 60).toString().padStart(2, '0');
     document.getElementById('timer-display').innerText = `${m}:${s}`;
   }
+
+  let initialQuote = zenQuotes[Math.floor(Math.random() * zenQuotes.length)];
+  let quoteEl = document.getElementById('maestro-quote');
+  if(quoteEl) quoteEl.innerText = '"' + initialQuote + '"';
 
   loadPlayer();
 })();

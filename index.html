@@ -85,12 +85,26 @@
       <div class="hero-subtitle">CALISTENIA MARCIAL</div>
     </div>
 
-    <!-- MAIN MISSION CARD -->
-    <div class="mission-card">
-      <div class="mission-status"><span>SENDA DEL GUERRERO</span> <span style="color:#fff;">DÍA ∞</span></div>
-      <h2 class="mission-title">ENTRENAMIENTO<br>DOJO AI</h2>
+    <!-- PERGAMINO DEL DRAGÓN -->
+    <div class="glass-panel" style="margin-bottom: 15px; border-color: var(--accent-gold); background: linear-gradient(180deg, rgba(30,30,30,0.8) 0%, rgba(10,10,10,0.95) 100%);">
+      <div style="text-align:center; color: var(--accent-gold); font-family: 'Cinzel'; font-size: 1.1rem; margin-bottom: 10px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 5px;">🐉 Sabiduría del Oráculo</div>
+      <div id="maestro-quote" style="font-size: 0.9rem; font-style: italic; text-align: center; color: #ccc; font-family: 'Cinzel', serif; line-height: 1.5;"></div>
+    </div>
+
+    <!-- MAIN MISSION CARDS -->
+    <div class="mission-card" style="margin-bottom: 15px;" id="btn-start-conditioning" style="cursor:pointer;">
+      <div class="mission-status"><span>ACONDICIONAMIENTO MARCIAL</span> <span></span></div>
+      <h2 class="mission-title">FUERZA Y<br>POTENCIA</h2>
       <div class="mission-stats">
-        <span>SOBRECARGA</span> <span>/</span> <span>HIPERTROFIA</span> <span>/</span> <span>RESILIENCIA</span>
+        <span>PURO IMPACTO</span> <span>/</span> <span>EXPLOSIVIDAD</span> <span>/</span> <span>ACERO CORE</span>
+      </div>
+    </div>
+
+    <div class="mission-card" style="margin-bottom: 15px; border-color: var(--accent-green); background: linear-gradient(135deg, rgba(40,167,69,0.15), rgba(0,0,0,0.8)); cursor:pointer;" id="btn-start-mobility">
+      <div class="mission-status"><span style="color:var(--accent-green);">RECUPERACIÓN ACTIVA</span> <span></span></div>
+      <h2 class="mission-title" style="color:var(--accent-green); text-shadow:0 0 10px rgba(40,167,69,0.3);">FLEXIBILIDAD Y<br>MOVILIDAD</h2>
+      <div class="mission-stats">
+        <span style="color:var(--accent-green);">DESCOMPRESIÓN</span> <span>/</span> <span style="color:var(--accent-green);">ELONGACIÓN ARTICULAR</span>
       </div>
     </div>
 
@@ -99,9 +113,9 @@
       <div class="stats-header"><span class="dot"></span> PERFIL DEL GUERRERO</div>
       <div class="stats-grid">
         <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">🦾</span><span>Fuerza</span> <span id="stat-str" class="hud-val">0.0</span></div>
-        <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">⚡</span><span>Rapidez</span> <span id="stat-spd" class="hud-val">0.0</span></div>
-        <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">🧘‍♂️</span><span>Flexión</span> <span id="stat-flex" class="hud-val">0.0</span></div>
-        <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">🛡️</span><span>Aguante</span> <span id="stat-end" class="hud-val">0.0</span></div>
+        <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">⚡</span><span>Velocidad</span> <span id="stat-spd" class="hud-val">0.0</span></div>
+        <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">🧘‍♂️</span><span>Flexibilidad</span> <span id="stat-flex" class="hud-val">0.0</span></div>
+        <div class="hud-stat"><span style="font-size:1.2rem; margin-bottom:4px;">🛡️</span><span>Resistencia</span> <span id="stat-end" class="hud-val">0.0</span></div>
       </div>
       <div class="xp-section">
         <div class="xp-labels"><span>PROGRESO DE RANGO</span> <span id="xp-text-mini" style="color:var(--accent-gold);">0 XP</span></div>
@@ -125,19 +139,13 @@
 
   <!-- ROUTINE VIEW -->
   <main id="routine-view" class="hidden-view">
-    <div class="glass-panel" style="margin-bottom:15px; border-color:var(--accent-gold);">
-       <div id="maestro-quote" style="font-size: 1rem; font-style: italic; text-align: center; color: var(--text-dim); font-family: 'Cinzel', serif;">
-          "Iniciando enlace con el Oráculo..."
-       </div>
-    </div>
-
     <div id="loader" style="display: none; font-size: 1.1rem; text-align:center; padding: 20px; font-family:'Cinzel',serif; color:var(--accent-gold);">El Maestro está forjando tu rutina...</div>
     
     <div id="exercises-list"></div>
 
     <div style="margin-top: 25px;">
-      <button id="btn-finish-routine" class="btn-complete" style="display:none; margin-bottom:15px;">✔️ RECLAMAR VICTORIA</button>
-      <button id="btn-cancel-routine" class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555;">ABANDONAR LA ARENA</button>
+      <button id="btn-finish-routine" class="btn-complete" style="display:none; margin-bottom:15px;">✔️ FINALIZAR ENTRENAMIENTO</button>
+      <button id="btn-cancel-routine" class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555;">CANCELAR RUTINA</button>
     </div>
   </main>
 
@@ -147,13 +155,6 @@
         <span class="nav-icon">📲</span>
         <span class="nav-label">APP</span>
      </div>
-     
-     <div class="nav-action-center" id="btn-start-routine-nav">
-        <div class="action-ring"></div>
-        <button class="action-fab">⚔️</button>
-        <div class="action-label">LUCHAR</div>
-     </div>
-
      <div class="nav-item" onclick="openCodexModal()">
         <span class="nav-icon">📜</span>
         <span class="nav-label">CÓDICE</span>
