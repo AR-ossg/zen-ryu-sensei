@@ -89,6 +89,11 @@
     updateUI();
   }
 
+  function checkExamPending() {
+    let rObj = getRankObj(player.level);
+    return player.level === rObj.max && player.xp >= player.level * 400;
+  }
+
   function updateUI() {
     document.getElementById('player-name').innerText = player.name;
     let rObj = getRankObj(player.level);
@@ -103,32 +108,78 @@
     document.getElementById('stat-end').innerText = player.stats.end.toFixed(1);
 
     let maxXP = player.level * 400;
-    if(document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `${Math.floor(player.xp)} / ${maxXP} XP`;
-    let percent = Math.min((player.xp / maxXP) * 100, 100);
-    document.getElementById('xp-bar').style.width = percent + '%';
+    let examModeReady = checkExamPending();
+    
+    if (examModeReady) {
+      if(document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `¡EXAMEN DISPONIBLE!`;
+      document.getElementById('xp-bar').style.width = '100%';
+      document.getElementById('xp-bar').style.background = 'linear-gradient(90deg, #ff0000, #ff5555)';
+      
+      let btnCond = document.getElementById('btn-start-conditioning');
+      if(btnCond) {
+          btnCond.style.borderColor = '#ff0000';
+          btnCond.innerHTML = `
+            <div class="mission-status"><span style="color:#ff0000;">PRUEBA DE ASCENSO</span> <span></span></div>
+            <h2 class="mission-title" style="color:#ff0000;">EXAMEN<br>MARCIAL</h2>
+            <div class="mission-stats" style="color:#ff5555;">
+              <span>DOLOR</span> <span>/</span> <span>RESISTENCIA EXTREMA</span> <span>/</span> <span>SINCERIDAD</span>
+            </div>`;
+      }
+    } else {
+      if(document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `${Math.floor(player.xp)} / ${maxXP} XP`;
+      let percent = Math.min((player.xp / maxXP) * 100, 100);
+      document.getElementById('xp-bar').style.width = percent + '%';
+      document.getElementById('xp-bar').style.background = 'linear-gradient(90deg, #b8860b, var(--accent-gold))';
+      
+      let btnCond = document.getElementById('btn-start-conditioning');
+      if(btnCond) {
+          btnCond.style.borderColor = '';
+          btnCond.innerHTML = `
+            <div class="mission-status"><span>ACONDICIONAMIENTO MARCIAL</span> <span></span></div>
+            <h2 class="mission-title">FUERZA Y<br>POTENCIA</h2>
+            <div class="mission-stats">
+              <span>PURO IMPACTO</span> <span>/</span> <span>EXPLOSIVIDAD</span> <span>/</span> <span>ACERO CORE</span>
+            </div>`;
+      }
+    }
   }
 
   function gainXP(amount, statAlias) {
+    if (checkExamPending()) return; // No acumula XP extra mientras espera el examen
+    
     player.xp += amount;
     player.stats[statAlias] += 0.2; 
     let maxXP = player.level * 400;
+    
+    let rObj = getRankObj(player.level);
     if (player.xp >= maxXP) {
-      player.xp -= maxXP;
-      player.level++;
-      showNotification(`¡HAS ASCENDIDO AL NIVEL ${player.level}!\n${getRankObj(player.level).title}`, "🌟 EVOLUCIÓN ESPIRITUAL");
+      if (player.level === rObj.max) {
+        player.xp = maxXP; 
+        showNotification("Estás bloqueado en la cúspide de tu rango. Es hora de demostrar si eres digno del siguiente paso en el escalafón. Tu próxima Misión de Acondicionamiento será un EXAMEN DE ASCENSO.", "Examen Máximo Disponible");
+      } else {
+        player.xp -= maxXP;
+        player.level++;
+        showNotification(`¡HAS ASCENDIDO AL NIVEL ${player.level}!\n${getRankObj(player.level).title}`, "🌟 EVOLUCIÓN ESPIRITUAL");
+      }
     }
     savePlayer();
     updateUI();
   }
 
-  function showNotification(msg, title) {
+  let currentNotiCallback = null;
+  function showNotification(msg, title, callback = null) {
     document.getElementById('noti-title').innerText = title;
     document.getElementById('noti-msg').innerText = msg;
     document.getElementById('notification-modal').style.display = 'flex';
+    currentNotiCallback = callback;
   }
 
   document.getElementById('noti-close').addEventListener('click', () => {
     document.getElementById('notification-modal').style.display = 'none';
+    if(currentNotiCallback) {
+        currentNotiCallback();
+        currentNotiCallback = null;
+    }
   });
 
   window.openInfoModal = function(name, desc, imgUrl) {
@@ -199,10 +250,13 @@
 
       // 3. Escalar matemáticamente
       let routine = selected.map(ex => {
-        // Fórmula de escala = baseVal + (Nivel - lvl_min) * scale
-        let factor = (player.level - ex.lvl_min) * ex.scale;
+        let isExam = window.isExamRoutine;
+        let virtualLevel = isExam ? ex.lvl_max : player.level;
+        
+        let factor = (virtualLevel - ex.lvl_min) * ex.scale;
         let finalVal = Math.floor(Math.max(ex.baseVal, ex.baseVal + factor));
         let numSets = type === 'mobility' ? 2 : (player.level > 20 ? 4 : 3);
+        if(isExam) numSets += 1;
         
         return {
           id: ex.id,
@@ -226,28 +280,58 @@
   }
 
   const startRoutineHandler = (type = 'conditioning') => {
+    let examPending = checkExamPending();
+    if(examPending && type === 'conditioning') {
+       showNotification("El Oráculo observa tu espíritu. Estás a punto de iniciar una Prueba de Ascenso. Sé absolutamente sincero: marca como terminada una serie SÓLO si realmente lograste el esfuerzo estricto y la técnica correcta. Engañar al sistema hoy significa lesionarte mañana en niveles superiores. El honor no admite auto-trampas.", "Examen Marcial de Honor", () => {
+           window.isExamRoutine = true;
+           initRoutineGeneration(type);
+       });
+       return;
+    } else if (examPending && type === 'mobility') {
+       showNotification("Debes probar tu valía física en el Examen de Ascenso antes de recuperar el aliento en la movilidad.", "Disciplina");
+       return;
+    }
+    
+    window.isExamRoutine = false;
+    initRoutineGeneration(type);
+  };
+
+  function initRoutineGeneration(type) {
     document.getElementById('home-view').className = 'hidden-view';
     document.getElementById('routine-view').className = 'active-view';
     document.getElementById('btn-finish-routine').style.display = 'none';
     document.getElementById('exercises-list').innerHTML = '';
     generateOfflineRoutine(type);
-  };
+  }
 
   if(document.getElementById('btn-start-conditioning')) document.getElementById('btn-start-conditioning').addEventListener('click', () => startRoutineHandler('conditioning'));
   if(document.getElementById('btn-start-mobility')) document.getElementById('btn-start-mobility').addEventListener('click', () => startRoutineHandler('mobility'));
 
   document.getElementById('btn-cancel-routine').addEventListener('click', () => {
+    if(window.isExamRoutine) {
+       player.xp = Math.max(0, player.level * 400 - 200);
+       savePlayer();
+       updateUI();
+       showNotification("Un guerrero conoce sus límites. Te has retirado del Examen de Ascenso. Has perdido experiencia, pero mañana regresarás más fuerte.", "Retorno a las Sombras");
+    }
     document.getElementById('routine-view').className = 'hidden-view';
     document.getElementById('home-view').className = 'active-view';
   });
 
   document.getElementById('btn-finish-routine').addEventListener('click', () => {
+    if(window.isExamRoutine) {
+       player.xp = 0; 
+       player.level++; 
+       showNotification(`¡HAS TRASCENDIDO TUS LÍMITES!\n\nAscendiendo al Nivel ${player.level}\nHas alcanzado el Rango: ${getRankObj(player.level).title}`, "Evolución Marcial Completada");
+    } else {
+       showNotification("Ha sido una sesión exigente. Has forjado tu espíritu y sumado una Victoria Histórica a tu perfil.", "✅ Reposo del Guerrero");
+    }
     player.workoutCount++;
     savePlayer();
     document.getElementById('routine-view').className = 'hidden-view';
     document.getElementById('home-view').className = 'active-view';
     document.getElementById('exercises-list').innerHTML = '';
-    showNotification("Ha sido una sesión exigente. Has forjado tu espíritu y sumado una Victoria Histórica a tu perfil.", "✅ Reposo del Guerrero");
+    updateUI();
   });
 
   // MUTACIÓN (ALTERNATIVA)
@@ -281,7 +365,7 @@
       let safeDesc = (ex.desc || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
       let safeN = (ex.n || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-      let altBtn = ex.alt ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ALTERNATIVA (No tengo Equipo)</button>` : '';
+      let altBtn = (ex.alt && !window.isExamRoutine) ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ALTERNATIVA (No tengo Equipo)</button>` : '';
 
       let cardHtml = `
         <div class="exercise-card" id="ex-${index}">
