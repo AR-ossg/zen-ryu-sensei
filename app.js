@@ -29,7 +29,7 @@
   let currentRoutine = [];
 
   function getRankObj(lvl) {
-    return rankTitles.find(r => lvl <= r.max);
+    return rankTitles.find(r => lvl <= r.max) || rankTitles[rankTitles.length - 1];
   }
 
   function savePlayer() {
@@ -44,7 +44,8 @@
       try { workoutHistory = JSON.parse(hx); } catch(e) {}
     }
     if (saved) {
-      player = JSON.parse(saved);
+      player = Object.assign(player, JSON.parse(saved));
+      if (typeof player.workoutCount === 'undefined') player.workoutCount = 0;
       document.getElementById('onboarding-wizard').style.display = 'none';
       updateUI();
     } else {
