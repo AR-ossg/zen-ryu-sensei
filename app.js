@@ -199,8 +199,11 @@
     document.getElementById('info-desc').innerHTML = listHtml;
     
     let imgContainer = document.getElementById('info-img-container');
-    if (imgUrl && imgUrl.startsWith('http')) {
-      imgContainer.innerHTML = `<img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">`;
+    if (imgUrl && (imgUrl.startsWith('http') || imgUrl.startsWith('./'))) {
+      imgContainer.innerHTML = `
+        <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">
+        <div style="font-size:0.65rem; color:#666; text-align:center; margin-top:8px; font-family:'Inter';">Animación biomecánica provista bajo licencia abierta</div>
+      `;
     } else {
       imgContainer.innerHTML = `<div style="width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>`;
     }
@@ -230,6 +233,39 @@
     document.getElementById('codex-list').innerHTML = html;
     document.getElementById('codex-sessions').innerText = player.workoutCount;
     document.getElementById('codex-modal').style.display = 'flex';
+  }
+
+  window.openLibraryModal = function() {
+    let content = '';
+    
+    EXERCISE_DB.forEach(ex => {
+        let isLocked = ex.lvl_min > player.level;
+        let displayName = isLocked ? "??? (Técnica Bloqueada)" : ex.n + " - " + ex.real;
+        let displayDesc = isLocked ? `Requiere Nivel ${ex.lvl_min} para desbloquear.` : ex.desc;
+        let imgStyle = isLocked ? "filter: blur(8px) grayscale(1) brightness(0.5); opacity: 0.6;" : "";
+        let borderCol = isLocked ? '#222' : 'var(--accent-gold)';
+        
+        let typeBadge = '';
+        if(ex.s === "str") typeBadge = '<span style="background:#8f2020; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FUERZA</span>';
+        if(ex.s === "spd") typeBadge = '<span style="background:#5555ff; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">VELOCIDAD</span>';
+        if(ex.s === "end") typeBadge = '<span style="background:#555555; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">AGUANTE</span>';
+        if(ex.s === "flex") typeBadge = '<span style="background:#28a745; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FLEX</span>';
+
+        content += `
+        <div style="background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
+          <div style="width:80px; height:80px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#000;">
+             <img src="${ex.m}" style="width:100%; height:100%; object-fit:cover; ${imgStyle}">
+          </div>
+          <div style="flex-grow:1;">
+             <h3 style="color:${isLocked ? '#666' : '#fff'}; font-family:'Cinzel'; font-size:0.95rem; margin:0 0 5px 0; line-height:1.2;">${displayName}</h3>
+             ${isLocked ? '' : `<div style="margin-bottom:8px;">${typeBadge} <span style="color:#888; font-size:0.7rem; margin-left:5px;">Nivel: ${ex.lvl_min}</span></div>`}
+             <p style="color:${isLocked ? '#ff5555' : '#aaa'}; font-size:0.8rem; line-height:1.4; margin:0;">${displayDesc}</p>
+          </div>
+        </div>`;
+    });
+
+    document.getElementById('library-list').innerHTML = content;
+    document.getElementById('library-modal').style.display = 'flex';
   }
 
   // ORÁCULO OFFLINE (MOTOR PROCEDIMENTAL)
@@ -322,6 +358,9 @@
     if(window.isExamRoutine) {
        player.xp = 0; 
        player.level++; 
+       initAudio();
+       playFanfare();
+       throwConfetti();
        showNotification(`¡HAS TRASCENDIDO TUS LÍMITES!\n\nAscendiendo al Nivel ${player.level}\nHas alcanzado el Rango: ${getRankObj(player.level).title}`, "Evolución Marcial Completada");
     } else {
        showNotification("Ha sido una sesión exigente. Has forjado tu espíritu y sumado una Victoria Histórica a tu perfil.", "✅ Reposo del Guerrero");
@@ -361,11 +400,11 @@
         ? `<button class="btn-secondary" style="width:auto;" onclick="openTimer(${numericVal})">⏱️ Temp. ${numericVal}s</button>`
         : `<button class="btn-secondary" style="width:auto;" onclick="openTimer(60)">⏱️ Descanso 60s</button>`;
       
-      let safeImg = ex.m && ex.m.startsWith('http') ? ex.m : '';
+      let safeImg = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
       let safeDesc = (ex.desc || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
       let safeN = (ex.n || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-      let altBtn = (ex.alt && !window.isExamRoutine) ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ALTERNATIVA (No tengo Equipo)</button>` : '';
+      let altBtn = (ex.alt && !window.isExamRoutine) ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 TÉCNICA ALTERNATIVA (Regresión / Adaptación)</button>` : '';
 
       let cardHtml = `
         <div class="exercise-card" id="ex-${index}">
@@ -441,10 +480,104 @@
     });
   });
 
-  // TIMER
+  // TIMER & AUDIO SYNTH
   let timerInterval;
   let timerSeconds = 0;
   let isCountdown = false;
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playBeep() {
+    if (!audioCtx) return;
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+  }
+
+  function playGong() {
+    if (!audioCtx) return;
+    let gain = audioCtx.createGain();
+    gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3);
+
+    let freqs = [200, 300, 350, 450, 520, 600];
+    freqs.forEach(f => {
+      let osc = audioCtx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+      osc.detune.setValueAtTime(Math.random() * 20 - 10, audioCtx.currentTime);
+      osc.connect(gain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 3);
+    });
+  }
+
+  function playFanfare() {
+    if (!audioCtx) initAudio();
+    if (!audioCtx) return;
+    let t = audioCtx.currentTime;
+    // C, E, G, High C (Arpeggio style)
+    let notes = [523.25, 659.25, 783.99, 1046.50, 1046.50];
+    notes.forEach((f, i) => {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(f, t + i*0.12);
+        gain.gain.setValueAtTime(0, t + i*0.12);
+        gain.gain.linearRampToValueAtTime(0.1, t + i*0.12 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.12 + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t + i*0.12);
+        osc.stop(t + i*0.12 + 0.3);
+    });
+  }
+
+  function throwConfetti() {
+    const colors = ['#ffd700', '#28a745', '#ff5555', '#ffffff'];
+    for(let i=0; i<80; i++) {
+        let d = document.createElement('div');
+        d.style.position = 'fixed';
+        d.style.zIndex = '99999';
+        d.style.width = '8px';
+        d.style.height = '16px';
+        d.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        d.style.top = '-20px';
+        d.style.left = (Math.random() * 100) + 'vw';
+        d.style.opacity = Math.random() + 0.5;
+        d.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+        d.style.pointerEvents = 'none';
+        
+        document.body.appendChild(d);
+        
+        let tx = (Math.random() - 0.5) * 300; 
+        let ty = window.innerHeight + 100; 
+        let duration = 2000 + Math.random() * 3000;
+        
+        d.animate([
+            { transform: 'translate3d(0, 0, 0) rotate(0deg)' },
+            { transform: 'translate3d(' + tx + 'px, ' + ty + 'px, 0) rotate(' + (360 + Math.random()*360) + 'deg)' }
+        ], {
+            duration: duration,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fill: 'forwards'
+        });
+        
+        setTimeout(() => d.remove(), duration);
+    }
+  }
 
   window.openTimer = function(seconds) {
     timerSeconds = parseInt(seconds, 10) || 0;
@@ -454,13 +587,18 @@
   }
   
   document.getElementById('timer-start').addEventListener('click', () => {
+    initAudio();
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
       if (isCountdown) {
         timerSeconds--;
+        if (timerSeconds <= 5 && timerSeconds > 0) {
+           playBeep();
+        }
         if (timerSeconds <= 0) {
            clearInterval(timerInterval);
            timerSeconds = 0;
+           playGong();
            showNotification("¡EL TIEMPO SE HA AGOTADO! DESCANSAR.", "Cronos");
         }
       } else {

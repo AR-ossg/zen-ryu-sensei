@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#111111"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fondo Premium Dark -->
+  <rect width="512" height="512" fill="url(#bgGrad)"/>
+  
+  <!-- Hexágono/Escudo Martial -->
+  <path d="M 256 60 L 450 160 L 450 350 L 256 452 L 62 350 L 62 160 Z" fill="none" stroke="#28a745" stroke-width="12" filter="url(#neon)"/>
+  <path d="M 256 85 L 420 175 L 420 335 L 256 422 L 92 335 L 92 175 Z" fill="none" stroke="#28a745" stroke-width="4" opacity="0.5" filter="url(#neon)"/>
+  
+  <!-- Monograma ZW -->
+  <text x="256" y="325" font-family="sans-serif" font-size="200" font-weight="900" text-anchor="middle" fill="#28a745" filter="url(#neon)">ZW</text>
+  
+  <!-- Detalles salpicaduras neon limitadas -->
+  <circle cx="120" cy="120" r="4" fill="#28a745" filter="url(#neon)" opacity="0.6"/>
+  <circle cx="400" cy="400" r="6" fill="#28a745" filter="url(#neon)" opacity="0.8"/>
+  <circle cx="420" cy="150" r="3" fill="#28a745" filter="url(#neon)" opacity="0.5"/>
+  <circle cx="100" cy="380" r="5" fill="#28a745" filter="url(#neon)" opacity="0.7"/>
+</svg>

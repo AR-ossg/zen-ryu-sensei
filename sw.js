@@ -9,5 +9,25 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Pass-through fetch to keep the app dynamic and fast
+  const url = new URL(e.request.url);
+  
+  // Caché First para los GIFs biomecánicos de GitHub
+  if (url.hostname === 'raw.githubusercontent.com') {
+    e.respondWith(
+      caches.match(e.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(e.request).then((networkResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      })
+    );
+    return;
+  }
+  
+  // Pass-through fetch to keep the app dynamic and fast for local files
 });

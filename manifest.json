@@ -8,9 +8,9 @@
   "description": "El Dojo PWA que moldea tu disciplina mediante IA.",
   "icons": [
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Enso.svg/512px-Enso.svg.png",
+      "src": "./icon.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
