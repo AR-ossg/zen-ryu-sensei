@@ -166,10 +166,10 @@
          }
       }
       if (typeof player.workoutCount === 'undefined') player.workoutCount = 0;
-      document.getElementById('onboarding-wizard').style.display = 'none';
+      closeModal('onboarding-wizard');
       updateUI();
     } else {
-      document.getElementById('onboarding-wizard').style.display = 'flex';
+      openModal('onboarding-wizard');
       document.getElementById('step-1').className = 'wizard-step active-step';
     }
   }
@@ -206,7 +206,7 @@
            deferredPrompt = null;
         } else {
            // Si es iOS o Android no proporcionó prompt nativo, mostramos instrucciones
-           document.getElementById('pwa-modal').style.display = 'flex';
+           openModal('pwa-modal');
         }
       });
     }
@@ -276,7 +276,7 @@
     player.workoutCount = 0;
     
     savePlayer();
-    document.getElementById('onboarding-wizard').style.display = 'none';
+    closeModal('onboarding-wizard');
     showNotification("Perfil Forjado con Especializaciones.\nBienvenido al Sendero, " + player.name, "Iniciación");
     updateUI();
   }
@@ -391,12 +391,12 @@
   function showNotification(msg, title, callback = null) {
     document.getElementById('noti-title').innerText = title;
     document.getElementById('noti-msg').innerText = msg;
-    document.getElementById('notification-modal').style.display = 'flex';
+    openModal('notification-modal');
     currentNotiCallback = callback;
   }
 
   document.getElementById('noti-close').addEventListener('click', () => {
-    document.getElementById('notification-modal').style.display = 'none';
+    closeModal('notification-modal');
     if(currentNotiCallback) {
         currentNotiCallback();
         currentNotiCallback = null;
@@ -422,16 +422,16 @@
     let imgContainer = document.getElementById('info-img-container');
     if (imgUrl && (imgUrl.startsWith('http') || imgUrl.startsWith('./'))) {
       imgContainer.innerHTML = `
-        <img src="${imgUrl}" class="zoomable-image" onclick="this.classList.toggle('zoomed-image')" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">
+        <img src="${imgUrl}" class="zoomable-image" onclick="openLightbox(this.src)" onclick="openLightbox(this.src)" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">
         <div style="font-size:0.65rem; color:#666; text-align:center; margin-top:8px; font-family:'Inter';">Cámaras del Códice - Toca la imagen para Ampliar/Reducir.</div>
       `;
     } else {
       imgContainer.innerHTML = `<div style="width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>`;
     }
-    document.getElementById('info-modal').style.display = 'flex';
+    openModal('info-modal');
   }
   document.getElementById('info-close').addEventListener('click', () => {
-    document.getElementById('info-modal').style.display = 'none';
+    closeModal('info-modal');
     document.getElementById('info-img-container').innerHTML = '';
   });
 
@@ -459,7 +459,7 @@
     let hxContainer = document.getElementById('codex-history');
     if(hxContainer) hxContainer.innerHTML = hxHtml;
 
-    document.getElementById('codex-modal').style.display = 'flex';
+    openModal('codex-modal');
   }
 
   window.openLibraryModal = function() {
@@ -493,7 +493,7 @@
     });
 
     document.getElementById('library-list').innerHTML = content;
-    document.getElementById('library-modal').style.display = 'flex';
+    openModal('library-modal');
   }
 
   // ORÁCULO OFFLINE (MOTOR PROCEDIMENTAL)
@@ -542,7 +542,7 @@
       });
 
       currentRoutine = routine; // Se guarda en variable global para mutaciones
-      document.getElementById('loader').style.display = 'none';
+      closeModal('loader');
       renderExercises(routine);
 
     }, 600); // Simulamos "Carga Neural" para efecto inmersivo
@@ -567,7 +567,7 @@
 
   function initRoutineGeneration(type) {
     switchView('routine-view', 'home-view');
-    document.getElementById('btn-finish-routine').style.display = 'none';
+    closeModal('btn-finish-routine');
     document.getElementById('exercises-list').innerHTML = '';
     generateOfflineRoutine(type);
   }
@@ -631,7 +631,7 @@
     let container = document.getElementById('exercises-list');
     container.innerHTML = '';
     
-    if(exercises && exercises.length > 0) document.getElementById('btn-finish-routine').style.display = 'none';
+    if(exercises && exercises.length > 0) closeModal('btn-finish-routine');
 
     exercises.forEach((ex, index) => {
       let isTime = ex.t === 'time' || ex.t === 'tiempo';
@@ -824,7 +824,7 @@
     timerSeconds = parseInt(seconds, 10) || 0;
     isCountdown = timerSeconds > 0;
     updateTimerDisplay();
-    document.getElementById('timer-modal').style.display = 'flex';
+    openModal('timer-modal');
   }
   
   document.getElementById('timer-start').addEventListener('click', () => {
@@ -853,7 +853,7 @@
   document.getElementById('timer-stop').addEventListener('click', () => clearInterval(timerInterval));
   document.getElementById('timer-close').addEventListener('click', () => {
     clearInterval(timerInterval);
-    document.getElementById('timer-modal').style.display = 'none';
+    closeModal('timer-modal');
   });
   function updateTimerDisplay() {
     let m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
