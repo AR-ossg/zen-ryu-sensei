@@ -156,14 +156,14 @@
     let vFlex = parseInt(document.getElementById('ob-flex').value) || 1;
     let vEnd = parseFloat(document.getElementById('ob-end').value) || 0;
 
-    let lvlStr = Math.max(1, Math.min(15, Math.floor(vStr / 4) + 1));
-    let lvlSpd = Math.max(1, Math.min(15, Math.floor(vSpd / 6) + 1));
-    let lvlFlex = Math.max(1, Math.min(10, vFlex));
-    let lvlEnd = Math.max(1, Math.min(15, Math.floor(vEnd * 2) + 1));
+    let lvlStr = Math.max(1, Math.floor(vStr / 2) + 1);
+    let lvlSpd = Math.max(1, Math.floor(vSpd * 0.8) + 1);
+    let lvlFlex = Math.max(1, vFlex);
+    let lvlEnd = Math.max(1, Math.floor(vEnd * 3.5) + 1);
 
     let maxInitLvl = Math.max(lvlStr, lvlSpd, lvlFlex, lvlEnd);
     let startIdx = rankTitles.findIndex(r => maxInitLvl <= r.max);
-    player.rankIndex = startIdx === -1 ? 0 : startIdx;
+    player.rankIndex = startIdx === -1 ? rankTitles.length - 1 : startIdx;
     
     let allowedCap = rankTitles[player.rankIndex].max;
     player.stats = {
@@ -197,9 +197,16 @@
     document.getElementById('player-sessions').innerText = player.workoutCount;
 
     document.getElementById('stat-str').innerText = "Lvl " + player.stats.str.lvl;
+    if(document.getElementById('bar-str')) document.getElementById('bar-str').style.width = (player.stats.str.xp / (player.stats.str.lvl * 100)) * 100 + "%";
+
     document.getElementById('stat-spd').innerText = "Lvl " + player.stats.spd.lvl;
+    if(document.getElementById('bar-spd')) document.getElementById('bar-spd').style.width = (player.stats.spd.xp / (player.stats.spd.lvl * 100)) * 100 + "%";
+
     document.getElementById('stat-flex').innerText = "Lvl " + player.stats.flex.lvl;
+    if(document.getElementById('bar-flex')) document.getElementById('bar-flex').style.width = (player.stats.flex.xp / (player.stats.flex.lvl * 100)) * 100 + "%";
+
     document.getElementById('stat-end').innerText = "Lvl " + player.stats.end.lvl;
+    if(document.getElementById('bar-end')) document.getElementById('bar-end').style.width = (player.stats.end.xp / (player.stats.end.lvl * 100)) * 100 + "%";
 
     let examModeReady = checkExamPending();
     
