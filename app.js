@@ -572,7 +572,7 @@
       closeModal('loader');
       renderExercises(routine);
 
-    }, 600); // Simulamos "Carga Neural" para efecto inmersivo
+    }, 120); // Brief pause for visual feedback
   }
 
   const startRoutineHandler = (type = 'conditioning') => {
@@ -704,7 +704,7 @@
       finBtn.style.display = 'block';
       finBtn.classList.add('pulse-glow');
       finBtn.innerText = "🏆 FINALIZAR ENTRENAMIENTO";
-      setTimeout(() => finBtn.scrollIntoView({behavior: 'smooth', block: 'end'}), 300);
+      setTimeout(() => finBtn.scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
     }
   }
 
