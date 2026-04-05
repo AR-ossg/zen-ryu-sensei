@@ -763,6 +763,11 @@
         ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 TÉCNICA ALTERNATIVA (Regresión / Adaptación)</button>`
         : '';
 
+      // XP escala con la dificultad del ejercicio (lvl_min) y las series exigidas
+      const baseLvl  = ex.lvl_min || 1;
+      const baseXP   = Math.round(Math.max(20, baseLvl * 1.5 + ex.sets * 2));
+      const xpReward = window.isExamRoutine ? Math.round(baseXP * 1.5) : baseXP;
+
       fullHtml += `
         <div class="exercise-card" id="ex-${index}">
           <div class="exercise-header">
@@ -773,7 +778,7 @@
             <strong>${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}</strong>
           </div>
           <div style="display:flex; gap:8px; margin-top:15px; width:100%;">
-            <button class="btn-complete-massive" onclick="completeTask(${index}, '${ex.s || 'str'}')">✔️ FORJAR (+20 XP)</button>
+            <button class="btn-complete-massive" onclick="completeTask(${index}, '${ex.s || 'str'}', ${xpReward})">✔️ FORJAR (+${xpReward} XP)</button>
           </div>
           ${altBtn}
           <div style="display:flex; gap:8px; margin-top:5px; width:100%;">
@@ -798,28 +803,31 @@
     }
   }
 
-  window.completeTask = function(index, statAlias) {
+  window.completeTask = function(index, statAlias, xpReward) {
     if(navigator.vibrate) navigator.vibrate(50);
     let s = "str";
     if (statAlias.toLowerCase().includes("spd")) s = "spd";
     if (statAlias.toLowerCase().includes("flex")) s = "flex";
     if (statAlias.toLowerCase().includes("end")) s = "end";
-    
-    gainXP(20, s); 
-    
+
+    // Si por alguna razón no se pasó el valor (ej: versión vieja en caché), usar 20
+    const xp = (typeof xpReward === 'number' && xpReward > 0) ? xpReward : 20;
+
+    gainXP(xp, s);
+
     let card = document.getElementById(`ex-${index}`);
     if(card) {
-      card.style.opacity = '0.7'; 
+      card.style.opacity = '0.7';
       card.style.borderColor = 'var(--accent-green)';
       let btn = card.querySelector('.btn-complete-massive');
-      if(btn) { 
-        btn.innerHTML = "✅ DISCIPLINA FORJADA"; 
-        btn.disabled = true; 
+      if(btn) {
+        btn.innerHTML = `✅ DISCIPLINA FORJADA (+${xp} XP)`;
+        btn.disabled = true;
         btn.style.boxShadow = 'none';
         btn.style.background = 'rgba(40,167,69,0.15)';
       }
     }
-    showNotification(`Tu disciplina ha forjado +20 XP en ${s.toUpperCase()}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
+    showNotification(`Tu disciplina ha forjado +${xp} XP en ${s.toUpperCase()}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
     checkAllTasksCompleted();
   }
 
