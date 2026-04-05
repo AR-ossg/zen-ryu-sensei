@@ -135,7 +135,8 @@ body {
 .btn-complete:disabled { opacity: 0.4; cursor: not-allowed; border-color: #555; color: #555; box-shadow:none;}
 
 /* EXERCISES ROUTINE VIEW */
-#routine-view { padding: 15px 20px 100px 20px; }
+#routine-view { padding: 15px 20px 100px 20px; contain: layout style; }
+#btn-finish-routine { will-change: opacity, filter; }
 .exercise-card { background: rgba(0,0,0,0.4); border: 1px solid #333; border-left: 4px solid var(--accent-gold); padding: 18px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 .exercise-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: bold; color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 12px;}
 .exercise-stat-badge { background: #111; color: var(--accent-gold); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-family:'Inter'; letter-spacing:1px;}
@@ -158,13 +159,12 @@ body {
 .wizard-step.active-step { display: flex !important; opacity: 1; }
 
 @keyframes intensePulse {
-  0%   { transform: scale(1);    opacity: 1; }
-  50%  { transform: scale(1.03); opacity: 0.85; }
-  100% { transform: scale(1);    opacity: 1; }
+  0%, 100% { opacity: 1;    filter: brightness(1); }
+  50%       { opacity: 0.78; filter: brightness(1.25); }
 }
 .pulse-glow {
-  animation: intensePulse 1.5s ease-in-out infinite;
-  will-change: transform, opacity;
+  animation: intensePulse 1.2s ease-in-out infinite;
+  will-change: opacity, filter;
   background: linear-gradient(135deg, #d4af37, #b8860b) !important;
   color: #000 !important;
   text-shadow: 0 1px 2px rgba(255,255,255,0.4);
