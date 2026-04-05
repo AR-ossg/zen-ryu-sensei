@@ -213,14 +213,12 @@
   });
 
   function switchView(viewToShow, viewToHide) {
-    if (!document.startViewTransition) {
-       document.getElementById(viewToHide).className = 'hidden-view';
-       document.getElementById(viewToShow).className = 'active-view';
-       return;
-    }
-    document.startViewTransition(() => {
-       document.getElementById(viewToHide).className = 'hidden-view';
-       document.getElementById(viewToShow).className = 'active-view';
+    const hideEl = document.getElementById(viewToHide);
+    const showEl = document.getElementById(viewToShow);
+    hideEl.className = 'hidden-view';
+    // Use rAF to let the browser flush the hide, then show with animation
+    requestAnimationFrame(() => {
+      showEl.className = 'active-view';
     });
   }
 

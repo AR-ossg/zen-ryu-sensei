@@ -27,9 +27,14 @@ const STATIC_URLS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_URLS))
+    caches.open(CACHE_NAME).then(cache => {
+      // Use individual adds so one failure doesn't break the whole cache
+      return Promise.allSettled(
+        STATIC_URLS.map(url => cache.add(url).catch(() => {}))
+      );
+    })
   );
+  self.skipWaiting(); // Take control immediately
 });
 
 self.addEventListener('activate', event => {
@@ -42,7 +47,7 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Apply new cache to all open tabs
   );
 });
 
