@@ -141,10 +141,9 @@ body {
 #timer-display { font-size: 4.5rem; font-family: monospace; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,215,0,0.4); margin: 20px 0;}
 
 /* UTILS && ANIMATIONS */
-/* Override modal-overlay hidden for wizard — it handles itself */
+/* Override: wizard and install-gate are NOT controlled by .show class */
 #onboarding-wizard { opacity: 1; pointer-events: all; visibility: visible; backdrop-filter: none; -webkit-backdrop-filter: none; transition: none; }
 #onboarding-wizard.hide { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s ease; }
-#install-gate { opacity: 1; pointer-events: all; visibility: visible; }
 
 @keyframes fadeInSlideUp {
   from { opacity: 0; transform: translateY(15px); }
