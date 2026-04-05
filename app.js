@@ -15,6 +15,98 @@
 
   let workoutHistory = [];
 
+  // --- NATIVE INDEXEDDB WRAPPER ---
+  const zendb = {
+     db: null,
+     init: function() {
+         return new Promise((resolve, reject) => {
+             let req = indexedDB.open("ZenRyuDB", 1);
+             req.onupgradeneeded = (e) => {
+                 let tdb = e.target.result;
+                 if(!tdb.objectStoreNames.contains("history")) {
+                     tdb.createObjectStore("history", { autoIncrement: true });
+                 }
+             };
+             req.onsuccess = (e) => {
+                 this.db = e.target.result;
+                 resolve(this.db);
+             };
+             req.onerror = (e) => reject(e);
+         });
+     },
+     addHistory: function(routineObj, specificDate) {
+         return new Promise((resolve, reject) => {
+             if(!this.db) return resolve();
+             let tx = this.db.transaction("history", "readwrite");
+             let store = tx.objectStore("history");
+             const dateStr = specificDate || new Date().toISOString();
+             store.add({ date: dateStr, routine: routineObj });
+             tx.oncomplete = () => resolve();
+             tx.onerror = (e) => reject(e);
+         });
+     },
+     getAllHistory: function() {
+         return new Promise((resolve, reject) => {
+             if(!this.db) return resolve([]);
+             let tx = this.db.transaction("history", "readonly");
+             let store = tx.objectStore("history");
+             let req = store.getAll();
+             req.onsuccess = () => resolve(req.result);
+             req.onerror = (e) => reject(e);
+         });
+     },
+     clearHistory: function() {
+         return new Promise((resolve, reject) => {
+             if(!this.db) return resolve();
+             let tx = this.db.transaction("history", "readwrite");
+             let store = tx.objectStore("history");
+             let req = store.clear();
+             req.onsuccess = () => resolve();
+             req.onerror = (e) => reject(e);
+         });
+     }
+  };
+
+  window.exportSave = async function() {
+    let dbHistory = [];
+    try { dbHistory = await zendb.getAllHistory(); } catch(e) {}
+    const saveData = { player: player, history: dbHistory, exportDate: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(saveData)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `zen_ryu_sensei_save_${new Date().getTime()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification("Respaldo exportado exitosamente.", "Sistema PWA");
+  }
+
+  window.importSave = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.player && typeof data.player === 'object') {
+            localStorage.setItem("zenWarriorPwaSave", JSON.stringify(data.player));
+            if (data.history && data.history.length > 0) {
+               await zendb.init().catch(e=>{});
+               await zendb.clearHistory();
+               for (let r of data.history) { await zendb.addHistory(r.routine, r.date); }
+            }
+            alert("Perfil restituido de forma segura. La academia se reiniciará para cargar tus habilidades.");
+            location.reload();
+        } else { alert("Archivo no válido para Zen Ryu Sensei."); }
+      } catch(err) { alert("Error leyendo el archivo."); }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  }
+
+
   const rankTitles = [
     { max: 4, title: "Semilla Inactiva", icon: "🌰" },
     { max: 9, title: "Brote de Bambú", icon: "🌱" },
@@ -41,12 +133,20 @@
     localStorage.setItem("zenWarriorHistory", JSON.stringify(workoutHistory));
   }
 
-  function loadPlayer() {
-    let saved = localStorage.getItem("zenWarriorPwaSave");
-    let hx = localStorage.getItem("zenWarriorHistory");
-    if (hx) {
-      try { workoutHistory = JSON.parse(hx); } catch(e) {}
+  async function loadPlayer() {
+    await zendb.init().catch(e => console.log("IDB skipped"));
+    
+    let oldHx = localStorage.getItem("zenWarriorHistory");
+    if (oldHx) {
+      try { 
+        let parsedHx = JSON.parse(oldHx); 
+        for (let h of parsedHx) { await zendb.addHistory(h.routine, h.date); }
+        localStorage.removeItem("zenWarriorHistory");
+      } catch(e) {}
     }
+    try { workoutHistory = await zendb.getAllHistory(); } catch(e) {}
+
+    let saved = localStorage.getItem("zenWarriorPwaSave");
     if (saved) {
       let savedPlayer = JSON.parse(saved);
       if (savedPlayer.level !== undefined && savedPlayer.rankIndex === undefined) {
@@ -196,17 +296,22 @@
     document.getElementById('player-level').innerText = minLvl;
     document.getElementById('player-sessions').innerText = player.workoutCount;
 
-    document.getElementById('stat-str').innerText = "Lvl " + player.stats.str.lvl;
-    if(document.getElementById('bar-str')) document.getElementById('bar-str').style.width = (player.stats.str.xp / (player.stats.str.lvl * 100)) * 100 + "%";
-
-    document.getElementById('stat-spd').innerText = "Lvl " + player.stats.spd.lvl;
-    if(document.getElementById('bar-spd')) document.getElementById('bar-spd').style.width = (player.stats.spd.xp / (player.stats.spd.lvl * 100)) * 100 + "%";
-
-    document.getElementById('stat-flex').innerText = "Lvl " + player.stats.flex.lvl;
-    if(document.getElementById('bar-flex')) document.getElementById('bar-flex').style.width = (player.stats.flex.xp / (player.stats.flex.lvl * 100)) * 100 + "%";
-
-    document.getElementById('stat-end').innerText = "Lvl " + player.stats.end.lvl;
-    if(document.getElementById('bar-end')) document.getElementById('bar-end').style.width = (player.stats.end.xp / (player.stats.end.lvl * 100)) * 100 + "%";
+    let cap = rObj.max;
+    ['str', 'spd', 'flex', 'end'].forEach(s => {
+       document.getElementById('stat-' + s).innerText = "Lvl " + player.stats[s].lvl;
+       let bar = document.getElementById('bar-' + s);
+       if (bar) {
+          if (player.stats[s].lvl >= cap) {
+             bar.style.width = "100%";
+             bar.style.background = "#ff5555";
+             bar.style.boxShadow = "0 0 5px #ff5555";
+          } else {
+             bar.style.width = (player.stats[s].xp / (player.stats[s].lvl * 100)) * 100 + "%";
+             bar.style.background = "var(--accent-gold)";
+             bar.style.boxShadow = "0 0 5px var(--accent-gold)";
+          }
+       }
+    });
 
     let examModeReady = checkExamPending();
     

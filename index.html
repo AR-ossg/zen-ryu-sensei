@@ -117,7 +117,10 @@
 
     <!-- STATS PANEL HUD -->
     <div class="glass-panel">
-      <div class="stats-header"><span class="dot"></span> PERFIL DEL GUERRERO</div>
+      <div class="stats-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div><span class="dot"></span> PERFIL DEL GUERRERO</div>
+        <button onclick="document.getElementById('settings-modal').style.display='flex'" style="background:none; border:none; font-size:1.4rem; cursor:pointer; padding:0; filter:grayscale(1) brightness(1.5);" title="Ajustes de Sistema">⚙️</button>
+      </div>
       <div class="stats-grid">
         <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">🦾</span><span>Fuerza</span> <span id="stat-str" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-str" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
         <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">⚡</span><span>Velocidad</span> <span id="stat-spd" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-spd" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
@@ -209,6 +212,17 @@
         <p>🍎 <b>iPhone (Safari):</b> Presiona el Botón "Compartir" (Centro de la barra Inferior) -> "Añadir a la pantalla de inicio".</p>
       </div>
       <button class="btn-primary" onclick="document.getElementById('pwa-modal').style.display='none'">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="modal-overlay" style="display:none; z-index:45000;">
+    <div class="modal-content" style="text-align:center;">
+      <h2 style="color:var(--accent-gold); margin-bottom: 10px; font-family:'Cinzel';">SISTEMA PWA</h2>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Respalda tu progreso para que nunca pierdas años de entrenamiento físico.</p>
+      <button class="btn-secondary" onclick="exportSave()" style="margin-bottom:15px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR DATOS</button>
+      <button class="btn-secondary" onclick="document.getElementById('import-file').click()" style="margin-bottom:20px; border-color:#ff5555; color:#ff5555;">📁 IMPORTAR DATOS</button>
+      <input type="file" id="import-file" style="display:none" accept=".json" onchange="importSave(event)">
+      <button class="btn-primary" onclick="document.getElementById('settings-modal').style.display='none'">CERRAR</button>
     </div>
   </div>
 
