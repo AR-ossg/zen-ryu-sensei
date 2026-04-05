@@ -108,18 +108,66 @@
 
 
   const rankTitles = [
-    { max: 4, title: "Semilla Inactiva", icon: "🌰" },
-    { max: 9, title: "Brote de Bambú", icon: "🌱" },
-    { max: 19, title: "Grulla de Piedra", icon: "🪨" },
-    { max: 29, title: "Tigre Enfocado", icon: "🐅" },
-    { max: 39, title: "Mantis de Hierro", icon: "🦗" },
-    { max: 49, title: "Guerrero Esmeralda", icon: "⚔️" },
-    { max: 59, title: "Sombra del Viento", icon: "🌪️" },
-    { max: 69, title: "Maestro del Silencio", icon: "🤫" },
-    { max: 79, title: "Alma de Acero", icon: "🦾" },
-    { max: 89, title: "Oráculo Corporal", icon: "🧿" },
-    { max: 99, title: "Demonio Consagrado", icon: "👹" },
-    { max: 999, title: "Dragón Ascendido", icon: "🐉" }
+    {
+      max: 4, title: "Semilla Inactiva", icon: "🌰", color: "#8B7355",
+      wisdom: "Todo gran viaje comienza con un cuerpo en reposo que decide moverse.",
+      lore: "La Semilla Inactiva eres tú en el umbral del despertar. Aún no has brotado, pero en tu interior duerme el código completo del Dragón. El primer paso no es el más difícil — es reconocer que eres capaz de darlo. El dojo te espera."
+    },
+    {
+      max: 9, title: "Brote de Bambú", icon: "🌱", color: "#4CAF50",
+      wisdom: "El bambú no pide permiso al suelo para crecer. Simplemente crece.",
+      lore: "Has roto la cáscara de la inercia. Como el brote de bambú, tus primeras semanas son frágiles — pero la raíz ya está anclada. Cada repetición construye cimientos invisibles que sostendrán tu templo físico durante décadas."
+    },
+    {
+      max: 19, title: "Grulla de Piedra", icon: "🪨", color: "#90A4AE",
+      wisdom: "La grulla que vuela lejos primero se detiene en silencio sobre la piedra.",
+      lore: "El equilibrio ya no es un accidente — empieza a ser una elección. Sobre la roca inmóvil, la grulla aprende que la quietud es la forma más profunda de potencia. Tu cuerpo descubre la diferencia entre tensión vacía y fuerza real."
+    },
+    {
+      max: 29, title: "Tigre Enfocado", icon: "🐅", color: "#FF8C00",
+      wisdom: "El tigre no ataca cuando tiene hambre. Ataca cuando es el momento preciso.",
+      lore: "Has despertado la ferocidad controlada. El tigre no desperdicia energía — cada movimiento es una decisión. Tu cuerpo aprende a concentrar potencia explosiva en fracciones de segundo. Esto no es agresividad: es precisión animal perfeccionada."
+    },
+    {
+      max: 39, title: "Mantis de Hierro", icon: "🦗", color: "#66BB6A",
+      wisdom: "Un golpe perfecto vale más que mil golpes mediocres.",
+      lore: "La mantis es el maestro de la economía del movimiento: no hay un músculo activado en vano, ni una respiración desperdiciada. Has iniciado la etapa donde la calidad supera a la cantidad y tu cuerpo comienza a moverse como un instrumento forjado en hierro."
+    },
+    {
+      max: 49, title: "Guerrero Esmeralda", icon: "⚔️", color: "#26A69A",
+      wisdom: "Un guerrero no es el que nunca cae — es el que cada vez se levanta con más arte.",
+      lore: "Has ganado el derecho de llamarte guerrero. Tu disciplina ya no es un hábito — es tu naturaleza. La esmeralda no nació brillante: fue presionada por la tierra durante milenios. Tu sufrimiento entrenado es ese brillo. El sendero te reconoce como propio."
+    },
+    {
+      max: 59, title: "Sombra del Viento", icon: "🌪️", color: "#7E57C2",
+      wisdom: "No luches contra el viento. Conviértete en él.",
+      lore: "Tu velocidad ha cruzado el umbral de lo consciente. El cuerpo se mueve antes de que la mente lo ordene. Eres la Sombra del Viento: estás ahí y luego no estás. En este rango, el tiempo mismo parece diferente cuando entrenas con plena presencia."
+    },
+    {
+      max: 69, title: "Maestro del Silencio", icon: "🤫", color: "#78909C",
+      wisdom: "El maestro verdadero enseña con su cuerpo en movimiento, no con sus palabras.",
+      lore: "Los grandes maestros no necesitan gritar. Su sabiduría vive codificada en cada fibra de su ser. Has alcanzado el silencio interior donde el ego ya no interfiere con el entrenamiento. Aquí no hay excusas, ni negociaciones, ni dudas. Solo la práctica."
+    },
+    {
+      max: 79, title: "Alma de Acero", icon: "🦾", color: "#B0BEC5",
+      wisdom: "El acero no teme al fuego. Fue forjado en él.",
+      lore: "El dolor ya es un idioma que hablas con fluidez. Tu voluntad ha sido templada en cientos de sesiones de exigencia pura. Lo que antes te quebraba ahora te perfecciona. Tu cuerpo es un instrumento de acero — rígido cuando debe serlo, flexible cuando la batalla lo exige."
+    },
+    {
+      max: 89, title: "Oráculo Corporal", icon: "🧿", color: "#5C6BC0",
+      wisdom: "El cuerpo nunca miente. Solo hay que aprender a escucharlo.",
+      lore: "Has desarrollado la intuición del maestro. Tu cuerpo te habla en un lenguaje que muy pocos aprenden a leer. Sabes cuándo ir al límite y cuándo el límite necesita expandirse. El entrenamiento ya no es esfuerzo — es el arte de interpretar tu potencial más profundo."
+    },
+    {
+      max: 99, title: "Demonio Consagrado", icon: "👹", color: "#E53935",
+      wisdom: "Los demonios consagrados no destruyen — transforman todo lo que tocan.",
+      lore: "Has cruzado los límites del promedio humano. Pocos en el mundo entrenan al nivel donde habitas ahora. El término demonio no es oscuro: es el espíritu que se niega a ceder ante cualquier obstáculo. Tu disciplina ya es sagrada."
+    },
+    {
+      max: 999, title: "Dragón Ascendido", icon: "🐉", color: "#FFD700",
+      wisdom: "El Dragón no busca la cumbre de la montaña. El Dragón es la montaña.",
+      lore: "Has disuelto la frontera entre entrenamiento y vida. Ya no practicas el Camino del Dragón — lo encarnas. Tu cuerpo es una obra maestra viviente, forjada en años de disciplina silenciosa. El Dragón Ascendido no compite con nadie: su único rival fue siempre la versión anterior de sí mismo."
+    }
   ];
 
   let currentRoutine = [];
@@ -215,10 +263,14 @@
   function switchView(viewToShow, viewToHide) {
     const hideEl = document.getElementById(viewToHide);
     const showEl = document.getElementById(viewToShow);
+    // 1st rAF: aplica hidden-view y permite al browser hacer flush del layout
     hideEl.className = 'hidden-view';
-    // Use rAF to let the browser flush the hide, then show with animation
+    // 2nd rAF (doble): espera al siguiente frame de pintura REAL antes de animar
+    // Esto evita que la animación de entrada compita con el layout del elemento saliente
     requestAnimationFrame(() => {
-      showEl.className = 'active-view';
+      requestAnimationFrame(() => {
+        showEl.className = 'active-view';
+      });
     });
   }
 
@@ -275,8 +327,11 @@
     
     savePlayer();
     document.getElementById('onboarding-wizard').classList.add('hide');
-    showNotification("Perfil Forjado con Especializaciones.\nBienvenido al Sendero, " + player.name, "Iniciación");
     updateUI();
+    // Pequeña pausa para que el wizard desaparezca antes de mostrar la tarjeta
+    setTimeout(() => {
+      showAscensionCard(getCurrentRank());
+    }, 350);
   }
 
   function checkExamPending() {
@@ -401,6 +456,55 @@
     }
   });
 
+  function showAscensionCard(rankObj) {
+    const color = rankObj.color || '#FFD700';
+    document.getElementById('asc-rank-icon').textContent  = rankObj.icon;
+    document.getElementById('asc-rank-title').textContent = rankObj.title.toUpperCase();
+    document.getElementById('asc-rank-wisdom').textContent = '"' + (rankObj.wisdom || '') + '"';
+    document.getElementById('asc-rank-lore').textContent   = rankObj.lore || '';
+    const card = document.querySelector('.rank-ascension-card');
+    if (card) {
+      card.style.borderColor = color;
+      card.style.boxShadow   = '0 0 40px ' + color + '55, 0 20px 60px rgba(0,0,0,1)';
+    }
+    const wisdomEl = document.getElementById('asc-rank-wisdom');
+    if (wisdomEl) { wisdomEl.style.borderLeftColor = color; wisdomEl.style.color = color; }
+    const iconEl = document.getElementById('asc-rank-icon');
+    if (iconEl) iconEl.style.textShadow = '0 0 30px ' + color;
+    const labelEl = document.getElementById('asc-rank-label');
+    if (labelEl) labelEl.style.color = color;
+    // Restart animation each time
+    if (card) { card.style.animation = 'none'; requestAnimationFrame(() => { card.style.animation = ''; }); }
+    openModal('rank-ascension-modal');
+  }
+
+  function buildCodexRankHtml() {
+    let html = '';
+    rankTitles.forEach((r, idx) => {
+      const isAcquired = player.rankIndex >= idx;
+      const isCurrent  = player.rankIndex === idx;
+      const color = r.color || '#FFD700';
+      if (isAcquired) {
+        html += '<div style="background:#111; border:1px solid ' + (isCurrent ? color : 'rgba(255,255,255,0.08)') + '; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:' + (isCurrent ? '0 0 20px ' + color + '33' : 'none') + '; position:relative;">';
+        if (isCurrent) html += '<div style="position:absolute;top:12px;right:12px;background:' + color + ';color:#000;font-size:0.5rem;font-weight:900;padding:3px 8px;border-radius:4px;letter-spacing:1.5px;">ACTUAL</div>';
+        html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">';
+        html += '<span style="font-size:2.8rem;text-shadow:0 0 12px ' + color + ';">' + r.icon + '</span>';
+        html += '<div><div style="font-family:\'Cinzel\';font-size:1rem;color:' + (isCurrent ? color : '#fff') + ';font-weight:700;margin-bottom:2px;">' + r.title + '</div>';
+        html += '<div style="font-size:0.6rem;color:#555;letter-spacing:1px;text-transform:uppercase;">Límite Nivel ' + (r.max === 999 ? 'Máximo' : r.max) + '</div></div></div>';
+        html += '<p style="font-style:italic;color:' + color + ';font-size:0.8rem;line-height:1.5;padding:10px 12px;border-left:2px solid ' + color + ';margin-bottom:10px;background:' + color + '11;border-radius:0 6px 6px 0;">' + (r.wisdom || '') + '</p>';
+        html += '<p style="color:#aaa;font-size:0.8rem;line-height:1.6;margin:0;">' + (r.lore || '') + '</p>';
+        html += '</div>';
+      } else {
+        html += '<div style="background:#0a0a0a;border:1px dashed #1a1a1a;border-radius:14px;padding:16px;margin-bottom:14px;opacity:0.45;">';
+        html += '<div style="display:flex;align-items:center;gap:14px;">';
+        html += '<span style="font-size:2.8rem;filter:grayscale(1) brightness(0.25);">' + r.icon + '</span>';
+        html += '<div><div style="font-family:\'Cinzel\';font-size:0.95rem;color:#333;font-weight:700;">??? RANGO SELLADO</div>';
+        html += '<div style="font-size:0.65rem;color:#2a2a2a;letter-spacing:1px;margin-top:3px;">Supera el Examen Marcial para revelar este conocimiento</div></div></div></div>';
+      }
+    });
+    return html;
+  }
+
   window.openInfoModal = function(name, desc, imgUrl) {
     document.getElementById('info-title').innerText = name;
     
@@ -435,31 +539,15 @@
   });
 
   window.openCodexModal = function() {
-    let html = '';
-    rankTitles.forEach((r, idx) => {
-       let isAcquired = player.rankIndex >= idx;
-       let isCurrent = player.rankIndex === idx;
-       let color = isCurrent ? 'var(--accent-gold)' : (isAcquired ? '#fff' : '#444');
-       let req = r.max === 999 ? 'Nivel Máximo' : `Límite Lvl ${r.max}`;
-       
-       html += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom:1px solid #222; color:${color}; ${isCurrent ? 'background:rgba(255,215,0,0.1); padding:10px; border-radius:6px; font-weight:bold;' : ''}">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:1.5rem; filter:${isAcquired ? 'grayscale(0)' : 'grayscale(1)'}; text-shadow:0 0 5px ${color};">${r.icon}</span>
-            <span style="font-family:'Cinzel'; font-size:1rem; text-transform:uppercase;">${r.title}</span>
-          </div>
-          <div style="font-size:0.75rem; color:#888;">${req}</div>
-       </div>`;
-    });
-    document.getElementById('codex-list').innerHTML = html;
+    document.getElementById('codex-list').innerHTML = buildCodexRankHtml();
     document.getElementById('codex-sessions').innerText = player.workoutCount;
-    
-    let hxHtml = workoutHistory.map(h => `<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">${h.date}</span><br><span style="color:#fff;">${h.type}</span></div>`).join('');
+    let hxHtml = workoutHistory.map(h => '<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">' + h.date + '</span><br><span style="color:#fff;">' + h.type + '</span></div>').join('');
     if(workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
     let hxContainer = document.getElementById('codex-history');
     if(hxContainer) hxContainer.innerHTML = hxHtml;
-
     openModal('codex-modal');
   }
+
 
   window.openLibraryModal = function() {
     let content = '';
@@ -623,7 +711,7 @@
        initAudio();
        playFanfare();
        throwConfetti();
-       showNotification(`¡HAS TRASCENDIDO TUS LÍMITES!\n\nAscendiendo en maestría.\nHas alcanzado el Rango: ${getCurrentRank().title}`, "Evolución Marcial Completada");
+       showAscensionCard(getCurrentRank());
     } else {
        showNotification("Ha sido una sesión exigente. Has forjado tu espíritu y sumado una Victoria Histórica a tu perfil.", "✅ Reposo del Guerrero");
     }
@@ -655,45 +743,47 @@
   }
 
   function renderExercises(exercises) {
-    let container = document.getElementById('exercises-list');
-    container.innerHTML = '';
-    
-    if(exercises && exercises.length > 0) closeModal('btn-finish-routine');
+    const container = document.getElementById('exercises-list');
 
+    if (exercises && exercises.length > 0) closeModal('btn-finish-routine');
+
+    // Acumula todo en UN string → asigna innerHTML una sola vez → 1 reflow total
+    let fullHtml = '';
     exercises.forEach((ex, index) => {
-      let isTime = ex.t === 'time' || ex.t === 'tiempo';
-      let numericVal = parseInt(ex.val) || 0;
-      let timerBtn = isTime && numericVal > 0 
+      const isTime    = ex.t === 'time' || ex.t === 'tiempo';
+      const numericVal = parseInt(ex.val) || 0;
+      const timerBtn  = isTime && numericVal > 0
         ? `<button class="btn-secondary" style="width:auto;" onclick="openTimer(${numericVal})">⏱️ Temp. ${numericVal}s</button>`
         : `<button class="btn-secondary" style="width:auto;" onclick="openTimer(60)">⏱️ Descanso 60s</button>`;
-      
-      let safeImg = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
-      let safeDesc = (ex.desc || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      let safeN = (ex.n || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-      let altBtn = (ex.alt && !window.isExamRoutine) ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 TÉCNICA ALTERNATIVA (Regresión / Adaptación)</button>` : '';
+      const safeImg  = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
+      const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const safeN    = (ex.n    || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const altBtn   = (ex.alt && !window.isExamRoutine)
+        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 TÉCNICA ALTERNATIVA (Regresión / Adaptación)</button>`
+        : '';
 
-      let cardHtml = `
+      fullHtml += `
         <div class="exercise-card" id="ex-${index}">
           <div class="exercise-header">
             <span>${ex.n}</span>
             <span class="exercise-stat-badge">${(ex.s || 'str').toUpperCase()}</span>
           </div>
-          <div style="font-size: 0.9rem; margin-bottom: 5px; color: #444;">
-           <strong>${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}</strong>
+          <div style="font-size:0.9rem; margin-bottom:5px; color:#444;">
+            <strong>${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}</strong>
           </div>
-          <div style="display: flex; gap: 8px; margin-top: 15px; width: 100%;">
-           <button class="btn-complete-massive" onclick="completeTask(${index}, '${ex.s || 'str'}')">✔️ FORJAR (+20 XP)</button>
+          <div style="display:flex; gap:8px; margin-top:15px; width:100%;">
+            <button class="btn-complete-massive" onclick="completeTask(${index}, '${ex.s || 'str'}')">✔️ FORJAR (+20 XP)</button>
           </div>
           ${altBtn}
-          <div style="display: flex; gap: 8px; margin-top: 5px; width: 100%;">
+          <div style="display:flex; gap:8px; margin-top:5px; width:100%;">
             <button class="btn-secondary" style="width:50%;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ Técnica</button>
             ${timerBtn}
           </div>
-        </div>
-      `;
-      container.innerHTML += cardHtml;
+        </div>`;
     });
+
+    container.innerHTML = fullHtml; // único reflow
   }
 
   window.checkAllTasksCompleted = function() {
@@ -815,36 +905,47 @@
 
   function throwConfetti() {
     const colors = ['#ffd700', '#28a745', '#ff5555', '#ffffff'];
-    for(let i=0; i<80; i++) {
+    // Usamos un DocumentFragment para insertar todos los nodos en UN SOLO reflow
+    const frag = document.createDocumentFragment();
+    const pieces = [];
+    const COUNT = 60;
+
+    for (let i = 0; i < COUNT; i++) {
         let d = document.createElement('div');
-        d.style.position = 'fixed';
-        d.style.zIndex = '99999';
-        d.style.width = '8px';
-        d.style.height = '16px';
-        d.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        d.style.top = '-20px';
-        d.style.left = (Math.random() * 100) + 'vw';
-        d.style.opacity = Math.random() + 0.5;
-        d.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
-        d.style.pointerEvents = 'none';
-        
-        document.body.appendChild(d);
-        
-        let tx = (Math.random() - 0.5) * 300; 
-        let ty = window.innerHeight + 100; 
-        let duration = 2000 + Math.random() * 3000;
-        
-        d.animate([
-            { transform: 'translate3d(0, 0, 0) rotate(0deg)' },
-            { transform: 'translate3d(' + tx + 'px, ' + ty + 'px, 0) rotate(' + (360 + Math.random()*360) + 'deg)' }
+        d.style.cssText = [
+          'position:fixed',
+          'z-index:99999',
+          'width:8px',
+          'height:16px',
+          'will-change:transform',
+          'pointer-events:none',
+          `background-color:${colors[i % colors.length]}`,
+          'top:-20px',
+          `left:${Math.random() * 100}vw`,
+          `opacity:${Math.random() * 0.5 + 0.5}`,
+          `border-radius:${Math.random() > 0.5 ? '50%' : '2px'}`
+        ].join(';');
+        frag.appendChild(d);
+        pieces.push(d);
+    }
+    // Un único reflow al insertar el Fragment completo
+    document.body.appendChild(frag);
+
+    // Animar DESPUÉS de insertar (browser ya tiene los nodos en el árbol)
+    pieces.forEach(d => {
+        const tx = (Math.random() - 0.5) * 300;
+        const ty = window.innerHeight + 100;
+        const duration = 2000 + Math.random() * 2500;
+        const anim = d.animate([
+            { transform: 'translate3d(0,0,0) rotate(0deg)' },
+            { transform: `translate3d(${tx}px,${ty}px,0) rotate(${360 + Math.random()*360}deg)` }
         ], {
-            duration: duration,
+            duration,
             easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             fill: 'forwards'
         });
-        
-        setTimeout(() => d.remove(), duration);
-    }
+        anim.finished.then(() => d.remove()).catch(() => d.remove());
+    });
   }
 
   window.openTimer = function(seconds) {

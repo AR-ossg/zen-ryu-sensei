@@ -289,6 +289,18 @@
       window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(e => {}));
     }
   </script>
+  <!-- RANK ASCENSION MODAL -->
+  <div id="rank-ascension-modal" class="modal-overlay" style="z-index:70000; background:rgba(0,0,0,0.98);">
+    <div class="rank-ascension-card">
+      <div id="asc-rank-label" style="font-size:0.55rem; letter-spacing:4px; text-transform:uppercase; margin-bottom:12px; font-weight:900;">⬆ NUEVO RANGO DESBLOQUEADO</div>
+      <div id="asc-rank-icon" style="font-size:5rem; margin-bottom:16px; display:block; line-height:1;"></div>
+      <div id="asc-rank-title" style="font-family:'Cinzel',serif; font-size:1.8rem; font-weight:800; color:#fff; margin-bottom:20px; line-height:1.1; letter-spacing:1px;"></div>
+      <p id="asc-rank-wisdom" style="font-style:italic; font-size:0.9rem; line-height:1.6; padding:12px 14px; border-left:3px solid #FFD700; margin-bottom:16px; background:rgba(255,215,0,0.06); border-radius:0 8px 8px 0; text-align:left;"></p>
+      <p id="asc-rank-lore" style="color:#bbb; font-size:0.85rem; line-height:1.7; margin-bottom:28px; text-align:left;"></p>
+      <button class="btn-primary" onclick="closeModal('rank-ascension-modal')" style="letter-spacing:3px; font-size:0.85rem;">ACEPTAR EL SENDERO</button>
+    </div>
+  </div>
+
   <div id="global-lightbox" onclick="closeLightbox()"><img id="global-lightbox-img" src=""></div>
   <script>
     window.openModal = function(id) { document.getElementById(id).classList.add('show'); };
