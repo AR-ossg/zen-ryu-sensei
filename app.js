@@ -166,10 +166,10 @@
          }
       }
       if (typeof player.workoutCount === 'undefined') player.workoutCount = 0;
-      closeModal('onboarding-wizard');
+      document.getElementById('onboarding-wizard').classList.add('hide');
       updateUI();
     } else {
-      openModal('onboarding-wizard');
+      document.getElementById('onboarding-wizard').classList.remove('hide');
       document.getElementById('step-1').className = 'wizard-step active-step';
     }
   }
@@ -480,7 +480,9 @@
         if(ex.s === "flex") typeBadge = '<span style="background:#28a745; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FLEX</span>';
 
         content += `
-        <div style="background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
+        <div ontouchstart="" onclick="openExerciseDetail('${ex.id || ex.n.replace(/[^a-z]/gi,'')}')" style="cursor:pointer; background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center; transition: transform 0.15s ease, background 0.15s; active:transform scale(0.97)" 
+          ontouchstart="this.style.transform='scale(0.97)'; this.style.background='#222';" 
+          ontouchend="this.style.transform=''; this.style.background='#151515';">
           <div style="width:80px; height:80px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#000;">
              <img src="${ex.m}" style="width:100%; height:100%; object-fit:cover; ${imgStyle}">
           </div>
@@ -489,11 +491,36 @@
              ${isLocked ? '' : `<div style="margin-bottom:8px;">${typeBadge} <span style="color:#888; font-size:0.7rem; margin-left:5px;">Nivel: ${ex.lvl_min}</span></div>`}
              <p style="color:${isLocked ? '#ff5555' : '#aaa'}; font-size:0.8rem; line-height:1.4; margin:0;">${displayDesc}</p>
           </div>
+          ${isLocked ? '' : '<span style="color:#555; font-size:1.2rem; flex-shrink:0;">›</span>'}
         </div>`;
+        // Store exercise data so detail modal can access it
+        window._exDB = window._exDB || {};
+        if(!isLocked) window._exDB[ex.id || ex.n.replace(/[^a-z]/gi,'')] = ex;
     });
 
     document.getElementById('library-list').innerHTML = content;
     openModal('library-modal');
+  }
+
+  window.openExerciseDetail = function(exId) {
+    const ex = (window._exDB || {})[exId];
+    if (!ex) return;
+    let statNames = {str:'Fuerza', spd:'Velocidad', end:'Resistencia', flex:'Flexibilidad'};
+    let statColors = {str:'#8f2020', spd:'#5555ff', end:'#555', flex:'#28a745'};
+    let html = `
+      <div style="text-align:center; padding-bottom:5px;">
+        <img src="${ex.m}" onclick="openLightbox('${ex.m}')" style="width:100%; max-height:220px; object-fit:cover; border-radius:10px; cursor:zoom-in; margin-bottom:15px; border:1px solid var(--glass-border);">
+        <h2 style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.2rem; margin-bottom:6px;">${ex.n}</h2>
+        <p style="color:#888; font-size:0.75rem; margin-bottom:12px; letter-spacing:1px;">${ex.real}</p>
+        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:15px;">
+          <span style="background:${statColors[ex.s]}; color:#fff; padding:3px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;">${statNames[ex.s]}</span>
+          <span style="background:#222; color:var(--accent-gold); padding:3px 10px; border-radius:4px; font-size:0.75rem;">Nivel mínimo: ${ex.lvl_min}</span>
+        </div>
+        <p style="color:#ccc; font-size:0.9rem; line-height:1.6; text-align:left; margin-bottom:20px;">${ex.desc}</p>
+        <button class="btn-primary" onclick="closeModal('exercise-detail-modal')">CERRAR</button>
+      </div>`;
+    document.getElementById('exercise-detail-body').innerHTML = html;
+    openModal('exercise-detail-modal');
   }
 
   // ORÁCULO OFFLINE (MOTOR PROCEDIMENTAL)
