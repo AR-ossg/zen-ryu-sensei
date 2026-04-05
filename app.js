@@ -422,7 +422,8 @@
     let imgContainer = document.getElementById('info-img-container');
     if (imgUrl && (imgUrl.startsWith('http') || imgUrl.startsWith('./'))) {
       imgContainer.innerHTML = `
-        <img src="${imgUrl}" class="zoomable-image" onclick="openLightbox(this.src)" onclick="openLightbox(this.src)" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);">
+        <img src="${imgUrl}" class="zoomable-image" onclick="openLightbox(this.src)" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div style="display:none; width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>
         <div style="font-size:0.65rem; color:#666; text-align:center; margin-top:8px; font-family:'Inter';">Cámaras del Códice - Toca la imagen para Ampliar/Reducir.</div>
       `;
     } else {
@@ -483,8 +484,8 @@
         <div ontouchstart="" onclick="openExerciseDetail('${ex.id || ex.n.replace(/[^a-z]/gi,'')}')" style="cursor:pointer; background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center; transition: transform 0.15s ease, background 0.15s; active:transform scale(0.97)" 
           ontouchstart="this.style.transform='scale(0.97)'; this.style.background='#222';" 
           ontouchend="this.style.transform=''; this.style.background='#151515';">
-          <div style="width:80px; height:80px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#000;">
-             <img src="${ex.m}" style="width:100%; height:100%; object-fit:cover; ${imgStyle}">
+          <div style="width:80px; height:80px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#111; display:flex; align-items:center; justify-content:center;">
+             <img src="${ex.m}" style="width:100%; height:100%; object-fit:cover; ${imgStyle}" onerror="this.style.display='none'; this.parentElement.innerHTML+='<span style=\\'font-size:2rem; opacity:0.4;\\'>${ex.s==='str'?'🦾':ex.s==='spd'?'⚡':ex.s==='end'?'🛡️':'🧘‍♂️'}</span>';">
           </div>
           <div style="flex-grow:1;">
              <h3 style="color:${isLocked ? '#666' : '#fff'}; font-family:'Cinzel'; font-size:0.95rem; margin:0 0 5px 0; line-height:1.2;">${displayName}</h3>
@@ -509,7 +510,8 @@
     let statColors = {str:'#8f2020', spd:'#5555ff', end:'#555', flex:'#28a745'};
     let html = `
       <div style="text-align:center; padding-bottom:5px;">
-        <img src="${ex.m}" onclick="openLightbox('${ex.m}')" style="width:100%; max-height:220px; object-fit:cover; border-radius:10px; cursor:zoom-in; margin-bottom:15px; border:1px solid var(--glass-border);">
+        <img src="${ex.m}" onclick="openLightbox('${ex.m}')" style="width:100%; max-height:220px; object-fit:cover; border-radius:10px; cursor:zoom-in; margin-bottom:15px; border:1px solid var(--glass-border);" onerror="this.style.display='none'; document.getElementById('ex-detail-img-fallback').style.display='flex';">
+        <div id="ex-detail-img-fallback" style="display:none; width:100%; height:180px; background:#111; border-radius:10px; border:1px dashed #444; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px; margin-bottom:15px;">[ Transmisión Visual Dañada ]</div>
         <h2 style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.2rem; margin-bottom:6px;">${ex.n}</h2>
         <p style="color:#888; font-size:0.75rem; margin-bottom:12px; letter-spacing:1px;">${ex.real}</p>
         <div style="display:flex; gap:8px; justify-content:center; margin-bottom:15px;">
