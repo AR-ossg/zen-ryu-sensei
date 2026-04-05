@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zen-warrior-pwa-v2';
+const CACHE_NAME = 'zen-warrior-pwa-v3';
 const STATIC_URLS = [
   './',
   './index.html',
@@ -6,9 +6,11 @@ const STATIC_URLS = [
   './app.js',
   './database.js',
   './manifest.json',
+  './icon.png',
   './icon-192.png',
   './icon-512.png',
-  './audio/beep.mp3'
+  './audio/beep.mp3',
+  './img/ryu_dragon.png'
 ];
 
 self.addEventListener('install', event => {

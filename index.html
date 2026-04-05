@@ -18,7 +18,8 @@
   <div id="onboarding-wizard" class="modal-overlay" style=" z-index:20000; background: var(--bg-dark);">
     <!-- FASE 1: Bienvenida -->
     <div class="wizard-step active-step" id="step-1" style="width:90%; max-width:400px; text-align:center;">
-      <img src="./img/ryu_dragon.png" style="width:160px; height:160px; object-fit:cover; border-radius:50%; box-shadow: 0 0 25px rgba(255,215,0,0.4); margin-bottom: 20px; border: 2px solid var(--accent-gold);">
+      <img src="./img/ryu_dragon.png" id="dragon-welcome-img" style="width:160px; height:160px; object-fit:cover; border-radius:50%; box-shadow: 0 0 25px rgba(255,215,0,0.4); margin-bottom: 20px; border: 2px solid var(--accent-gold);" onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
+      <div id="dragon-emoji-fallback" style="display:none; font-size:7rem; margin-bottom:15px; text-shadow: 0 0 30px rgba(255,215,0,0.5);">🐉</div>
       <h2 style="font-family:'Cinzel'; color:var(--accent-gold); font-size:2rem; margin-bottom:15px; line-height:1;">ZEN RYU SENSEI</h2>
       <p style="color:#ccc; font-weight:600; margin-bottom:15px; display:none;">Bienvenido a tu nuevo camino de crecimiento personal.</p>
       <p style="color:#888; font-size:0.85rem; margin-bottom:25px; line-height:1.5;">Soy tu Sensei. Yo te guiaré matemática y espiritualmente en el sendero del Dragón hacia la maestría física. Pero antes de moldearte, necesito medir de qué estás hecho. ¿Estás listo para tu Examen de Admisión?</p>

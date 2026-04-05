@@ -276,7 +276,7 @@
     player.workoutCount = 0;
     
     savePlayer();
-    closeModal('onboarding-wizard');
+    document.getElementById('onboarding-wizard').classList.add('hide');
     showNotification("Perfil Forjado con Especializaciones.\nBienvenido al Sendero, " + player.name, "Iniciación");
     updateUI();
   }
