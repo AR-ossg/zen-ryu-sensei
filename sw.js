@@ -1,4 +1,9 @@
-const CACHE_NAME = 'zen-ryu-pwa-v4';
+// ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
+// para forzar la actualización en los teléfonos que ya tienen la app instalada.
+// Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
+const CACHE_NAME = 'zen-ryu-pwa-v5';
+
+// Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
   './',
   './index.html',
@@ -9,68 +14,61 @@ const STATIC_URLS = [
   './icon.png',
   './icon-192.png',
   './icon-512.png',
-  './img/ryu_dragon.png',
-  './img/techniques/str_1.png',
-  './img/techniques/str_2.png',
-  './img/techniques/str_3.png',
-  './img/techniques/str_4.png',
-  './img/techniques/str_5.png',
-  './img/techniques/str_6.png',
-  './img/techniques/str_7.png',
-  './img/techniques/str_8.png',
-  './img/techniques/str_9.png',
-  './img/techniques/str_10.png',
-  './img/techniques/str_11.png',
-  './img/techniques/str_12.png',
-  './img/techniques/str_13.png'
 ];
 
+// Imágenes — se cachean la primera vez que se usan (Cache-First)
+const IMAGE_EXTS = ['.png', '.jpg', '.gif', '.webp', '.svg'];
+
+// ─── INSTALL: pre-cachea el shell de la app ───────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      // Use individual adds so one failure doesn't break the whole cache
-      return Promise.allSettled(
-        STATIC_URLS.map(url => cache.add(url).catch(() => {}))
-      );
-    })
+    caches.open(CACHE_NAME).then(cache =>
+      Promise.allSettled(STATIC_URLS.map(url => cache.add(url).catch(() => {})))
+    )
   );
-  self.skipWaiting(); // Take control immediately
+  self.skipWaiting(); // Activa el nuevo SW de inmediato sin esperar que se cierren tabs
 });
 
+// ─── ACTIVATE: elimina cachés viejos ──────────────────────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim()) // Apply new cache to all open tabs
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim()) // Toma control de todos los tabs abiertos
   );
 });
 
+// ─── FETCH: estrategia híbrida ────────────────────────────────────────────
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then(networkResponse => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+  const url = new URL(event.request.url);
+  const isImage = IMAGE_EXTS.some(ext => url.pathname.endsWith(ext));
+
+  if (isImage) {
+    // CACHE-FIRST para imágenes (no cambian, se sirven rápido offline)
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        return fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        }).catch(() => {});
+      })
+    );
+  } else {
+    // NETWORK-FIRST para HTML/JS/CSS: siempre intenta la red primero
+    // Si la red falla (offline), sirve desde caché como fallback
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
-        
-        let responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
-        
-        return networkResponse;
-      }).catch(() => {
-        // Fallback offline si falta red
-      });
-    })
-  );
+        return response;
+      }).catch(() => caches.match(event.request))
+    );
+  }
 });
+
