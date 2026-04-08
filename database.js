@@ -10,7 +10,46 @@ const zenQuotes = [
   "Como el bambú: flexible en la tormenta, irrompible en su raíz.",
   "La constancia es la espada que corta la montaña de la imposibilidad.",
   "Un guerrero no se rinde ante lo que le gusta, encuentra el gusto en lo que es difícil.",
-  "El sudor es la tinta con la que escribes tu leyenda."
+  "El sudor es la tinta con la que escribes tu leyenda.",
+  "Sé como el agua, mi amigo. Fluye o golpea.",
+  "El obstáculo es el camino.",
+  "No es lo que te sucede, sino cómo reaccionas lo que importa.",
+  "La dificultad es el alimento de las almas valientes.",
+  "Desde lo uno, conoce lo diez mil.",
+  "El viaje de mil millas comienza con un solo paso.",
+  "La suavidad vence a la dureza; la lentitud vence a la prisa.",
+  "Mañana ganarás a quien eras hoy.",
+  "Aquel que se domina a sí mismo es el dueño de su destino.",
+  "La disciplina es el puente entre las metas y los logros.",
+  "El espíritu debe estar siempre por encima de la técnica.",
+  "Vacía tu mente, sé amorfo, moldeable como el agua.",
+  "La mejor venganza es ser diferente a quien causó el daño.",
+  "El éxito no es el final, el fracaso no es la ruina: es el valor para seguir lo que cuenta.",
+  "Un momento de paciencia puede evitar un gran desastre.",
+  "La mente es un excelente sirviente, pero un maestro terrible.",
+  "Si no hay enemigo en tu interior, el enemigo externo no podrá dañarte.",
+  "No ores por una vida fácil, ora por la fuerza para soportar una difícil.",
+  "El guerrero exitoso es un hombre promedio con un enfoque similar al láser.",
+  "La potencia definitiva grita menos pero rompe con gravedad cósmica.",
+  "En el centro del caos reside la oportunidad.",
+  "Conocerte a ti mismo es la única victoria real sobre la tierra.",
+  "La voluntad de ganar no es nada sin la voluntad de prepararse.",
+  "El reposo es el maestro del movimiento; el silencio el padre de la acción.",
+  "Un verdadero filo mantiene su borde incluso en la masacre del agotamiento.",
+  "La paciencia afila la cuchilla; la agresión ciega solo la agota.",
+  "No te detengas cuando te canses, detente cuando hayas terminado.",
+  "El único oponente real eres tú mismo hace un minuto.",
+  "Excava el pozo antes de tener sed; forja el músculo antes del combate.",
+  "La maestría no es un destino, es el sendero que caminas hoy.",
+  "No pienses, siente. Es como un dedo apuntando a la luna.",
+  "Acepta todo tal como es; la resistencia mental es debilidad.",
+  "Haz cada cosa en tu entrenamiento como si fuera la última.",
+  "Tu vida es lo que tus pensamientos construyen en el silencio del dojo.",
+  "Lo que es difícil de soportar, es dulce de recordar al final del camino.",
+  "La adversidad introduce a un hombre consigo mismo.",
+  "El dojo no tiene paredes; entrena en cada respiración, en cada paso.",
+  "Silencio en la mente, fuego en la técnica, titanio en la voluntad.",
+  "Ningún árbol se vuelve robusto si no es azotado por el viento de la carga física."
 ];
 
 // Base de Datos Estructural - De Lvl 1 a Lvl 100
@@ -180,6 +219,34 @@ const EXERCISE_DB = [
     desc: "1. Como Pistol Squat, pero cruzas y extiendes la pierna en el aire DETRÁS y AL LADO de la pierna de apoyo. Rompe toda dependencia compensatoria.",
     m: "./img/techniques/str_21.png", alt: null
   },
+  {
+    id: "str_22", n: "Diamante del Viento", real: "Flexión Diamante Estricta",
+    s: "str", lvl_min: 12, lvl_max: 35, t: "reps", domain: "conditioning",
+    baseVal: 10, scale: 0.8,
+    desc: "1. Manos formando un diamante bajo el esternón. 2. Baja rozando manos y sube bloqueando codo. Tríceps de acero.",
+    m: "./img/techniques/str_3.png", alt: null
+  },
+  {
+    id: "str_23", n: "Garra de Arquero", real: "Archer Pushups (Flexión Lateral)",
+    s: "str", lvl_min: 40, lvl_max: 75, t: "reps", domain: "conditioning",
+    baseVal: 8, scale: 0.6,
+    desc: "1. Manos muy abiertas. 2. Baja hacia un lado estirando el brazo opuesto totalmente recto. Potencia unilateral.",
+    m: "./img/techniques/str_5.png", alt: null
+  },
+  {
+    id: "str_22", n: "Diamante del Viento", real: "Flexión Diamante Estricta",
+    s: "str", lvl_min: 12, lvl_max: 35, t: "reps", domain: "conditioning",
+    baseVal: 10, scale: 0.8,
+    desc: "1. Manos formando un diamante bajo el esternón. 2. Baja rozando manos y sube bloqueando codo. Tríceps de acero.",
+    m: "./img/techniques/str_3.png", alt: null
+  },
+  {
+    id: "str_23", n: "Garra de Arquero", real: "Archer Pushups (Flexión Lateral)",
+    s: "str", lvl_min: 40, lvl_max: 75, t: "reps", domain: "conditioning",
+    baseVal: 8, scale: 0.6,
+    desc: "1. Manos muy abiertas. 2. Baja hacia un lado estirando el brazo opuesto totalmente recto. Potencia unilateral.",
+    m: "./img/techniques/str_5.png", alt: null
+  },
 
   // =========================================================
   // VELOCIDAD Y EXPLOSIVIDAD (SPD)
@@ -232,6 +299,62 @@ const EXERCISE_DB = [
     baseVal: 8, scale: 0.5,
     desc: "1. Mantén un pie suspendido SIEMPRE. 2. Baja, flexión en 1 pie, vuelve explosivo en 1 pie, y salta. Cambia pie cada repetición. Pliometría letal.",
     m: "./img/techniques/spd_7.png", alt: null
+  },
+  {
+    id: "spd_8", n: "Guepardo en Reposo", real: "Elevación de Rodillas (High Knees)",
+    s: "spd", lvl_min: 1, lvl_max: 15, t: "time", domain: "conditioning",
+    baseVal: 30, scale: 1.5,
+    desc: "1. De pie, levanta rodillas alternadas al pecho con la mayor frecuencia posible. 2. Mantén torso recto y braceo rítmico.",
+    m: "./img/techniques/spd_8.png", alt: null
+  },
+  {
+    id: "spd_9", n: "Viento entre los Dedos", real: "Jumping Jacks de Combate",
+    s: "spd", lvl_min: 3, lvl_max: 15, t: "time", domain: "conditioning",
+    baseVal: 40, scale: 1.2,
+    desc: "1. Salta abriendo piernas y subiendo brazos. 2. Cierra con rapidez extrema. Busca cadencia y rebote ligero.",
+    m: "./img/techniques/spd_9.png", alt: null
+  },
+  {
+    id: "spd_10", n: "Reflejo del Tigre", real: "Pies Rápidos (Fast Feet)",
+    s: "spd", lvl_min: 1, lvl_max: 10, t: "time", domain: "conditioning",
+    baseVal: 20, scale: 2.0,
+    desc: "1. Pies en puntitas, posición atlética baja. 2. Mueve los pies lo más rápido posible sin desplazarte. Vibración corporal total.",
+    m: "./img/techniques/spd_1.png", alt: null
+  },
+  {
+    id: "spd_11", n: "Sombra Fugaz", real: "Mountain Climbers con Salto",
+    s: "spd", lvl_min: 8, lvl_max: 25, t: "time", domain: "conditioning",
+    baseVal: 25, scale: 1.5,
+    desc: "1. Posición de plancha. 2. Alterna pies al pecho pero despegando ambos del suelo en cada cambio (salto horizontal).",
+    m: "./img/techniques/spd_2.png", alt: null
+  },
+  {
+    id: "spd_12", n: "Sombra Guerrera", real: "Boxeo de Sombra (Shadow Box)",
+    s: "spd", lvl_min: 10, lvl_max: 40, t: "time", domain: "conditioning",
+    baseVal: 60, scale: 2.0,
+    desc: "1. En guardia, lanza directos y ganchos al aire moviéndote ligero. 2. Busca fluidez y velocidad de retorno de los puños al rostro.",
+    m: "./img/techniques/spd_2.png", alt: null
+  },
+  {
+    id: "spd_13", n: "Salto del Trueno", real: "Pop Squats (Saltos de Apertura)",
+    s: "spd", lvl_min: 45, lvl_max: 75, t: "reps", domain: "conditioning",
+    baseVal: 15, scale: 1.0,
+    desc: "1. Salta abriendo piernas a sentadilla y tocando el piso. 2. Cierra de un salto explosivo. Cardio de alta intensidad.",
+    m: "./img/techniques/spd_4.png", alt: null
+  },
+  {
+    id: "spd_12", n: "Sombra Guerrera", real: "Boxeo de Sombra (Shadow Box)",
+    s: "spd", lvl_min: 10, lvl_max: 40, t: "time", domain: "conditioning",
+    baseVal: 60, scale: 2.0,
+    desc: "1. En guardia, lanza directos y ganchos al aire moviéndote ligero. 2. Busca fluidez y velocidad de retorno de los puños al rostro.",
+    m: "./img/techniques/spd_2.png", alt: null
+  },
+  {
+    id: "spd_13", n: "Salto del Trueno", real: "Pop Squats (Saltos de Apertura)",
+    s: "spd", lvl_min: 45, lvl_max: 75, t: "reps", domain: "conditioning",
+    baseVal: 15, scale: 1.0,
+    desc: "1. Salta abriendo piernas a sentadilla y tocando el piso. 2. Cierra de un salto explosivo. Cardio de alta intensidad.",
+    m: "./img/techniques/spd_4.png", alt: null
   },
 
   // =========================================================
@@ -307,6 +430,62 @@ const EXERCISE_DB = [
     baseVal: 30, scale: 1.0,
     desc: "1. El Jinete perfecto sin muralla. Piernas descendidas paralelas al piso. Torso herguido. Siente cómo se fortalecen ligamentos micro.",
     m: "./img/techniques/end_10.png", alt: null
+  },
+  {
+    id: "end_11", n: "Estatua de Barro", real: "Superman Hold (Isometría Lumbar)",
+    s: "end", lvl_min: 1, lvl_max: 12, t: "time", domain: "conditioning",
+    baseVal: 30, scale: 1.5,
+    desc: "1. Boca abajo, levanta brazos y piernas estiradas. 2. Sostén la contracción de toda la cadena posterior sintiendo la fuerza en la espalda.",
+    m: "./img/techniques/end_1.png", alt: null
+  },
+  {
+    id: "end_12", n: "Vuelo de la Grulla", real: "Bird-Dog Hold (Estabilidad)",
+    s: "end", lvl_min: 2, lvl_max: 15, t: "time", domain: "conditioning",
+    baseVal: 40, scale: 1.2,
+    desc: "1. 4 apoyos. Extiende brazo derecho y pierna izquierda. 2. Mantén equilibrio ciego sin rotar la cadera. Alterna a mitad de tiempo.",
+    m: "./img/techniques/end_2.png", alt: null
+  },
+  {
+    id: "end_13", n: "Paso del Pantano", real: "Elevación de Piernas Bajas (Leg Raises)",
+    s: "end", lvl_min: 5, lvl_max: 20, t: "reps", domain: "conditioning",
+    baseVal: 12, scale: 0.8,
+    desc: "1. Acostado, manos bajo glúteo. 2. Sube piernas rectas a 30 grados y baja sin tocar el suelo. Resistencia abdominal pura.",
+    m: "./img/techniques/end_3.png", alt: null
+  },
+  {
+    id: "end_14", n: "Círculos de Éter", real: "Hollow Cross (Tensión Total)",
+    s: "end", lvl_min: 12, lvl_max: 35, t: "time", domain: "conditioning",
+    baseVal: 20, scale: 1.0,
+    desc: "1. Posición Hollow pero brazos en cruz laterales. 2. Máxima tensión abdominal y de hombros. Un desafío mental y físico.",
+    m: "./img/techniques/end_3.png", alt: null
+  },
+  {
+    id: "end_15", n: "Marcha del Monje", real: "Plancha con Toques de Hombro",
+    s: "end", lvl_min: 25, lvl_max: 55, t: "time", domain: "conditioning",
+    baseVal: 40, scale: 1.5,
+    desc: "1. Plancha alta (manos). 2. Levanta una mano y toca el hombro opuesto sin que la cadera se mueva un milímetro. Control puro.",
+    m: "./img/techniques/end_2.png", alt: null
+  },
+  {
+    id: "end_16", n: "Respiración de Piedra", real: "Plancha Dinámica (Subir/Bajar)",
+    s: "end", lvl_min: 55, lvl_max: 85, t: "time", domain: "conditioning",
+    baseVal: 30, scale: 1.2,
+    desc: "1. De antebrazos a manos y vuelve a antebrazos. 2. Mantén el cuerpo como una tabla sin balanceos laterales.",
+    m: "./img/techniques/end_2.png", alt: null
+  },
+  {
+    id: "end_15", n: "Marcha del Monje", real: "Plancha con Toques de Hombro",
+    s: "end", lvl_min: 25, lvl_max: 55, t: "time", domain: "conditioning",
+    baseVal: 40, scale: 1.5,
+    desc: "1. Plancha alta (manos). 2. Levanta una mano y toca el hombro opuesto sin que la cadera se mueva un milímetro. Control puro.",
+    m: "./img/techniques/end_2.png", alt: null
+  },
+  {
+    id: "end_16", n: "Respiración de Piedra", real: "Plancha Dinámica (Subir/Bajar)",
+    s: "end", lvl_min: 55, lvl_max: 85, t: "time", domain: "conditioning",
+    baseVal: 30, scale: 1.2,
+    desc: "1. De antebrazos a manos y vuelve a antebrazos. 2. Mantén el cuerpo como una tabla sin balanceos laterales.",
+    m: "./img/techniques/end_2.png", alt: null
   },
 
   // =========================================================
@@ -394,6 +573,40 @@ const EXERCISE_DB = [
     baseVal: 35, scale: 1.2,
     desc: "1. Pierna fuerte al frente y tira la otra recta larga al fondo. Desciende y rota el pecho levantando el brazo.",
     m: "./img/techniques/flex_11.png", alt: null
+  },
+  {
+    id: "flex_26", n: "Plegado de Hierro", real: "Pancake Stretch Total",
+    s: "flex", lvl_min: 60, lvl_max: 100, t: "time", domain: "mobility",
+    desc: "Pliegue completo de piernas y torso contra el piso. Relaja profundamente.",
+    m: "./img/techniques/flex_26.png", scale: 1, baseVal: 60
+  },
+  {
+    id: "flex_27", n: "Cauce Abierto", real: "Estiramiento de Rana (Frog Stretch)",
+    s: "flex", lvl_min: 18, lvl_max: 45, t: "time", domain: "mobility",
+    baseVal: 45, scale: 1.0,
+    desc: "1. Rodillas muy abiertas en el piso, pies en 90 grados hacia afuera. 2. Empuja cadera suavemente hacia atrás. Ideal para splits.",
+    m: "./img/techniques/flex_1.png", alt: null
+  },
+  {
+    id: "flex_28", n: "Ala del Dragón", real: "Lizard Twist (Torsión de Cadera)",
+    s: "flex", lvl_min: 40, lvl_max: 70, t: "time", domain: "mobility",
+    baseVal: 30, scale: 1.0,
+    desc: "1. Estocada profunda, una mano al piso. 2. La otra mano empuja rodilla hacia afuera mientras giras el torso al cielo.",
+    m: "./img/techniques/flex_3.png", alt: null
+  },,
+  {
+    id: "flex_27", n: "Cauce Abierto", real: "Estiramiento de Rana (Frog Stretch)",
+    s: "flex", lvl_min: 18, lvl_max: 45, t: "time", domain: "mobility",
+    baseVal: 45, scale: 1.0,
+    desc: "1. Rodillas muy abiertas en el piso, pies en 90 grados hacia afuera. 2. Empuja cadera suavemente hacia atrás. Ideal para splits.",
+    m: "./img/techniques/flex_1.png", alt: null
+  },
+  {
+    id: "flex_28", n: "Ala del Dragón", real: "Lizard Twist (Torsión de Cadera)",
+    s: "flex", lvl_min: 40, lvl_max: 70, t: "time", domain: "mobility",
+    baseVal: 30, scale: 1.0,
+    desc: "1. Estocada profunda, una mano al piso. 2. La otra mano empuja rodilla hacia afuera mientras giras el torso al cielo.",
+    m: "./img/techniques/flex_3.png", alt: null
   },
   {
     id: "flex_12", n: "Carga del Lagarto", real: "Lizard Stretch (Codos en piso)",

@@ -15,58 +15,68 @@
 <body>
 
   <!-- ONBOARDING WIZARD -->
-  <div id="onboarding-wizard" class="modal-overlay" style=" z-index:20000; background: var(--bg-dark);">
+  <div id="onboarding-wizard" class="modal-overlay" style=" z-index:20000; background: var(--bg-dark); overflow:hidden;">
+    <div class="scanline-bg"></div>
+    
+    <!-- AUDIO ASSETS FOR SYSTEM OVERRIDE -->
+    <audio id="sys-sync-sound" src="https://cdn.freesound.org/previews/235/235882_2977461-hq.mp3" preload="auto"></audio>
+    <audio id="sys-complete-sound" src="https://cdn.freesound.org/previews/320/320655_5260872-hq.mp3" preload="auto"></audio>
+
     <!-- FASE 1: Bienvenida -->
-    <div class="wizard-step active-step" id="step-1" style="width:90%; max-width:400px; text-align:center;">
-      <img src="./icon.png" id="dragon-welcome-img" style="width:160px; height:160px; object-fit:cover; border-radius:50%; box-shadow: 0 0 25px rgba(255,215,0,0.4); margin-bottom: 20px; border: 2px solid var(--accent-gold);" onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
-      <div id="dragon-emoji-fallback" style="display:none; font-size:7rem; margin-bottom:15px; text-shadow: 0 0 30px rgba(255,215,0,0.5);">🐉</div>
-      <h2 style="font-family:'Cinzel'; color:var(--accent-gold); font-size:2rem; margin-bottom:15px; line-height:1;">ZEN RYU SENSEI</h2>
-      <p style="color:#ccc; font-weight:600; margin-bottom:15px; display:none;">Bienvenido a tu nuevo camino de crecimiento personal.</p>
-      <p style="color:#888; font-size:0.85rem; margin-bottom:25px; line-height:1.5;">Soy tu Sensei. Yo te guiaré matemática y espiritualmente en el sendero del Dragón hacia la maestría física. Pero antes de moldearte, necesito medir de qué estás hecho. ¿Estás listo para tu Examen de Admisión?</p>
-      <input type="text" id="ob-name" placeholder="Escribe tu Nombre Guerrero" style="width:100%; padding:15px; margin-bottom:20px; background:#111; color:#fff; border:1px solid #333; border-radius:8px; text-align:center; font-family:'Cinzel'; font-size:1.2rem;">
-      <button class="btn-primary" onclick="nextWizardStep(1)">ESTOY LISTO, MAESTRO</button>
+    <div class="wizard-step active-step wizard-card" id="step-1">
+      <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:5px;">SISTEMA INICIADO: CALIBRACIÓN 1/5</div>
+      <img src="./icon.png" id="dragon-welcome-img" class="holo-image" style="width:140px; height:140px; border-radius:50%; object-position:center; margin: 0 auto 20px auto;" onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
+      <div id="dragon-emoji-fallback" style="display:none; font-size:6rem; margin-bottom:15px; text-shadow: 0 0 30px rgba(255,215,0,0.5);">👁️</div>
+      <h2 class="system-title">ANALIZANDO RECEPTÁCULO</h2>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.6;">Yo seré tu Sensei en este ciclo. Para moldear tu Avatar Físico, necesito medir tus parámetros base.<br><br><b>¿Cuál es tu Título de Guerrero?</b></p>
+      <input type="text" id="ob-name" class="wizard-input" placeholder="INGRESA TU NOMBRE AQUÍ">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(1)" style="letter-spacing:2px;">INICIAR SINCRONIZACIÓN</button>
     </div>
 
     <!-- FASE 2: Fuerza -->
-    <div class="wizard-step hidden-step" id="step-2" style="width:90%; max-width:400px; text-align:center;">
-      <h2 style="font-family:'Cinzel'; color:#fff; margin-bottom:15px;">PRUEBA DE FUERZA</h2>
-      <img src="./img/techniques/str_2.png" style="width:100%; max-height:180px; object-fit:cover; border-radius:12px; margin-bottom:15px; border:1px solid var(--accent-gold);" onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
-      <p style="color:#ccc; font-size:0.95rem; margin-bottom:15px; line-height:1.4;">Haz todas las <b>flexiones de brazos</b> que puedas <b>una sola vez sin descansar</b>.</p>
-      <input type="number" id="ob-str" placeholder="Número de repeticiones" min="0" style="width:100%; outline:none; padding:15px; text-align:center; margin-bottom:20px; font-size:1.2rem; font-family:monospace; background:#000; color:var(--accent-gold); border:1px solid #444; border-radius:8px;">
-      <button class="btn-primary" onclick="nextWizardStep(2)">SIGUIENTE PRUEBA</button>
+    <div class="wizard-step hidden-step wizard-card" id="step-2">
+      <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:5px;">TEST DE FUERZA: CALIBRACIÓN 2/5</div>
+      <h2 class="system-title">PARÁMETRO: FUERZA PURA</h2>
+      <img src="./img/techniques/str_2.png" class="holo-image" onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Baja hasta romper tu límite.<br>Haz todas las <b>flexiones</b> que puedas en un solo set sin descanso.</p>
+      <input type="number" id="ob-str" class="wizard-input" placeholder="Reps Totales" min="0">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR DATOS</button>
     </div>
 
     <!-- FASE 3: Velocidad -->
-    <div class="wizard-step hidden-step" id="step-3" style="width:90%; max-width:400px; text-align:center;">
-      <h2 style="font-family:'Cinzel'; color:#fff; margin-bottom:15px;">PRUEBA DE VELOCIDAD</h2>
-      <img src="./img/techniques/spd_3.png" style="width:100%; max-height:180px; object-fit:cover; border-radius:12px; margin-bottom:15px; border:1px solid var(--accent-gold);" onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
-      <p style="color:#ccc; font-size:0.95rem; margin-bottom:15px; line-height:1.4;">Pon un reloj a 60 segundos exactos. ¿Cuántos <b>Burpees</b> puedes hacer?</p>
-      <input type="number" id="ob-spd" placeholder="Número de burpees" min="0" style="width:100%; outline:none; padding:15px; text-align:center; margin-bottom:20px; font-size:1.2rem; font-family:monospace; background:#000; color:var(--accent-gold); border:1px solid #444; border-radius:8px;">
-      <button class="btn-primary" onclick="nextWizardStep(3)">SIGUIENTE PRUEBA</button>
+    <div class="wizard-step hidden-step wizard-card" id="step-3">
+      <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:5px;">TEST DE VELOCIDAD: CALIBRACIÓN 3/5</div>
+      <h2 class="system-title">PARÁMETRO: EXPLOSIVIDAD</h2>
+      <img src="./img/techniques/spd_3.png" class="holo-image" onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Un ciclo de 60 segundos.<br>Descubre cuántos <b>Burpees</b> exactos puede resistir tu motor pulmonar.</p>
+      <input type="number" id="ob-spd" class="wizard-input" placeholder="Total Burpees" min="0">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR DATOS</button>
     </div>
 
     <!-- FASE 4: Flexibilidad -->
-    <div class="wizard-step hidden-step" id="step-4" style="width:90%; max-width:400px; text-align:center;">
-      <h2 style="font-family:'Cinzel'; color:#fff; margin-bottom:15px;">PRUEBA DE FLEXIBILIDAD</h2>
-      <img src="./img/techniques/flex_1.png" style="width:100%; max-height:180px; object-fit:cover; border-radius:12px; margin-bottom:15px; border:1px solid var(--accent-gold);" onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
-      <p style="color:#ccc; font-size:0.95rem; margin-bottom:15px; line-height:1.4;">¿Hasta dónde baja tu cuerpo al estirarte hacia el piso en frío?</p>
-      <select id="ob-flex" style="width:100%; outline:none; padding:15px; text-align:left; margin-bottom:20px; font-size:0.85rem; background:#000; color:var(--accent-gold); border:1px solid #444; border-radius:8px; font-family:'Inter'; white-space: normal;">
-        <option value="1">Lvl 1: Roca (No paso de mis rodillas)</option>
-        <option value="10">Lvl 10: Tronco (Toco puntas de mis pies/tobillos)</option>
-        <option value="20">Lvl 20: Bambú (Palmas completas en suelo)</option>
-        <option value="35">Lvl 35: Agua (Apertura grande / Medio Spagat)</option>
-        <option value="55">Lvl 55: Goma (Dominio del Spagat/Split puro)</option>
+    <div class="wizard-step hidden-step wizard-card" id="step-4">
+      <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:5px;">TEST DE ELASTICIDAD: CALIBRACIÓN 4/5</div>
+      <h2 class="system-title">PARÁMETRO: FLUIDEZ</h2>
+      <img src="./img/techniques/flex_1.png" class="holo-image" onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Evaluación de rango angular.<br>Elongación espinal profunda (tocar el suelo con piernas rectas). ¿A qué nivel llegas?</p>
+      <select id="ob-flex" class="wizard-select">
+        <option value="1">Lvl 1: Roca (No paso rodillas)</option>
+        <option value="10">Lvl 10: Tronco (Toco puntas pies)</option>
+        <option value="20">Lvl 20: Bambú (Palmas en suelo)</option>
+        <option value="35">Lvl 35: Agua (Medio Spagat)</option>
+        <option value="55">Lvl 55: Goma (Split puro)</option>
       </select>
-      <button class="btn-primary" onclick="nextWizardStep(4)">SIGUIENTE PRUEBA</button>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR DATOS</button>
     </div>
 
     <!-- FASE 5: Aguante -->
-    <div class="wizard-step hidden-step" id="step-5" style="width:90%; max-width:400px; text-align:center;">
-      <h2 style="font-family:'Cinzel'; color:#fff; margin-bottom:15px;">PRUEBA DE RESISTENCIA</h2>
-      <img src="./img/techniques/end_2.png" style="width:100%; max-height:180px; object-fit:cover; border-radius:12px; margin-bottom:15px; border:1px solid var(--accent-gold);" onerror="this.src='https://c.tenor.com/Z421O2c-2GIAAAAC/plank-exercise.gif'">
-      <p style="color:#ccc; font-size:0.95rem; margin-bottom:15px; line-height:1.4;">Plancha abdominal. Anota los <b>minutos (o fracción)</b> que aguantas antes de rendirte.</p>
-      <input type="number" id="ob-end" placeholder="Ej: 1.5 minutos" min="0" step="0.1" style="width:100%; outline:none; padding:15px; text-align:center; margin-bottom:20px; font-size:1.2rem; font-family:monospace; background:#000; color:var(--accent-gold); border:1px solid #444; border-radius:8px;">
-      <button class="btn-primary" style="background:var(--accent-green); color:#000; box-shadow:0 0 20px var(--accent-green); border:none;" onclick="finishWizard()">COMPLETAR EXAMEN</button>
+    <div class="wizard-step hidden-step wizard-card" id="step-5">
+      <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:5px;">TEST DE AGUANTE: CALIBRACIÓN 5/5</div>
+      <h2 class="system-title">PARÁMETRO: RESISTENCIA</h2>
+      <img src="./img/techniques/end_2.png" class="holo-image" onerror="this.src='https://c.tenor.com/Z421O2c-2GIAAAAC/plank-exercise.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Resistencia isométrica final.<br><b>Plancha abdominal pura.</b> Anota los minutos que logras antes del fallo sistémico.</p>
+      <input type="number" id="ob-end" class="wizard-input" placeholder="Ej: 1.5 minutos" min="0" step="0.1">
+      <button class="btn-complete-massive" onclick="playCompleteSound(); finishWizard()">ESTABLECER ENLACE</button>
     </div>
   </div>
 
@@ -86,7 +96,7 @@
   </header>
 
   <!-- HOME VIEW (Dashboard) -->
-  <main id="home-view" class="active-view">
+  <main id="home-view" class="active-view" style="padding-bottom: 120px;">
     
     <div class="hero-title-container">
       <h1 class="hero-title">ZEN RYU<br>SENSEI</h1>
@@ -100,28 +110,18 @@
       <div id="maestro-quote" style="font-size: 0.9rem; font-style: italic; text-align: center; color: #ccc; font-family: 'Cinzel', serif; line-height: 1.5;"></div>
     </div>
 
-    <!-- MAIN MISSION CARDS -->
-    <div class="mission-card" ontouchstart="" style="margin-bottom: 15px; cursor:pointer;" id="btn-start-conditioning">
-      <div class="mission-status"><span>ACONDICIONAMIENTO MARCIAL</span> <span></span></div>
-      <h2 class="mission-title">FUERZA Y<br>POTENCIA</h2>
+    <div class="mission-card" ontouchstart="" style="margin-bottom: 30px; cursor:pointer;" id="btn-start-conditioning">
+      <div class="mission-status"><span>MISIÓN DIARIA</span> <span></span></div>
+      <h2 class="mission-title">ENTRENAMIENTO DE<br>CUERPO COMPLETO</h2>
       <div class="mission-stats">
-        <span>PURO IMPACTO</span> <span>/</span> <span>EXPLOSIVIDAD</span> <span>/</span> <span>ACERO CORE</span>
-      </div>
-    </div>
-
-    <div class="mission-card" ontouchstart="" style="margin-bottom: 15px; border-color: var(--accent-green); background: linear-gradient(135deg, rgba(40,167,69,0.15), rgba(0,0,0,0.8)); cursor:pointer;" id="btn-start-mobility">
-      <div class="mission-status"><span style="color:var(--accent-green);">RECUPERACIÓN ACTIVA</span> <span></span></div>
-      <h2 class="mission-title" style="color:var(--accent-green); text-shadow:0 0 10px rgba(40,167,69,0.3);">FLEXIBILIDAD Y<br>MOVILIDAD</h2>
-      <div class="mission-stats">
-        <span style="color:var(--accent-green);">DESCOMPRESIÓN</span> <span>/</span> <span style="color:var(--accent-green);">ELONGACIÓN ARTICULAR</span>
+        <span>FORTALEZA INTEGRAL</span> <span>/</span> <span>TODOS LOS ATRIBUTOS</span>
       </div>
     </div>
 
     <!-- STATS PANEL HUD -->
     <div class="glass-panel">
-      <div class="stats-header" style="display:flex; justify-content:space-between; align-items:center;">
-        <div><span class="dot"></span> PERFIL DEL GUERRERO</div>
-        <button onclick="openModal('settings-modal')" style="background:none; border:none; font-size:1.4rem; cursor:pointer; padding:0; filter:grayscale(1) brightness(1.5);" title="Ajustes de Sistema">⚙️</button>
+      <div class="stats-header" style="justify-content:center; letter-spacing:4px; font-size:0.75rem;">
+        PERFIL DEL GUERRERO
       </div>
       <div class="stats-grid">
         <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">🦾</span><span>Fuerza</span> <span id="stat-str" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-str" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
@@ -147,31 +147,79 @@
       <audio id="audio-player" src="" preload="none" loop></audio>
     </div>
 
+    <!-- SPECIALIZED TRAINING IS NOW AN EASTER EGG ON STAT LABELS -->
+
+    <!-- BOTTOM FIXED NAV (HOME ONLY) -->
+    <nav class="bottom-nav">
+       <div class="nav-item" onclick="openLibraryModal()">
+          <span class="nav-icon">📚</span>
+          <span class="nav-label">TÉCNICAS</span>
+       </div>
+       <div class="nav-item" onclick="openCodexModal()">
+          <span class="nav-icon">📜</span>
+          <span class="nav-label">CÓDICE</span>
+       </div>
+       <div class="nav-item" onclick="openModal('settings-modal')">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">AJUSTES</span>
+       </div>
+    </nav>
   </main>
 
-  <!-- ROUTINE VIEW -->
-  <main id="routine-view" class="hidden-view">
-    <div id="loader" style="display: none; font-size: 1.1rem; text-align:center; padding: 20px; font-family:'Cinzel',serif; color:var(--accent-gold);">El Maestro está forjando tu rutina...</div>
+<!-- ROUTINE OVERVIEW VIEW -->
+  <main id="routine-overview-view" class="hidden-view">
+    <div id="loader" style="display: none; font-size: 1.1rem; text-align:center; padding: 20px; font-family:'Cinzel',serif; color:var(--accent-gold); animation: float 2s infinite;">El Maestro está forjando tu rutina...</div>
     
-    <div id="exercises-list"></div>
+    <div id="overview-content" style="display:none; margin-top:20px; padding-bottom:100px;">
+       <h2 style="font-family:'Cinzel'; color:var(--accent-gold); text-align:center; margin-bottom: 20px; font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.3);">MISIÓN FORJADA</h2>
+       
+       <div class="glass-panel" style="margin: 0 20px 20px 20px; padding:15px;">
+          <div class="stats-header" style="justify-content:center; letter-spacing:3px;">REPORTE DE BATALLA</div>
+          <div style="display:flex; justify-content:space-around; text-align:center; margin-bottom: 15px;">
+             <div><div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">TIEMPO EST.</div><div id="ov-time" style="color:#fff; font-family:monospace; font-size:1.2rem; font-weight:bold;">0m</div></div>
+             <div><div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">EJERCICIOS</div><div id="ov-count" style="color:#fff; font-family:monospace; font-size:1.2rem; font-weight:bold;">0</div></div>
+             <div><div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">ENFOQUE</div><div id="ov-focus" style="color:var(--accent-gold); font-size:0.9rem; font-weight:bold; margin-top:4px;">MIXTO</div></div>
+          </div>
+          <div id="ov-list" style="max-height: 48vh; overflow-y:auto; border-top:1px dashed #333; padding-top:15px; margin-top:5px; font-size:0.85rem;">
+             <!-- Inyectado por JS -->
+          </div>
+       </div>
 
-    <div style="margin-top: 25px;">
-      <button id="btn-finish-routine" class="btn-complete" style="display:none; margin-bottom:15px;">✔️ FINALIZAR ENTRENAMIENTO</button>
-      <button id="btn-cancel-routine" class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555;">CANCELAR RUTINA</button>
+       <div style="padding: 0 20px;">
+          <button id="btn-start-focus" class="btn-primary" style="margin-bottom:15px; padding:18px; font-size:1.1rem; border-color:var(--accent-gold); background:linear-gradient(135deg, #b8860b, #5a4205); box-shadow: 0 0 20px rgba(255,215,0,0.2);">🔥 COMENZAR MISIÓN</button>
+          <div style="display:flex; gap:10px;">
+             <button id="btn-reforge-routine" class="btn-secondary" style="margin-top:0;">🔄 REFORJAR</button>
+             <button id="btn-cancel-overview" class="btn-secondary" style="margin-top:0; border-color:var(--accent-red); color:#ff5555;">RETIRARSE</button>
+          </div>
+       </div>
     </div>
   </main>
 
-  <!-- BOTTOM FLOATING NAV -->
-  <nav class="bottom-nav" style="justify-content: space-around;">
-     <div class="nav-item" onclick="openLibraryModal()">
-        <span class="nav-icon">📚</span>
-        <span class="nav-label">TÉCNICAS</span>
-     </div>
-     <div class="nav-item" onclick="openCodexModal()">
-        <span class="nav-icon">📜</span>
-        <span class="nav-label">CÓDICE</span>
-     </div>
-  </nav>
+  <!-- ROUTINE FOCUS VIEW (CAROUSEL) -->
+  <main id="routine-focus-view" class="hidden-view">
+    <div style="padding: 15px 20px; display:flex; justify-content:space-between; align-items:center;">
+       <div id="focus-progress-text" style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.1rem; font-weight:bold; text-shadow:0 0 5px rgba(255,215,0,0.3);">EJERCICIO 1 DE 5</div>
+       <button id="btn-cancel-focus" style="background:none; border:none; color:#ff5555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; cursor:pointer; font-weight:bold;">ABANDONAR</button>
+    </div>
+    
+    <div id="focus-exercises-container" style="position:relative; width:100%; height:calc(100vh - 100px); overflow:hidden; padding:0 20px;">
+       <!-- Inyectado por JS -->
+    </div>
+
+    <!-- Finalización -->
+    <div id="focus-finish-container" style="display:none; padding: 20px; text-align:center; position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; background:rgba(0,0,0,0.9); flex-direction:column; justify-content:center; align-items:center;">
+       <div class="wizard-card" style="box-shadow: 0 0 50px rgba(255,215,0,0.4), inset 0 0 30px rgba(0,0,0,1); border: 2px solid var(--accent-gold);">
+         <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(255,215,0,0.3); padding-bottom:10px;">MISIÓN CUMPLIDA</div>
+         <div class="avatar-glow" style="margin-bottom:20px; display:flex; justify-content:center;">
+           <img src="./victory_coin.png" style="width:230px; height:230px; object-fit:cover; border-radius:50%; box-shadow: 0 0 40px rgba(255,180,0,0.4); filter: drop-shadow(0 0 25px rgba(255,180,0,0.6)); animation: float 3s ease-in-out infinite;">
+         </div>
+         <h2 class="system-title" style="font-size:2.4rem; text-transform:uppercase; margin-bottom:30px;">ESPÍRITU<br>FORJADO</h2>
+         <button id="btn-finish-routine" class="btn-complete-massive" style="background:var(--accent-green); color:#000; box-shadow: 0 0 30px rgba(40,167,69,0.8); text-shadow:0 0 2px #fff;">✔️ RECLAMAR VICTORIA</button>
+       </div>
+    </div>
+  </main>
+
+
 
   <!-- MODALS SECUNDARIOS -->
   <div id="timer-modal" class="modal-overlay">
@@ -186,11 +234,14 @@
     </div>
   </div>
 
-  <div id="notification-modal" class="modal-overlay" style=" z-index: 30000;">
-    <div class="modal-content">
-      <h2 id="noti-title" style="color:var(--accent-gold); margin-bottom: 15px; font-family:'Cinzel', serif;">SISTEMA</h2>
-      <p id="noti-msg" style="font-size:0.95rem; color:#fff; line-height:1.6; margin-bottom: 25px;"></p>
-      <button id="noti-close" class="btn-primary">CONTINUAR</button>
+  <div id="notification-modal" class="modal-overlay" style="z-index: 90000;">
+    <div class="wizard-card" style="box-shadow: 0 20px 60px rgba(0,0,0,1), inset 0 0 20px rgba(200,0,0,0.1); border-color:#555;">
+      <h2 id="noti-title" style="color:var(--accent-gold); margin-bottom: 15px; font-family:'Cinzel', serif; font-size: 1.5rem; text-shadow:0 0 10px rgba(255,215,0,0.4);">SISTEMA</h2>
+      <p id="noti-msg" style="font-size:0.95rem; color:#ccc; line-height:1.6; margin-bottom: 25px; padding: 0 10px;"></p>
+      <div id="noti-buttons" style="display:flex; gap:10px; justify-content:center;">
+        <button id="noti-cancel" class="btn-secondary" style="display:none; flex:1;">CANCELAR</button>
+        <button id="noti-close" class="btn-primary" style="border-width:2px; flex:1;">CONTINUAR</button>
+      </div>
     </div>
   </div>
 
@@ -206,12 +257,44 @@
 
 
 
+  <div id="ios-install-modal" class="modal-overlay" style="z-index:40001;">
+    <div class="modal-content" style="max-width: 420px; padding: 30px 25px;">
+      <h2 style="color:var(--accent-gold); margin-bottom: 30px; font-family:'Cinzel'; font-size: 1.5rem; letter-spacing: 2px;">VÍA DE ASCENSIÓN (iOS)</h2>
+      
+      <div class="ios-step">
+        <div class="ios-step-icon">📤</div>
+        <div class="ios-step-text">
+          <b>PASO 1</b>
+          Presiona el botón <b>Compartir</b> en la barra de Safari (el icono del cuadrado con flecha).
+        </div>
+      </div>
+
+      <div class="ios-step">
+        <div class="ios-step-icon">➕</div>
+        <div class="ios-step-text">
+          <b>PASO 2</b>
+          Desliza hacia abajo y selecciona <b>"Añadir a la pantalla de inicio"</b>.
+        </div>
+      </div>
+
+      <div class="ios-step" style="margin-bottom: 35px; border-color: rgba(255,215,0,0.2);">
+        <div class="ios-step-icon" style="background:var(--accent-gold); color:#000;">🐉</div>
+        <div class="ios-step-text" style="color:#fff;">
+          <b>PASO FINAL</b>
+          Presiona <b>"Añadir"</b> en la esquina superior derecha para forjar el acceso al Dojo.
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="closeModal('ios-install-modal')">ENTENDIDO</button>
+    </div>
+  </div>
+
   <div id="pwa-modal" class="modal-overlay" style=" z-index:40000;">
     <div class="modal-content">
       <h2 style="color:var(--accent-gold); margin-bottom: 15px; font-family:'Cinzel';">DESCARGAR APP</h2>
       <div style="text-align: left; font-size:0.85rem; color:#ccc; line-height: 1.6; margin-bottom: 20px;">
         <p>📱 <b>Android:</b> Menú de Chrome -> "Instalar Aplicación" o "Añadir a pantalla de inicio".</p><br>
-        <p>🍎 <b>iPhone (Safari):</b> Presiona el Botón "Compartir" (Centro de la barra Inferior) -> "Añadir a la pantalla de inicio".</p>
+        <p>🍎 <b>Mac (Chrome):</b> Presiona el icono de instalación en la barra de direcciones.</p>
       </div>
       <button class="btn-primary" onclick="closeModal('pwa-modal')">ENTENDIDO</button>
     </div>
@@ -221,9 +304,10 @@
     <div class="modal-content" style="text-align:center;">
       <h2 style="color:var(--accent-gold); margin-bottom: 10px; font-family:'Cinzel';">SISTEMA PWA</h2>
       <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Respalda tu progreso para que nunca pierdas años de entrenamiento físico.</p>
-      <button class="btn-secondary" onclick="exportSave()" style="margin-bottom:15px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR DATOS</button>
-      <button class="btn-secondary" onclick="document.getElementById('import-file').click()" style="margin-bottom:20px; border-color:#ff5555; color:#ff5555;">📁 IMPORTAR DATOS</button>
+      <button class="btn-secondary" onclick="exportSave()" style="margin-bottom:10px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR DATOS</button>
+      <button class="btn-secondary" onclick="document.getElementById('import-file').click()" style="margin-bottom:10px; border-color:#ff5555; color:#ff5555;">📁 IMPORTAR DATOS</button>
       <input type="file" id="import-file" style="display:none" accept=".json" onchange="importSave(event)">
+      <button class="btn-secondary" onclick="debugSystem()" style="margin-bottom:20px; border-color:#aaa; color:#aaa; font-size:0.7rem;">🔄 BUSCAR ACTUALIZACIONES</button>
       <button class="btn-primary" onclick="closeModal('settings-modal')">CERRAR</button>
     </div>
   </div>
@@ -282,11 +366,11 @@
     <button class="btn-secondary" style="max-width:300px; margin:0 auto;" onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
   </div>
 
-  <script src="./database.js"></script>
-  <script src="./app.js"></script>
+  <script src="./database.js?v=10"></script>
+  <script src="./app.js?v=10"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(e => {}));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10').catch(e => {}));
     }
   </script>
   <!-- RANK ASCENSION MODAL -->
@@ -303,13 +387,68 @@
 
   <div id="global-lightbox" onclick="closeLightbox()"><img id="global-lightbox-img" src=""></div>
   <script>
-    window.openModal = function(id) { document.getElementById(id).classList.add('show'); };
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('show'); };
+    window.openModal = function(id) { 
+        if(window.UISoundEngine) window.UISoundEngine.playSwoosh();
+        document.getElementById(id).classList.add('show'); 
+    };
+    window.closeModal = function(id) { 
+        if(window.UISoundEngine) window.UISoundEngine.playSwoosh();
+        document.getElementById(id).classList.remove('show'); 
+    };
+    let currentNotiCallback = null;
+    let currentNotiCancelCallback = null;
+
+    function showNotification(msg, title, callback = null) {
+        document.getElementById('noti-title').innerText = title || "NOTIFICACIÓN";
+        document.getElementById('noti-msg').innerText = msg;
+        document.getElementById('noti-close').innerText = "CONTINUAR";
+        document.getElementById('noti-cancel').style.display = 'none';
+        openModal('notification-modal');
+        currentNotiCallback = callback;
+        currentNotiCancelCallback = null;
+    }
+
+    window.showConfirm = function(msg, title, onConfirm, onCancel = null) {
+        document.getElementById('noti-title').innerText = title || "CONFIRMACIÓN";
+        document.getElementById('noti-msg').innerText = msg;
+        document.getElementById('noti-close').innerText = "ACEPTAR";
+        document.getElementById('noti-cancel').style.display = 'block';
+        openModal('notification-modal');
+        currentNotiCallback = onConfirm;
+        currentNotiCancelCallback = onCancel;
+    };
+
+    document.getElementById('noti-close').addEventListener('click', () => {
+        closeModal('notification-modal');
+        if(currentNotiCallback) {
+            const cb = currentNotiCallback;
+            currentNotiCallback = null;
+            cb();
+        }
+    });
+
+    document.getElementById('noti-cancel').addEventListener('click', () => {
+        closeModal('notification-modal');
+        if(currentNotiCancelCallback) {
+            const ccb = currentNotiCancelCallback;
+            currentNotiCancelCallback = null;
+            ccb();
+        }
+    });
+
     window.openLightbox = function(src) { 
         document.getElementById('global-lightbox-img').src = src; 
         document.getElementById('global-lightbox').classList.add('show'); 
     };
     window.closeLightbox = function() { document.getElementById('global-lightbox').classList.remove('show'); };
+    
+    window.debugSystem = function() {
+        showConfirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?", "ACTUALIZACIÓN", () => { window.location.reload(); });
+    };
+    window.playCompleteSound = function() {
+        const audio = document.getElementById('sys-complete-sound');
+        if(audio) { audio.currentTime = 0; audio.play().catch(e=>console.log("Audio play prevented:", e)); }
+    };
   </script>
 </body>
 </html>

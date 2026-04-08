@@ -1,19 +1,20 @@
 // ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
 // para forzar la actualización en los teléfonos que ya tienen la app instalada.
 // Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
-const CACHE_NAME = 'zen-ryu-pwa-v5';
+const CACHE_NAME = 'zen-ryu-pwa-v30';
 
 // Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
   './',
   './index.html',
   './style.css',
-  './app.js',
-  './database.js',
+  './app.js?v=10',
+  './database.js?v=10',
   './manifest.json',
   './icon.png',
   './icon-192.png',
   './icon-512.png',
+  './victory_coin.png',
 ];
 
 // Imágenes — se cachean la primera vez que se usan (Cache-First)
@@ -71,4 +72,3 @@ self.addEventListener('fetch', event => {
     );
   }
 });
-

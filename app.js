@@ -15,6 +15,37 @@
 
   let workoutHistory = [];
 
+  const STAT_LABELS = {
+    str: 'FUERZA',
+    spd: 'VELOCIDAD',
+    flex: 'FLEXIBILIDAD',
+    end: 'RESISTENCIA'
+  };
+
+  window.debugSystem = function() {
+    if (confirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?")) {
+       if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+             for(let registration of registrations) { registration.unregister(); }
+          });
+       }
+       if (window.caches) {
+          caches.keys().then(names => {
+             for (let name of names) caches.delete(name);
+          });
+       }
+       location.replace(location.origin + location.pathname + '?v=' + Date.now());
+    }
+  };
+
+  window.sessionState = {
+    active: false,
+    gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
+    levelUps: [],
+    rankUpReady: false,
+    reachedCap: false
+  };
+
   // --- NATIVE INDEXEDDB WRAPPER ---
   const zendb = {
      db: null,
@@ -34,13 +65,16 @@
              req.onerror = (e) => reject(e);
          });
      },
-     addHistory: function(routineObj, specificDate) {
+     addHistory: function(entry, specificDate) {
          return new Promise((resolve, reject) => {
              if(!this.db) return resolve();
              let tx = this.db.transaction("history", "readwrite");
              let store = tx.objectStore("history");
-             const dateStr = specificDate || new Date().toISOString();
-             store.add({ date: dateStr, routine: routineObj });
+             // entry can be a full {date,type} object or a legacy routineObj string
+             const record = (typeof entry === 'object' && entry.type)
+               ? entry
+               : { date: specificDate || new Date().toISOString(), type: entry || 'Entrenamiento' };
+             store.add(record);
              tx.oncomplete = () => resolve();
              tx.onerror = (e) => reject(e);
          });
@@ -95,7 +129,10 @@
             if (data.history && data.history.length > 0) {
                await zendb.init().catch(e=>{});
                await zendb.clearHistory();
-               for (let r of data.history) { await zendb.addHistory(r.routine, r.date); }
+               for (let r of data.history) {
+                 // Support both new {date,type} and old {date,routine} formats
+                 await zendb.addHistory({ date: r.date, type: r.type || 'Entrenamiento' });
+               }
             }
             alert("Perfil restituido de forma segura. La academia se reiniciará para cargar tus habilidades.");
             location.reload();
@@ -109,64 +146,64 @@
 
   const rankTitles = [
     {
-      max: 4, title: "Semilla Inactiva", icon: "🌰", color: "#8B7355",
-      wisdom: "Todo gran viaje comienza con un cuerpo en reposo que decide moverse.",
-      lore: "La Semilla Inactiva eres tú en el umbral del despertar. Aún no has brotado, pero en tu interior duerme el código completo del Dragón. El primer paso no es el más difícil — es reconocer que eres capaz de darlo. El dojo te espera."
+      max: 4, title: "Letargo Mortal", icon: "🌑", color: "#8B7355",
+      wisdom: "Todo gran viaje comienza con un cuerpo en reposo que decide despertar.",
+      lore: "Estás en el umbral del despertar. Aún no has soltado tus cadenas, pero en tu interior duerme el código de la ascensión. El primer paso no es el más difícil — es reconocer el peso del letargo y decidir destruirlo. El dojo de sombras te espera."
     },
     {
-      max: 9, title: "Brote de Bambú", icon: "🌱", color: "#4CAF50",
-      wisdom: "El bambú no pide permiso al suelo para crecer. Simplemente crece.",
-      lore: "Has roto la cáscara de la inercia. Como el brote de bambú, tus primeras semanas son frágiles — pero la raíz ya está anclada. Cada repetición construye cimientos invisibles que sostendrán tu templo físico durante décadas."
+      max: 9, title: "Iniciado del Camino", icon: "⛩️", color: "#4CAF50",
+      wisdom: "El umbral se cruza una sola vez. No hay vuelta atrás.",
+      lore: "Has roto la cáscara de la inercia. Eres un iniciado recién llegado a la forja. Tras cruzar la puerta oscura, tus semanas son de adaptación dolorosa. Cada fibra rasgada construye cimientos invisibles que sostendrán el templo viviente en el que te convertirás."
     },
     {
-      max: 19, title: "Grulla de Piedra", icon: "🪨", color: "#90A4AE",
-      wisdom: "La grulla que vuela lejos primero se detiene en silencio sobre la piedra.",
-      lore: "El equilibrio ya no es un accidente — empieza a ser una elección. Sobre la roca inmóvil, la grulla aprende que la quietud es la forma más profunda de potencia. Tu cuerpo descubre la diferencia entre tensión vacía y fuerza real."
+      max: 19, title: "Fuerza Latente", icon: "🩸", color: "#90A4AE",
+      wisdom: "El equilibrio mecánico ya no es accidente. Es una elección consciente.",
+      lore: "Has asimilado el sufrimiento entrenando en gravedad. Tu voluntad ahora dirige un cuerpo que resuena con la tensión estática. Estás descubriendo la diferencia brutal, cruda y profunda entre un esfuerzo desesperado y una potencia pura y calculada."
     },
     {
-      max: 29, title: "Tigre Enfocado", icon: "🐅", color: "#FF8C00",
-      wisdom: "El tigre no ataca cuando tiene hambre. Ataca cuando es el momento preciso.",
-      lore: "Has despertado la ferocidad controlada. El tigre no desperdicia energía — cada movimiento es una decisión. Tu cuerpo aprende a concentrar potencia explosiva en fracciones de segundo. Esto no es agresividad: es precisión animal perfeccionada."
+      max: 29, title: "Cazador de Sombras", icon: "🥷", color: "#FF8C00",
+      wisdom: "La agresión descontrolada solo agota; la paciencia afila la cuchilla.",
+      lore: "Has despertado una ferocidad letal y controlada. Las sombras no te asustan porque ya cazas en ellas. Cada repetición es perfecta, y el fracaso no se comete por falta de esfuerzo, sino al acercarte cada vez más a tus verdaderos límites insondables."
     },
     {
-      max: 39, title: "Mantis de Hierro", icon: "🦗", color: "#66BB6A",
-      wisdom: "Un golpe perfecto vale más que mil golpes mediocres.",
-      lore: "La mantis es el maestro de la economía del movimiento: no hay un músculo activado en vano, ni una respiración desperdiciada. Has iniciado la etapa donde la calidad supera a la cantidad y tu cuerpo comienza a moverse como un instrumento forjado en hierro."
+      max: 39, title: "Acero Vivo", icon: "⛓️", color: "#66BB6A",
+      wisdom: "Un golpe perfecto, forjado en repetición, destruye mil movimientos ciegos.",
+      lore: "Tus tendones resuenan con la densidad del metal irrompible. Has asimilado la economía absoluta: ningún músculo se acciona por error, ni siquiera una respiración se da por sentada. Tu cuerpo ya se desplaza como un instrumento implacable forjado en hierro y obsidiana."
     },
     {
-      max: 49, title: "Guerrero Esmeralda", icon: "⚔️", color: "#26A69A",
-      wisdom: "Un guerrero no es el que nunca cae — es el que cada vez se levanta con más arte.",
-      lore: "Has ganado el derecho de llamarte guerrero. Tu disciplina ya no es un hábito — es tu naturaleza. La esmeralda no nació brillante: fue presionada por la tierra durante milenios. Tu sufrimiento entrenado es ese brillo. El sendero te reconoce como propio."
+      max: 49, title: "Guerrero Templado", icon: "⚔️", color: "#26A69A",
+      wisdom: "Un verdadero filo no es el que nunca sufre, sino el que mantiene su borde en la masacre.",
+      lore: "El sendero te ha puesto contra la pared innumerables veces. Has ganado el derecho a ser aclamado como un combatiente firme. Esta disciplina se arraigó hasta tu naturaleza, curtiéndote. Acostumbrado a los golpes, ya no te derrumbas; asimilas, analizas y aplastas."
     },
     {
       max: 59, title: "Sombra del Viento", icon: "🌪️", color: "#7E57C2",
-      wisdom: "No luches contra el viento. Conviértete en él.",
-      lore: "Tu velocidad ha cruzado el umbral de lo consciente. El cuerpo se mueve antes de que la mente lo ordene. Eres la Sombra del Viento: estás ahí y luego no estás. En este rango, el tiempo mismo parece diferente cuando entrenas con plena presencia."
+      wisdom: "No colisiones inútilmente contra la fuerza invisible. Usa su furia.",
+      lore: "Te desplazas con cinética letal, donde el comando físico ocurre en un instante microsegundos antes de la orden consciente. Eres una entidad biomecánica de reflejo letal; el mundo a tu alrededor entrena en una dimensión donde el ego desaparece por la rapidez letal."
     },
     {
-      max: 69, title: "Maestro del Silencio", icon: "🤫", color: "#78909C",
-      wisdom: "El maestro verdadero enseña con su cuerpo en movimiento, no con sus palabras.",
-      lore: "Los grandes maestros no necesitan gritar. Su sabiduría vive codificada en cada fibra de su ser. Has alcanzado el silencio interior donde el ego ya no interfiere con el entrenamiento. Aquí no hay excusas, ni negociaciones, ni dudas. Solo la práctica."
+      max: 69, title: "Voz del Vacío", icon: "🌌", color: "#78909C",
+      wisdom: "La potencia definitiva grita menos pero rompe con gravedad cósmica.",
+      lore: "Dejaste atrás las diletantes quejas. Entrenas inmerso en el éter abismal. La inmensa comprensión física se ha callado en tu interior porque ha depurado cualquier ego. Para cruzar este vacío se exige el desapego radical —entrenas no porque debas o temas, sino porque ahora eres eso."
     },
     {
-      max: 79, title: "Alma de Acero", icon: "🦾", color: "#B0BEC5",
-      wisdom: "El acero no teme al fuego. Fue forjado en él.",
-      lore: "El dolor ya es un idioma que hablas con fluidez. Tu voluntad ha sido templada en cientos de sesiones de exigencia pura. Lo que antes te quebraba ahora te perfecciona. Tu cuerpo es un instrumento de acero — rígido cuando debe serlo, flexible cuando la batalla lo exige."
+      max: 79, title: "Alma de Titanio", icon: "🛡️", color: "#B0BEC5",
+      wisdom: "La armadura del guerrero maduro es la inquebrantable mente que la habita.",
+      lore: "La percepción de dolor se ha destilado en pura retroalimentación sensorial. Formaste armaduras nerviosas de pura resiliencia táctica. Sólido y absoluto ante las cargas, tu espíritu y materia se consolidan; el titanio es fuerte pero letal por la flexibilidad."
     },
     {
-      max: 89, title: "Oráculo Corporal", icon: "🧿", color: "#5C6BC0",
-      wisdom: "El cuerpo nunca miente. Solo hay que aprender a escucharlo.",
-      lore: "Has desarrollado la intuición del maestro. Tu cuerpo te habla en un lenguaje que muy pocos aprenden a leer. Sabes cuándo ir al límite y cuándo el límite necesita expandirse. El entrenamiento ya no es esfuerzo — es el arte de interpretar tu potencial más profundo."
+      max: 89, title: "Oráculo Marcial", icon: "👁️‍🗨️", color: "#5C6BC0",
+      wisdom: "La lectura de las limitantes es la destreza final de la fuerza desatada.",
+      lore: "Encuentras la iluminación prediciendo cómo fallará el cuerpo para anular dichos quiebres. La biomecánica no te oculta nada. Habitas y experimentas el poder predictivo para someter por instinto innegable cualquier obstáculo de progresión."
     },
     {
-      max: 99, title: "Demonio Consagrado", icon: "👹", color: "#E53935",
-      wisdom: "Los demonios consagrados no destruyen — transforman todo lo que tocan.",
-      lore: "Has cruzado los límites del promedio humano. Pocos en el mundo entrenan al nivel donde habitas ahora. El término demonio no es oscuro: es el espíritu que se niega a ceder ante cualquier obstáculo. Tu disciplina ya es sagrada."
+      max: 99, title: "Monarca del Abismo", icon: "👹", color: "#E53935",
+      wisdom: "Aquel capaz de asomarse a las profundidades dominará la oscuridad del agotamiento.",
+      lore: "Ya muy pocos habitan este escalafón místico de exigencia atroz en el borde humano. Eres considerado un monstruo disciplinario, que se eleva destruyendo complacencias del ego, un auténtico rey en la oscura planicie del condicionamiento solitario."
     },
     {
       max: 999, title: "Dragón Ascendido", icon: "🐉", color: "#FFD700",
-      wisdom: "El Dragón no busca la cumbre de la montaña. El Dragón es la montaña.",
-      lore: "Has disuelto la frontera entre entrenamiento y vida. Ya no practicas el Camino del Dragón — lo encarnas. Tu cuerpo es una obra maestra viviente, forjada en años de disciplina silenciosa. El Dragón Ascendido no compite con nadie: su único rival fue siempre la versión anterior de sí mismo."
+      wisdom: "No existen cimas tras asimilar el absoluto. La entidad divina es el esfuerzo transmutado.",
+      lore: "Frontera suprimida. Encarnas silenciosamente la brutal perfección abstracta. Alquimia lograda; la cúspide evolutiva ya no es medible porque trascendiste cada escalón por una brutal tenacidad constante. El dragón contempla sereno sin más contrincante que la inmensidad."
     }
   ];
 
@@ -178,7 +215,8 @@
 
   function savePlayer() {
     localStorage.setItem("zenWarriorPwaSave", JSON.stringify(player));
-    localStorage.setItem("zenWarriorHistory", JSON.stringify(workoutHistory));
+    // NOTE: workoutHistory is persisted exclusively in IndexedDB now.
+    // Do NOT write it to localStorage to avoid duplicate migration on every reload.
   }
 
   async function loadPlayer() {
@@ -188,7 +226,10 @@
     if (oldHx) {
       try { 
         let parsedHx = JSON.parse(oldHx); 
-        for (let h of parsedHx) { await zendb.addHistory(h.routine, h.date); }
+        for (let h of parsedHx) {
+          // Old format: {date, type}  — preserve both fields
+          await zendb.addHistory({ date: h.date, type: h.type || 'Entrenamiento' });
+        }
         localStorage.removeItem("zenWarriorHistory");
       } catch(e) {}
     }
@@ -216,6 +257,8 @@
       if (typeof player.workoutCount === 'undefined') player.workoutCount = 0;
       document.getElementById('onboarding-wizard').classList.add('hide');
       updateUI();
+      updateCodexUI();
+      updateLibraryUI();
     } else {
       document.getElementById('onboarding-wizard').classList.remove('hide');
       document.getElementById('step-1').className = 'wizard-step active-step';
@@ -237,6 +280,11 @@
     let btnInstall = document.getElementById('btn-install-pwa');
     let gate = document.getElementById('install-gate');
     
+    const isIOS = () => {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    };
+
     // Siempre lo mostramos si NO estamos en la app instalada (standalone)
     if (btnInstall && gate && !isStandalone()) {
       gate.style.display = 'flex';
@@ -245,28 +293,39 @@
         if(navigator.vibrate) navigator.vibrate(50);
         
         if (deferredPrompt) {
-           // Si Android nos dio el prompt nativo, lo usamos (1-clic)
-           deferredPrompt.prompt();
-           const { outcome } = await deferredPrompt.userChoice;
-           if (outcome === 'accepted') {
-               gate.style.display = 'none';
-           }
-           deferredPrompt = null;
+            // Si Android/Chrome nos dio el prompt nativo, lo usamos (1-clic)
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                gate.style.display = 'none';
+            }
+            deferredPrompt = null;
+        } else if (isIOS()) {
+            // Si es iOS, mostramos la ventana elegante específica
+            openModal('ios-install-modal');
         } else {
-           // Si es iOS o Android no proporcionó prompt nativo, mostramos instrucciones
-           openModal('pwa-modal');
+            // Caso general (Android sin prompt nativo o PC)
+            openModal('pwa-modal');
         }
       });
     }
   });
 
   function switchView(viewToShow, viewToHide) {
+    console.log(`ZenRyu: switchView ${viewToHide} -> ${viewToShow}`);
+    if(window.UISoundEngine) window.UISoundEngine.playSwoosh();
     const hideEl = document.getElementById(viewToHide);
     const showEl = document.getElementById(viewToShow);
+    
+    if (!hideEl || !showEl) {
+       console.warn("ZenRyu: View transition failed, one or more elements missing.", {viewToShow, viewToHide});
+       if(showEl) showEl.className = 'active-view';
+       return;
+    }
+
     // 1st rAF: aplica hidden-view y permite al browser hacer flush del layout
     hideEl.className = 'hidden-view';
     // 2nd rAF (doble): espera al siguiente frame de pintura REAL antes de animar
-    // Esto evita que la animación de entrada compita con el layout del elemento saliente
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         showEl.className = 'active-view';
@@ -351,7 +410,15 @@
 
     let cap = rObj.max;
     ['str', 'spd', 'flex', 'end'].forEach(s => {
-       document.getElementById('stat-' + s).innerText = "Lvl " + player.stats[s].lvl;
+       const statEl = document.getElementById('stat-' + s);
+       if (statEl) {
+         statEl.innerText = "Lvl " + player.stats[s].lvl;
+         // HUEVO DE PASCUA: Entrenamiento especializado al tocar el nombre/nivel
+         const parent = statEl.closest('.hud-stat');
+         if(parent) {
+            parent.onclick = () => startSpecializedTraining(s);
+         }
+       }
        let bar = document.getElementById('bar-' + s);
        if (bar) {
           if (player.stats[s].lvl >= cap) {
@@ -419,20 +486,38 @@
     let stat = player.stats[statAlias];
     
     if (stat.lvl >= cap) {
-       showNotification("Esta capacidad ha llegado a su tope momentáneo. Necesitas evolucionar tus otras disciplinas físicas y luego superar el Examen Final para ascender de Rango.", "Cuerpo al Límite");
+       if (window.sessionState && window.sessionState.active) {
+          window.sessionState.reachedCap = true;
+       } else {
+          showNotification("Esta capacidad ha llegado a su tope momentáneo. Necesitas evolucionar tus otras disciplinas físicas y luego superar el Examen Final para ascender de Rango.", "Cuerpo al Límite");
+       }
        return;
     }
     
     stat.xp += amount;
+    if (window.sessionState && window.sessionState.active) {
+       window.sessionState.gainedXP[statAlias] += amount;
+    }
+    
     let requiredXp = stat.lvl * 100;
     
     if (stat.xp >= requiredXp) {
       stat.xp -= requiredXp;
       stat.lvl++;
-      showNotification(`¡Tu disciplina en ${statAlias.toUpperCase()} ha evolucionado al Nivel ${stat.lvl}!`, "🌟 DESBLOQUEO FÍSICO");
+      
+      if (window.sessionState && window.sessionState.active) {
+         window.sessionState.levelUps.push({ stat: statAlias, lvl: stat.lvl });
+      } else {
+         showNotification(`¡Tu disciplina en ${STAT_LABELS[statAlias]} ha evolucionado al Nivel ${stat.lvl}!`, "🌟 DESBLOQUEO FÍSICO");
+         updateLibraryUI();
+      }
       
       if (checkExamPending()) {
-         showNotification("Estás bloqueado en la cúspide de tu rango. Es hora de demostrar si eres digno del siguiente paso en el escalafón. Tu próxima Misión de Acondicionamiento será un EXAMEN DE ASCENSO.", "Examen Máximo Disponible");
+         if (window.sessionState && window.sessionState.active) {
+            window.sessionState.rankUpReady = true;
+         } else {
+            showNotification("Estás bloqueado en la cúspide de tu rango. Es hora de demostrar si eres digno del siguiente paso en el escalafón. Tu próxima Misión de Acondicionamiento será un EXAMEN DE ASCENSO.", "Examen Máximo Disponible");
+         }
       }
     }
     
@@ -441,18 +526,40 @@
   }
 
   let currentNotiCallback = null;
-  function showNotification(msg, title, callback = null) {
+  let currentCancelCallback = null;
+  function showNotification(msg, title, callback = null, showCancel = false, cancelCallback = null) {
     document.getElementById('noti-title').innerText = title;
     document.getElementById('noti-msg').innerText = msg;
+    
+    const cancelBtn = document.getElementById('noti-cancel');
+    if(showCancel) {
+      cancelBtn.style.display = 'block';
+    } else {
+      cancelBtn.style.display = 'none';
+    }
+
     openModal('notification-modal');
     currentNotiCallback = callback;
+    currentCancelCallback = cancelCallback;
   }
 
   document.getElementById('noti-close').addEventListener('click', () => {
     closeModal('notification-modal');
     if(currentNotiCallback) {
-        currentNotiCallback();
+        const cb = currentNotiCallback;
         currentNotiCallback = null;
+        currentCancelCallback = null;
+        cb();
+    }
+  });
+
+  document.getElementById('noti-cancel').addEventListener('click', () => {
+    closeModal('notification-modal');
+    if(currentCancelCallback) {
+        const cb = currentCancelCallback;
+        currentNotiCallback = null;
+        currentCancelCallback = null;
+        cb();
     }
   });
 
@@ -538,56 +645,68 @@
     document.getElementById('info-img-container').innerHTML = '';
   });
 
-  window.openCodexModal = function() {
-    document.getElementById('codex-list').innerHTML = buildCodexRankHtml();
+  window.updateCodexUI = function() {
+    const listEl = document.getElementById('codex-list');
+    if(!listEl) return;
+    listEl.innerHTML = buildCodexRankHtml();
     document.getElementById('codex-sessions').innerText = player.workoutCount;
-    let hxHtml = workoutHistory.map(h => '<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">' + h.date + '</span><br><span style="color:#fff;">' + h.type + '</span></div>').join('');
+    let hxHtml = workoutHistory.map(h => {
+      const dateStr = h.date || '';
+      const typeStr = h.type || (h.routine ? 'Entrenamiento' : 'Sesión');
+      return '<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">' + dateStr + '</span><br><span style="color:#fff;">' + typeStr + '</span></div>';
+    }).join('');
     if(workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
     let hxContainer = document.getElementById('codex-history');
     if(hxContainer) hxContainer.innerHTML = hxHtml;
+  };
+
+  window.openCodexModal = function() {
     openModal('codex-modal');
-  }
+  };
 
 
-  window.openLibraryModal = function() {
+  window.updateLibraryUI = function() {
+    const listEl = document.getElementById('library-list');
+    if(!listEl) return;
     let content = '';
     
     EXERCISE_DB.forEach(ex => {
         let pLvl = player.stats[ex.s]?.lvl || 1;
         let isLocked = ex.lvl_min > pLvl;
         let displayName = isLocked ? "??? (Técnica Bloqueada)" : ex.n + " - " + ex.real;
-        let displayDesc = isLocked ? `Requiere Nivel ${ex.lvl_min} físico de ${ex.s.toUpperCase()} para desbloquear.` : ex.desc;
+        let displayDesc = isLocked ? `Requiere Nivel ${ex.lvl_min} físico de ${STAT_LABELS[ex.s] || ex.s} para desbloquear.` : ex.desc;
         let imgStyle = isLocked ? "filter: blur(8px) grayscale(1) brightness(0.5); opacity: 0.6;" : "";
         let borderCol = isLocked ? '#222' : 'var(--accent-gold)';
         
         let typeBadge = '';
         if(ex.s === "str") typeBadge = '<span style="background:#8f2020; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FUERZA</span>';
         if(ex.s === "spd") typeBadge = '<span style="background:#5555ff; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">VELOCIDAD</span>';
-        if(ex.s === "end") typeBadge = '<span style="background:#555555; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">AGUANTE</span>';
-        if(ex.s === "flex") typeBadge = '<span style="background:#28a745; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FLEX</span>';
+        if(ex.s === "end") typeBadge = '<span style="background:#555555; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">RESISTENCIA</span>';
+        if(ex.s === "flex") typeBadge = '<span style="background:#28a745; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FLEXIBILIDAD</span>';
 
         content += `
-        <div ontouchstart="" onclick="openExerciseDetail('${ex.id || ex.n.replace(/[^a-z]/gi,'')}')" style="cursor:pointer; background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center; transition: transform 0.15s ease, background 0.15s; active:transform scale(0.97)" 
-          ontouchstart="this.style.transform='scale(0.97)'; this.style.background='#222';" 
-          ontouchend="this.style.transform=''; this.style.background='#151515';">
-          <div style="width:80px; height:80px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#111; display:flex; align-items:center; justify-content:center;">
-             <img src="${ex.m}" style="width:100%; height:100%; object-fit:cover; ${imgStyle}" onerror="this.style.display='none'; this.parentElement.innerHTML+='<span style=\\'font-size:2rem; opacity:0.4;\\'>${ex.s==='str'?'🦾':ex.s==='spd'?'⚡':ex.s==='end'?'🛡️':'🧘‍♂️'}</span>';">
+        <div ontouchstart="" onclick="openExerciseDetail('${ex.id || ex.n.replace(/[^a-z]/gi,'')}')" style="cursor:pointer; background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center; transition: transform 0.1s ease; active:transform scale(0.98)" 
+          ontouchstart="this.style.transform='scale(0.98)';" 
+          ontouchend="this.style.transform='';">
+          <div style="width:70px; height:70px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#111; display:flex; align-items:center; justify-content:center;">
+             <img src="${ex.m}" loading="lazy" style="width:100%; height:100%; object-fit:cover; ${imgStyle}" onerror="this.style.display='none'; this.parentElement.innerHTML+='<span style=\\'font-size:1.5rem; opacity:0.4;\\'>${ex.s==='str'?'🦾':ex.s==='spd'?'⚡':ex.s==='end'?'🛡️':'🧘‍♂️'}</span>';">
           </div>
           <div style="flex-grow:1;">
-             <h3 style="color:${isLocked ? '#666' : '#fff'}; font-family:'Cinzel'; font-size:0.95rem; margin:0 0 5px 0; line-height:1.2;">${displayName}</h3>
-             ${isLocked ? '' : `<div style="margin-bottom:8px;">${typeBadge} <span style="color:#888; font-size:0.7rem; margin-left:5px;">Nivel: ${ex.lvl_min}</span></div>`}
-             <p style="color:${isLocked ? '#ff5555' : '#aaa'}; font-size:0.8rem; line-height:1.4; margin:0;">${displayDesc}</p>
+             <h3 style="color:${isLocked ? '#666' : '#fff'}; font-family:'Cinzel'; font-size:0.9rem; margin:0 0 5px 0; line-height:1.2;">${displayName}</h3>
+             ${isLocked ? '' : `<div style="margin-bottom:6px;">${typeBadge} <span style="color:#888; font-size:0.7rem; margin-left:5px;">Lvl: ${ex.lvl_min}</span></div>`}
+             <p style="color:${isLocked ? '#ff5555' : '#888'}; font-size:0.75rem; line-height:1.4; margin:0;">${displayDesc}</p>
           </div>
-          ${isLocked ? '' : '<span style="color:#555; font-size:1.2rem; flex-shrink:0;">›</span>'}
         </div>`;
-        // Store exercise data so detail modal can access it
         window._exDB = window._exDB || {};
         if(!isLocked) window._exDB[ex.id || ex.n.replace(/[^a-z]/gi,'')] = ex;
     });
 
-    document.getElementById('library-list').innerHTML = content;
+    listEl.innerHTML = content;
+  };
+
+  window.openLibraryModal = function() {
     openModal('library-modal');
-  }
+  };
 
   window.openExerciseDetail = function(exId) {
     const ex = (window._exDB || {})[exId];
@@ -612,26 +731,41 @@
   }
 
   // ORÁCULO OFFLINE (MOTOR PROCEDIMENTAL)
-  function generateOfflineRoutine(type = 'conditioning') {
+  function generateOfflineRoutine(type, focusStat = null) {
     document.getElementById('loader').style.display = 'block';
     
     setTimeout(() => {
-      // 1. Filtrar base de datos según nivel individual y el tipo (domain)
-      let validExercises = EXERCISE_DB.filter(ex => {
-         let pLvl = player.stats[ex.s]?.lvl || 1;
-         let topLimit = window.isExamRoutine ? ex.lvl_max + 10 : ex.lvl_max;
-         return pLvl >= ex.lvl_min && pLvl <= topLimit && ex.domain === type;
-      });
+      let selected = [];
+      const statsOrder = ['str', 'spd', 'end', 'flex'];
       
-      // Si por alguna razón no hay validos, relajar el nivel
-      if(validExercises.length < 5) validExercises = EXERCISE_DB.filter(ex => ex.domain === type);
-      if(validExercises.length === 0) validExercises = EXERCISE_DB; // Failsafe extremo
+      // El volumen es ahora estático por petición del guerrero:
+      // Cuerpo Completo = 8 ejercicios (2 de cada uno)
+      // Especializado = 6 ejercicios (del mismo stat)
+      let targetStats = focusStat ? [focusStat] : statsOrder;
+      let countPerStat = focusStat ? 6 : 2;
 
-      // 2. Seleccionar 4 o 5 aleatorios dependiendo del tipo
-      let shuffled = validExercises.sort(() => 0.5 - Math.random());
-      let selected = shuffled.slice(0, type === 'mobility' ? 4 : 5);
+      targetStats.forEach(stat => {
+        // 1. Filtrar base de datos según nivel individual y stat
+        let validForStat = EXERCISE_DB.filter(ex => {
+           let pLvl = player.stats[stat]?.lvl || 1;
+           let topLimit = window.isExamRoutine ? ex.lvl_max + 10 : ex.lvl_max;
+           return ex.s === stat && pLvl >= ex.lvl_min && pLvl <= topLimit;
+        });
+        
+        if(validForStat.length === 0) {
+          validForStat = EXERCISE_DB.filter(ex => ex.s === stat);
+        }
 
-      // 3. Escalar matemáticamente
+        // 2. Barajar pool de este stat y seleccionar
+        let pool = [...validForStat].sort(() => 0.5 - Math.random());
+        let statSelection = [];
+        while (statSelection.length < countPerStat) {
+          statSelection.push(...pool);
+        }
+        selected.push(...statSelection.slice(0, countPerStat));
+      });
+
+      // 3. Escalar matemáticamente (sin barajar al final para mantener orden)
       let routine = selected.map(ex => {
         let isExam = window.isExamRoutine;
         let pLvl = player.stats[ex.s]?.lvl || 1;
@@ -639,7 +773,7 @@
         
         let factor = (virtualLevel - ex.lvl_min) * ex.scale;
         let finalVal = Math.floor(Math.max(ex.baseVal, ex.baseVal + factor));
-        let numSets = type === 'mobility' ? 2 : (player.level > 20 ? 4 : 3);
+        let numSets = type === 'mobility' ? 2 : (player.rankIndex >= 2 ? 4 : 3);
         if(isExam) numSets += 1;
         
         return {
@@ -649,6 +783,7 @@
           t: ex.t,
           val: finalVal,
           s: ex.s,
+          domain: ex.domain,
           sets: numSets,
           desc: ex.desc,
           m: ex.m,
@@ -656,19 +791,19 @@
         };
       });
 
-      currentRoutine = routine; // Se guarda en variable global para mutaciones
-      closeModal('loader');
-      renderExercises(routine);
+      currentRoutine = routine;
+      document.getElementById('loader').style.display = 'none';
+      renderOverview(routine);
 
-    }, 120); // Brief pause for visual feedback
+    }, 150);
   }
 
-  const startRoutineHandler = (type = 'conditioning') => {
+  const startRoutineHandler = (type = 'conditioning', focusStat = null) => {
     let examPending = checkExamPending();
     if(examPending && type === 'conditioning') {
        showNotification("El Oráculo observa tu espíritu. Estás a punto de iniciar una Prueba de Ascenso. Sé absolutamente sincero: marca como terminada una serie SÓLO si realmente lograste el esfuerzo estricto y la técnica correcta. Engañar al sistema hoy significa lesionarte mañana en niveles superiores. El honor no admite auto-trampas.", "Examen Marcial de Honor", () => {
            window.isExamRoutine = true;
-           initRoutineGeneration(type);
+           initRoutineGeneration(type, focusStat);
        });
        return;
     } else if (examPending && type === 'mobility') {
@@ -677,58 +812,362 @@
     }
     
     window.isExamRoutine = false;
-    initRoutineGeneration(type);
+    window.currentFocusStat = focusStat; // Guardar el foco para la sesión actual
+    initRoutineGeneration(type, focusStat);
   };
 
-  function initRoutineGeneration(type) {
-    switchView('routine-view', 'home-view');
-    closeModal('btn-finish-routine');
-    document.getElementById('exercises-list').innerHTML = '';
-    generateOfflineRoutine(type);
+  function initRoutineGeneration(type, focusStat = null) {
+    switchView('routine-overview-view', 'home-view');
+    document.getElementById('overview-content').style.display = 'none';
+    generateOfflineRoutine(type, focusStat);
   }
 
   if(document.getElementById('btn-start-conditioning')) document.getElementById('btn-start-conditioning').addEventListener('click', () => startRoutineHandler('conditioning'));
-  if(document.getElementById('btn-start-mobility')) document.getElementById('btn-start-mobility').addEventListener('click', () => startRoutineHandler('mobility'));
+  
+  window.startSpecializedTraining = function(statAlias) {
+    startRoutineHandler('conditioning', statAlias);
+  };
 
-  document.getElementById('btn-cancel-routine').addEventListener('click', () => {
-    if(window.isExamRoutine) {
-       let cap = getCurrentRank().max;
-       ['str','spd','flex','end'].forEach(s => {
-          player.stats[s].lvl = Math.max(1, cap - 1);
-          player.stats[s].xp = (cap - 1) * 80;
-       });
-       savePlayer();
-       updateUI();
-       showNotification("Un guerrero conoce sus límites. Te has retirado del Examen de Ascenso. Has retrocedido en tu maestría para forjarte de nuevo.", "Retorno a las Sombras");
-    }
-    switchView('home-view', 'routine-view');
+  function penalizeRankExit() {
+     let cap = getCurrentRank().max;
+     ['str','spd','flex','end'].forEach(s => {
+        player.stats[s].lvl = Math.max(1, cap - 1);
+        player.stats[s].xp = (cap - 1) * 80;
+     });
+     savePlayer();
+     updateUI();
+     showNotification("Un guerrero conoce sus límites. Te has retirado del Examen de Ascenso. Has retrocedido en tu maestría para forjarte de nuevo.", "Retorno a las Sombras");
+  }
+
+  document.getElementById('btn-cancel-overview').addEventListener('click', () => {
+    if(window.isExamRoutine) penalizeRankExit();
+    switchView('home-view', 'routine-overview-view');
   });
+
+  document.getElementById('btn-cancel-focus').addEventListener('click', () => {
+    if(window.isExamRoutine) {
+      showNotification(
+        "Un guerrero debe ser sincero con sus capacidades. Si sientes que no puedes completar este examen con honor y técnica perfecta, puedes retirarte hoy para volver más fuerte mañana. Pero ten en cuenta: retirarte de una Prueba de Ascenso conlleva una penalización en tu maestría actual.",
+        "El Juicio del Maestro",
+        () => {
+           penalizeRankExit();
+           window.sessionState.active = false;
+           switchView('home-view', 'routine-focus-view');
+        },
+        true
+      );
+    } else {
+      window.sessionState.active = false;
+      switchView('home-view', 'routine-focus-view');
+    }
+  });
+  
+  document.getElementById('btn-reforge-routine').addEventListener('click', () => {
+    let currentType = currentRoutine[0]?.domain || 'conditioning';
+    let currentFocus = window.currentFocusStat || null; // Recuperar el foco si existe
+    document.getElementById('overview-content').style.display = 'none';
+    generateOfflineRoutine(currentType, currentFocus);
+  });
+  
+  document.getElementById('btn-start-focus').addEventListener('click', () => {
+     window.sessionState = {
+        active: true,
+        gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
+        levelUps: [],
+        rankUpReady: false,
+        reachedCap: false
+     };
+     switchView('routine-focus-view', 'routine-overview-view');
+     
+     const cancelBtn = document.getElementById('btn-cancel-focus');
+     cancelBtn.style.display = 'block';
+     
+     if (window.isExamRoutine) {
+        cancelBtn.innerText = "RETIRADA HONORABLE";
+        cancelBtn.style.color = "#ff3333";
+        cancelBtn.style.textShadow = "0 0 10px rgba(255,0,0,0.5)";
+     } else {
+        cancelBtn.innerText = "ABANDONAR";
+        cancelBtn.style.color = "#ff5555";
+        cancelBtn.style.textShadow = "none";
+     }
+
+     renderFocusExercises(currentRoutine);
+  });
+
+  function processSessionResults() {
+     console.log("ZenRyu: Starting session completion sequence.");
+     window.sessionState.active = false;
+     if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+     
+     // 1. Force trophy screen hide
+     console.log("ZenRyu: Hiding trophy container.");
+     const finContainer = document.getElementById('focus-finish-container');
+     if(finContainer) {
+        finContainer.style.display = 'none';
+        finContainer.classList.remove('pulse-glow');
+     }
+
+     // 2. Build consolidated rewards message
+     let rewardsText = "";
+     let gainedXp = false;
+     for (let s in window.sessionState.gainedXP) {
+         if (window.sessionState.gainedXP[s] > 0) {
+             rewardsText += `• ${STAT_LABELS[s]}: +${window.sessionState.gainedXP[s]} XP\n`;
+             gainedXp = true;
+         }
+     }
+     
+     let levelUpsText = "";
+     window.sessionState.levelUps.forEach(lu => {
+         levelUpsText += `• ${STAT_LABELS[lu.stat]} ha subido al Nivel ${lu.lvl}!\n`;
+     });
+
+     let steps = [];
+     if (gainedXp || levelUpsText) {
+         let fullMsg = "Has completado la forja física de hoy.\n\n";
+         if (gainedXp) fullMsg += "EXPERIENCIA GANADA:\n" + rewardsText + "\n";
+         if (levelUpsText) fullMsg += "DESBLOQUEOS:\n" + levelUpsText;
+
+         steps.push({
+             title: "🎖 RESUMEN DE PROGRESO",
+             msg: fullMsg
+         });
+     }
+
+     if (window.sessionState.reachedCap) {
+         steps.push({
+             title: "Cuerpo al Límite",
+             msg: "Has alcanzado el tope en esta disciplina. Forja tus otras capacidades para desbloquear el Examen de Ascenso."
+         });
+     }
+
+     if (window.sessionState.rankUpReady) {
+         steps.push({
+             title: "Examen Disponible",
+             msg: "Has alcanzado la cúspide de tu rango. Próxima misión será un EXAMEN DE ASCENSO."
+         });
+     }
+
+     let currentType = (currentRoutine && currentRoutine[0] && currentRoutine[0].domain) ? currentRoutine[0].domain : 'conditioning';
+     let typeName = window.isExamRoutine ? "Examen Marcial" : (currentType === 'mobility' ? "Flexibilidad Activa" : "Acondicionamiento Físico");
+
+     const finishAndSwitchMap = () => {
+         try {
+             console.log("ZenRyu: Executing finishAndSwitchMap.");
+             
+             // Clear UI
+             const focusContainer = document.getElementById('focus-exercises-container');
+             if(focusContainer) focusContainer.innerHTML = '';
+
+             // History
+             let histEntry = {
+               date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+               type: typeName
+             };
+             workoutHistory.unshift(histEntry);
+             if(workoutHistory.length > 50) workoutHistory.pop();
+
+             zendb.addHistory(histEntry).catch(e => console.error("ZenRyu: DB Error", e));
+             player.workoutCount++;
+             savePlayer();
+             updateUI();
+             updateCodexUI();
+             
+             console.log("ZenRyu: Navigation check - showing home-view.");
+             switchView('home-view', 'routine-focus-view');
+
+             // Final Reset of state
+             window.sessionState = {
+                active: false,
+                gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
+                levelUps: [],
+                rankUpReady: false,
+                reachedCap: false
+             };
+         } catch (e) {
+             console.error("ZenRyu: Critical error in finishAndSwitchMap", e);
+             // Safety fallback
+             switchView('home-view', 'routine-focus-view');
+         }
+     };
+
+     const executeFinalStep = () => {
+         if(window.isExamRoutine) {
+            player.rankIndex++; 
+            ['str','spd','flex','end'].forEach(s => { player.stats[s].xp = 0; });
+            initAudio();
+            playFanfare();
+            throwConfetti();
+            showAscensionCard(getCurrentRank());
+            finishAndSwitchMap();
+         } else {
+            finishAndSwitchMap();
+         }
+     };
+
+     const nextStep = () => {
+         if (steps.length === 0) {
+             executeFinalStep();
+         } else {
+             let step = steps.shift();
+             showNotification(step.msg, step.title, nextStep);
+         }
+     };
+
+     nextStep();
+  }
 
   document.getElementById('btn-finish-routine').addEventListener('click', () => {
-    if(window.isExamRoutine) {
-       player.rankIndex++; 
-       ['str','spd','flex','end'].forEach(s => { player.stats[s].xp = 0; });
-       initAudio();
-       playFanfare();
-       throwConfetti();
-       showAscensionCard(getCurrentRank());
-    } else {
-       showNotification("Ha sido una sesión exigente. Has forjado tu espíritu y sumado una Victoria Histórica a tu perfil.", "✅ Reposo del Guerrero");
-    }
-    
-    if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-    let typeName = window.isExamRoutine ? "Examen Marcial" : (currentRoutine[0]?.domain === 'mobility' ? "Flexibilidad Activa" : "Acondicionamiento Físico");
-    workoutHistory.unshift({ date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), type: typeName });
-    if(workoutHistory.length > 50) workoutHistory.pop();
-
-    player.workoutCount++;
-    savePlayer();
-    switchView('home-view', 'routine-view');
-    document.getElementById('exercises-list').innerHTML = '';
-    updateUI();
+    processSessionResults();
   });
 
-  // MUTACIÓN (ALTERNATIVA)
+  function renderOverview(exercises) {
+     const ovList = document.getElementById('ov-list');
+     let totalSecs = 0;
+     let focusObj = {};
+     let html = '';
+     
+     exercises.forEach((ex, idx) => {
+        focusObj[ex.s] = (focusObj[ex.s] || 0) + 1;
+        let sets = ex.sets || 3;
+        
+        let exTime = 45; 
+        if(ex.t === 'time' || ex.t === 'tiempo') { exTime = parseInt(ex.val); } 
+        else { exTime = (parseInt(ex.val) * 3); } 
+        
+        totalSecs += sets * exTime;
+        totalSecs += (sets - 1) * 60; 
+        
+        html += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:8px;">
+           <span style="color:#ccc;">${ex.n}</span>
+           <span style="color:var(--accent-gold); font-family:monospace;">${sets}x${ex.r.toUpperCase()}</span>
+        </div>`;
+     });
+     
+     totalSecs += exercises.length * 60; // transiciones y preparacion
+     let estMins = Math.ceil(totalSecs / 60);
+     document.getElementById('ov-time').innerText = estMins + 'm';
+     document.getElementById('ov-count').innerText = exercises.length;
+     
+     let focusStatsFound = Object.keys(focusObj);
+     let focusLabel = 'MIXTO';
+     if (focusStatsFound.length === 1) {
+         focusLabel = STAT_LABELS[focusStatsFound[0]] || 'MIXTO';
+     } else if (focusStatsFound.length > 2) {
+         focusLabel = 'CUERPO COMPLETO';
+     } else {
+         let predominant = focusStatsFound.reduce((a, b) => focusObj[a] > focusObj[b] ? a : b);
+         focusLabel = STAT_LABELS[predominant] || 'MIXTO';
+     }
+
+     document.getElementById('ov-focus').innerText = focusLabel;
+     
+     ovList.innerHTML = html;
+     document.getElementById('overview-content').style.display = 'block';
+  }
+
+  let currentFocusIndex = 0;
+
+  function renderFocusExercises(exercises) {
+    const container = document.getElementById('focus-exercises-container');
+    document.getElementById('focus-finish-container').style.display = 'none';
+    currentFocusIndex = 0;
+
+    let fullHtml = '';
+    exercises.forEach((ex, index) => {
+      const isTime    = ex.t === 'time' || ex.t === 'tiempo';
+      const numericVal = parseInt(ex.val) || 0;
+      
+      let timerBtn = '';
+      if(isTime && numericVal > 0) {
+         timerBtn = `<div style="display:flex; gap:8px;">
+            <button class="btn-secondary" style="border-color:var(--accent-gold); color:var(--accent-gold); width:50%;" onclick="openTimer(${numericVal})">⏱️ ESFUERZO</button>
+            <button class="btn-secondary" style="border-color:#555; width:50%;" onclick="openTimer(60)">⏱️ RECUPERACIÓN</button>
+         </div>`;
+      } else {
+         timerBtn = `<button class="btn-secondary" style="width:100%; border-color:#555;" onclick="openTimer(60)">⏱️ RECUPERACIÓN 60s</button>`;
+      }
+
+      const safeImg  = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
+      const safeDesc = (ex.desc || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
+      const safeN    = (ex.n    || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
+      const altBtn   = (ex.alt && !window.isExamRoutine)
+        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:8px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ADAPTAR TÉCNICA</button>`
+        : '';
+
+      const baseLvl  = ex.lvl_min || 1;
+      const baseXP   = Math.round(Math.max(20, baseLvl * 1.5 + ex.sets * 2));
+      const xpReward = window.isExamRoutine ? Math.round(baseXP * 1.5) : baseXP;
+
+      fullHtml += `
+        <div class="exercise-card focus-card" id="ex-${index}" style="position:absolute; width:100%; height:100%; left:0; top:0; background:none; border:none; box-shadow:none; padding:10px; opacity: ${index === 0 ? 1 : 0}; pointer-events: ${index === 0 ? 'all' : 'none'}; transform: ${index === 0 ? 'translateX(0)' : 'translateX(50px)'}; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease; display:flex; flex-direction:column; align-items:center; text-align:center; box-sizing:border-box; justify-content:center;">
+
+          <div style="font-size:1.5rem; color:var(--accent-gold); font-family:'Cinzel'; margin-bottom:5px; text-shadow:0 0 10px rgba(255,215,0,0.3);">${ex.n}</div>
+          <div style="background:#111; color:var(--accent-gold); padding:4px 10px; border-radius:4px; font-size:0.75rem; font-family:'Inter'; letter-spacing:1px; margin-bottom:15px; border:1px solid #333;">${STAT_LABELS[ex.s || 'str']}</div>
+          
+          <div style="font-size:1.3rem; margin-bottom:20px; color:#fff; font-weight:900; letter-spacing:1px; background:#1a1a1a; padding:10px 20px; border-radius:8px; border:1px dashed #444; width:100%;">
+            ${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:350px;">
+            <button class="btn-complete-massive focus-complete-btn" onclick="completeFocusTask(${index}, '${ex.s || 'str'}', ${xpReward})">✔️ FORJAR (+${xpReward} XP)</button>
+            ${timerBtn}
+            <button class="btn-secondary" style="width:100%; border-color:#444;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ TÉCNICA E INSTRUCCIONES</button>
+            ${altBtn}
+          </div>
+        </div>`;
+    });
+
+    container.innerHTML = fullHtml;
+    updateFocusProgress();
+  }
+
+  function updateFocusProgress() {
+     let el = document.getElementById('focus-progress-text');
+     if(el) el.innerText = `EJERCICIO ${currentFocusIndex + 1} DE ${currentRoutine.length}`;
+  }
+
+  window.completeFocusTask = function(index, statAlias, xpReward) {
+    if(navigator.vibrate) navigator.vibrate(50);
+    let s = "str";
+    if (statAlias.toLowerCase().includes("spd")) s = "spd";
+    if (statAlias.toLowerCase().includes("flex")) s = "flex";
+    if (statAlias.toLowerCase().includes("end")) s = "end";
+
+    const xp = (typeof xpReward === 'number' && xpReward > 0) ? xpReward : 20;
+    gainXP(xp, s);
+    
+    if (!window.sessionState || !window.sessionState.active) {
+       showNotification(`Tu disciplina ha forjado +${xp} XP en ${STAT_LABELS[s]}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
+    }
+
+    let currentCard = document.getElementById(`ex-${index}`);
+    if(currentCard) {
+       currentCard.style.opacity = '0';
+       currentCard.style.transform = 'translateX(-50px)';
+       currentCard.style.pointerEvents = 'none';
+    }
+    
+    currentFocusIndex++;
+    
+    if(currentFocusIndex < currentRoutine.length) {
+       let nextCard = document.getElementById(`ex-${currentFocusIndex}`);
+       if(nextCard) {
+          nextCard.style.opacity = '1';
+          nextCard.style.transform = 'translateX(0)';
+          nextCard.style.pointerEvents = 'all';
+       }
+       updateFocusProgress();
+    } else {
+       document.getElementById('focus-progress-text').innerText = "RUTINA COMPLETADA";
+       document.getElementById('btn-cancel-focus').style.display = 'none';
+       let finContainer = document.getElementById('focus-finish-container');
+       finContainer.style.display = 'flex';
+       finContainer.classList.add('pulse-glow');
+    }
+  }
+
   window.mutateExercise = function(index, baseId) {
     let exObj = EXERCISE_DB.find(x => x.id === baseId);
     if(exObj && exObj.alt) {
@@ -737,98 +1176,20 @@
        current.desc = exObj.alt.desc;
        current.m = exObj.alt.m || ""; 
        current.alt = null; // ya fue mutado
-       renderExercises(currentRoutine); // re-render completo rápido
+       renderFocusExercises(currentRoutine); // re-render
+       
+       for(let i=0; i<currentRoutine.length; i++) {
+           let c = document.getElementById(`ex-${i}`);
+           if(c) {
+               if(i === currentFocusIndex) {
+                   c.style.opacity = '1'; c.style.transform = 'translateX(0)'; c.style.pointerEvents = 'all';
+               } else {
+                   c.style.opacity = '0'; c.style.transform = 'translateX(50px)'; c.style.pointerEvents = 'none';
+               }
+           }
+       }
        showNotification("El Oráculo ha adaptado la técnica a tus circunstancias.", "Mutación Física");
     }
-  }
-
-  function renderExercises(exercises) {
-    const container = document.getElementById('exercises-list');
-
-    if (exercises && exercises.length > 0) closeModal('btn-finish-routine');
-
-    // Acumula todo en UN string → asigna innerHTML una sola vez → 1 reflow total
-    let fullHtml = '';
-    exercises.forEach((ex, index) => {
-      const isTime    = ex.t === 'time' || ex.t === 'tiempo';
-      const numericVal = parseInt(ex.val) || 0;
-      const timerBtn  = isTime && numericVal > 0
-        ? `<button class="btn-secondary" style="width:auto;" onclick="openTimer(${numericVal})">⏱️ Temp. ${numericVal}s</button>`
-        : `<button class="btn-secondary" style="width:auto;" onclick="openTimer(60)">⏱️ Descanso 60s</button>`;
-
-      const safeImg  = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
-      const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      const safeN    = (ex.n    || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      const altBtn   = (ex.alt && !window.isExamRoutine)
-        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:5px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 TÉCNICA ALTERNATIVA (Regresión / Adaptación)</button>`
-        : '';
-
-      // XP escala con la dificultad del ejercicio (lvl_min) y las series exigidas
-      const baseLvl  = ex.lvl_min || 1;
-      const baseXP   = Math.round(Math.max(20, baseLvl * 1.5 + ex.sets * 2));
-      const xpReward = window.isExamRoutine ? Math.round(baseXP * 1.5) : baseXP;
-
-      fullHtml += `
-        <div class="exercise-card" id="ex-${index}">
-          <div class="exercise-header">
-            <span>${ex.n}</span>
-            <span class="exercise-stat-badge">${(ex.s || 'str').toUpperCase()}</span>
-          </div>
-          <div style="font-size:0.9rem; margin-bottom:5px; color:#444;">
-            <strong>${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}</strong>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:15px; width:100%;">
-            <button class="btn-complete-massive" onclick="completeTask(${index}, '${ex.s || 'str'}', ${xpReward})">✔️ FORJAR (+${xpReward} XP)</button>
-          </div>
-          ${altBtn}
-          <div style="display:flex; gap:8px; margin-top:5px; width:100%;">
-            <button class="btn-secondary" style="width:50%;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ Técnica</button>
-            ${timerBtn}
-          </div>
-        </div>`;
-    });
-
-    container.innerHTML = fullHtml; // único reflow
-  }
-
-  window.checkAllTasksCompleted = function() {
-    let cards = document.querySelectorAll('.exercise-card');
-    let completed = document.querySelectorAll('.exercise-card .btn-complete-massive:disabled');
-    if(cards.length > 0 && cards.length === completed.length) {
-      let finBtn = document.getElementById('btn-finish-routine');
-      finBtn.style.display = 'block';
-      finBtn.classList.add('pulse-glow');
-      finBtn.innerText = "🏆 FINALIZAR ENTRENAMIENTO";
-      setTimeout(() => finBtn.scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
-    }
-  }
-
-  window.completeTask = function(index, statAlias, xpReward) {
-    if(navigator.vibrate) navigator.vibrate(50);
-    let s = "str";
-    if (statAlias.toLowerCase().includes("spd")) s = "spd";
-    if (statAlias.toLowerCase().includes("flex")) s = "flex";
-    if (statAlias.toLowerCase().includes("end")) s = "end";
-
-    // Si por alguna razón no se pasó el valor (ej: versión vieja en caché), usar 20
-    const xp = (typeof xpReward === 'number' && xpReward > 0) ? xpReward : 20;
-
-    gainXP(xp, s);
-
-    let card = document.getElementById(`ex-${index}`);
-    if(card) {
-      card.style.opacity = '0.7';
-      card.style.borderColor = 'var(--accent-green)';
-      let btn = card.querySelector('.btn-complete-massive');
-      if(btn) {
-        btn.innerHTML = `✅ DISCIPLINA FORJADA (+${xp} XP)`;
-        btn.disabled = true;
-        btn.style.boxShadow = 'none';
-        btn.style.background = 'rgba(40,167,69,0.15)';
-      }
-    }
-    showNotification(`Tu disciplina ha forjado +${xp} XP en ${s.toUpperCase()}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
-    checkAllTasksCompleted();
   }
 
   // AUDIO RADIO
@@ -997,9 +1358,97 @@
     document.getElementById('timer-display').innerText = `${m}:${s}`;
   }
 
-  let initialQuote = zenQuotes[Math.floor(Math.random() * zenQuotes.length)];
+  let quoteIdx = Math.floor(Math.random() * zenQuotes.length);
   let quoteEl = document.getElementById('maestro-quote');
-  if(quoteEl) quoteEl.innerText = '"' + initialQuote + '"';
+  if(quoteEl) {
+    quoteEl.innerText = '"' + zenQuotes[quoteIdx] + '"';
+    // Rotate quote every 30 seconds
+    setInterval(() => {
+      quoteIdx = (quoteIdx + 1) % zenQuotes.length;
+      quoteEl.style.opacity = '0';
+      setTimeout(() => {
+        quoteEl.innerText = '"' + zenQuotes[quoteIdx] + '"';
+        quoteEl.style.opacity = '1';
+      }, 400);
+    }, 30000);
+  }
 
   loadPlayer();
 })();
+
+window.UISoundEngine = {
+  ctx: null,
+  init: function() {
+    if(!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  },
+  playClick: function() {
+    this.init();
+    if(!this.ctx) return;
+    let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator();
+    let gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(400, t);
+    osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.02, t + 0.01);
+    gain.gain.linearRampToValueAtTime(0.001, t + 0.05);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.06);
+  },
+  playSwoosh: function() {
+    this.init();
+    if(!this.ctx) return;
+    let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator();
+    let gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(200, t);
+    osc.frequency.exponentialRampToValueAtTime(400, t + 0.15);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.05, t + 0.05);
+    gain.gain.linearRampToValueAtTime(0.001, t + 0.2);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.25);
+  },
+  playError: function() {
+    this.init();
+    if(!this.ctx) return;
+    let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator();
+    let gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.linearRampToValueAtTime(100, t + 0.15);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.05, t + 0.02);
+    gain.gain.linearRampToValueAtTime(0.001, t + 0.2);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.25);
+  }
+};
+
+document.addEventListener('click', (e) => {
+  if(window.UISoundEngine) window.UISoundEngine.init();
+  let target = e.target.closest('button, .nav-item, .exercise-card, .btn-primary, .btn-secondary, .btn-complete-massive, .radio-btn, .zoomable-image, .mission-card');
+  if (target) {
+     if(target.disabled) {
+         if(window.UISoundEngine) window.UISoundEngine.playError();
+         if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+     } else {
+         if(window.UISoundEngine) window.UISoundEngine.playClick();
+         if(navigator.vibrate) navigator.vibrate(15);
+     }
+  }
+});
