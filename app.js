@@ -495,10 +495,10 @@
       if(btnCond) {
           btnCond.style.borderColor = '';
           btnCond.innerHTML = `
-            <div class="mission-status"><span>ACONDICIONAMIENTO MARCIAL</span> <span></span></div>
-            <h2 class="mission-title">FUERZA Y<br>POTENCIA</h2>
+            <div class="mission-status"><span style="color:var(--accent-gold);">SENDERO DEL GUERRERO</span> <span style="color:var(--accent-gold);">⚡</span></div>
+            <h2 class="mission-title" style="font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.2);">ACONDICIONAMIENTO<br>MARCIAL</h2>
             <div class="mission-stats">
-              <span>PURO IMPACTO</span> <span>/</span> <span>EXPLOSIVIDAD</span> <span>/</span> <span>ACERO CORE</span>
+              <span>FORJA DEL TEMPLO</span> <span>/</span> <span>PODER INTEGRAL</span>
             </div>`;
       }
     }
