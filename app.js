@@ -333,8 +333,26 @@
     });
   }
 
+  // SOUNDS & NOTIFICATIONS
+  window.playSysSound = function() {
+    const snd = document.getElementById('sys-sync-sound');
+    if(snd) {
+      snd.currentTime = 0;
+      snd.play().catch(() => {});
+    }
+  };
+
+  window.playCompleteSound = function() {
+    const snd = document.getElementById('sys-complete-sound');
+    if(snd) {
+      snd.currentTime = 0;
+      snd.play().catch(() => {});
+    }
+  };
+
   // ONBOARDING WIZARD
   window.nextWizardStep = function(currentStep) {
+    console.log(`ZenRyu: nextWizardStep ${currentStep}`);
     let inputsCheck = {
       1: 'ob-name',
       2: 'ob-str',
@@ -348,8 +366,15 @@
       return;
     }
 
-    document.getElementById('step-' + currentStep).className = 'wizard-step hidden-step';
-    document.getElementById('step-' + (currentStep + 1)).className = 'wizard-step active-step';
+    const currentEl = document.getElementById('step-' + currentStep);
+    const nextEl = document.getElementById('step-' + (currentStep + 1));
+    
+    if (currentEl && nextEl) {
+      currentEl.classList.remove('active-step');
+      currentEl.classList.add('hidden-step');
+      nextEl.classList.remove('hidden-step');
+      nextEl.classList.add('active-step');
+    }
   }
 
   window.finishWizard = function() {

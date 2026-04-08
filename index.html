@@ -22,61 +22,59 @@
     <audio id="sys-sync-sound" src="https://cdn.freesound.org/previews/235/235882_2977461-hq.mp3" preload="auto"></audio>
     <audio id="sys-complete-sound" src="https://cdn.freesound.org/previews/320/320655_5260872-hq.mp3" preload="auto"></audio>
 
-    <!-- FASE 1: Bienvenida -->
     <div class="wizard-step active-step wizard-card" id="step-1">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase;">SISTEMA INICIADO: CALIBRACIÓN 1/5</div>
+      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">SISTEMA INICIADO: CALIBRACIÓN 1/5</div>
       <img src="./icon.png" id="dragon-welcome-img" class="holo-image" style="width:100px; height:100px; border-radius:50%; object-position:center; margin: 0 auto 15px auto;" onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
       <div id="dragon-emoji-fallback" style="display:none; font-size:6rem; margin-bottom:15px; text-shadow: 0 0 30px rgba(255,215,0,0.5);">👁️</div>
-      <h2 class="system-title">ANALIZANDO RECEPTÁCULO</h2>
-      <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.6;">Yo seré tu Sensei en este ciclo. Para moldear tu Avatar Físico, necesito medir tus parámetros base.<br><br><b>¿Cuál es tu Título de Guerrero?</b></p>
-      <input type="text" id="ob-name" class="wizard-input" placeholder="INGRESA TU NOMBRE AQUÍ">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(1)" style="letter-spacing:2px;">INICIAR SINCRONIZACIÓN</button>
+      <h2 class="system-title">EL DESPERTAR</h2>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.6; text-align:center;">El acero solo nace tras el fuego. Tu llegada al Templo marca el inicio de una transformación; antes de guiar tu camino, el Oráculo debe conocer la firmeza de tu raíz. <br><br><b>¿Bajo qué nombre será recordada tu leyenda?</b></p>
+      <input type="text" id="ob-name" class="wizard-input" placeholder="TU TÍTULO AQUÍ">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(1)" style="letter-spacing:2px;">INICIAR SENDA</button>
     </div>
 
     <!-- FASE 2: Fuerza -->
     <div class="wizard-step hidden-step wizard-card" id="step-2">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase;">TEST DE FUERZA: CALIBRACIÓN 2/5</div>
-      <h2 class="system-title">PARÁMETRO: FUERZA PURA</h2>
+      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: FIRMEZA 2/5</div>
+      <h2 class="system-title">FUERZA DE LA MONTAÑA</h2>
       <img src="./img/techniques/str_2.png" class="holo-image" onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Baja hasta romper tu límite.<br>Haz todas las <b>flexiones</b> que puedas en un solo set sin descanso.</p>
-      <input type="number" id="ob-str" class="wizard-input" placeholder="Reps Totales" min="0">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR DATOS</button>
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">La montaña no se mueve ante el viento.<br>Desciende y asciende hasta que tu voluntad se imponga al cuerpo. ¿Cuántas <b>flexiones</b> resistes?</p>
+      <input type="number" id="ob-str" class="wizard-input" placeholder="Repeticiones" min="0">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR VOLUNTAD</button>
     </div>
 
     <!-- FASE 3: Velocidad -->
     <div class="wizard-step hidden-step wizard-card" id="step-3">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase;">TEST DE VELOCIDAD: CALIBRACIÓN 3/5</div>
-      <h2 class="system-title">PARÁMETRO: EXPLOSIVIDAD</h2>
+      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: EL RAYO 3/5</div>
+      <h2 class="system-title">VELOCIDAD DE LA SOMBRA</h2>
       <img src="./img/techniques/spd_3.png" class="holo-image" onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Un ciclo de 60 segundos.<br>Descubre cuántos <b>Burpees</b> exactos puede resistir tu motor pulmonar.</p>
-      <input type="number" id="ob-spd" class="wizard-input" placeholder="Total Burpees" min="0">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR DATOS</button>
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El rayo precede al trueno. La explosividad es la clave.<br>Durante 60 latidos, descubre cuántos <b>Burpees</b> puede resistir el motor de tu aliento.</p>
+      <input type="number" id="ob-spd" class="wizard-input" placeholder="Burpees Totales" min="0">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR VELOCIDAD</button>
     </div>
 
     <!-- FASE 4: Flexibilidad -->
     <div class="wizard-step hidden-step wizard-card" id="step-4">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase;">TEST DE ELASTICIDAD: CALIBRACIÓN 4/5</div>
-      <h2 class="system-title">PARÁMETRO: FLUIDEZ</h2>
+      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: EL BAMBÚ 4/5</div>
+      <h2 class="system-title">FLUIDEZ DEL ESPÍRITU</h2>
       <img src="./img/techniques/flex_1.png" class="holo-image" onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Evaluación de rango angular.<br>Elongación espinal profunda (tocar el suelo con piernas rectas). ¿A qué nivel llegas?</p>
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El bambú que no se dobla, se rompe.<br>Alcanza la tierra con tus manos descubriendo tu límite de elasticidad.</p>
       <select id="ob-flex" class="wizard-select">
-        <option value="1">Lvl 1: Roca (No paso rodillas)</option>
-        <option value="10">Lvl 10: Tronco (Toco puntas pies)</option>
-        <option value="20">Lvl 20: Bambú (Palmas en suelo)</option>
-        <option value="35">Lvl 35: Agua (Medio Spagat)</option>
-        <option value="55">Lvl 55: Goma (Split puro)</option>
+        <option value="1">🌱 Inflexible (No llego a las rodillas)</option>
+        <option value="5">🌿 Rígido (Llego a las espinillas)</option>
+        <option value="10">🎋 Flexible (Toco mis pies)</option>
+        <option value="15">🐉 Maestro (Palmas al suelo)</option>
       </select>
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR DATOS</button>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR FLUIDEZ</button>
     </div>
 
-    <!-- FASE 5: Aguante -->
+    <!-- FASE 5: Resistencia -->
     <div class="wizard-step hidden-step wizard-card" id="step-5">
-      <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:5px;">TEST DE AGUANTE: CALIBRACIÓN 5/5</div>
-      <h2 class="system-title">PARÁMETRO: RESISTENCIA</h2>
-      <img src="./img/techniques/end_2.png" class="holo-image" onerror="this.src='https://c.tenor.com/Z421O2c-2GIAAAAC/plank-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5;">Resistencia isométrica final.<br><b>Plancha abdominal pura.</b> Anota los minutos que logras antes del fallo sistémico.</p>
-      <input type="number" id="ob-end" class="wizard-input" placeholder="Ej: 1.5 minutos" min="0" step="0.1">
-      <button class="btn-complete-massive" onclick="playCompleteSound(); finishWizard()">ESTABLECER ENLACE</button>
+      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: EL SENDERO 5/5</div>
+      <h2 class="system-title">RESISTENCIA DEL GUERRERO</h2>
+      <img src="./img/techniques/run_1.png" class="holo-image" onerror="this.src='https://c.tenor.com/u7qFk9kX_V0AAAAC/running-run.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El camino largo revela al verdadero maestro.<br>¿Cuántos minutos eres capaz de correr antes de que el fuego queme tu aliento?</p>
+      <input type="number" id="ob-end" class="wizard-input" placeholder="Minutos (aprox)" min="0">
+      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:10px;">FORJAR EL ACCESO</button>
     </div>
   </div>
 

@@ -292,7 +292,16 @@ body {
   overflow: hidden;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+.wizard-card p, .wizard-card h2, .wizard-card div {
+  text-align: center !important;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
 .wizard-card::before {
   content: '';
   position: absolute;
@@ -313,9 +322,9 @@ body {
 
 .holo-image {
   width: 100%;
-  max-width: 110px;
-  max-height: 110px;
-  object-fit: cover;
+  max-width: 280px;
+  max-height: 180px;
+  object-fit: contain;
   border-radius: 12px;
   margin-bottom: 20px;
   border: 2px solid var(--accent-gold);
