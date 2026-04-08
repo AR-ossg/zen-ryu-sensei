@@ -147,9 +147,31 @@ body {
   backface-visibility: hidden;
 }
 
-.hud-stat { flex-grow: 1; min-width: 0; cursor: pointer; transition: transform 0.2s, filter 0.2s; }
-.hud-stat:hover { color: #fff; text-shadow: 0 0 10px var(--accent-gold); filter: brightness(1.2); }
-.hud-stat:active { transform: scale(0.97); }
+.hud-stat { 
+  flex-grow: 1; 
+  min-width: 0; 
+  cursor: pointer; 
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+  position: relative;
+}
+.hud-stat::after {
+  content: '⚡';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 0.5rem;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+.hud-stat:hover { 
+  color: #fff; 
+  text-shadow: 0 0 10px var(--accent-gold); 
+  border-color: var(--accent-gold);
+  background: rgba(255,215,0,0.05);
+  transform: translateY(-2px);
+}
+.hud-stat:hover::after { opacity: 1; }
+.hud-stat:active { transform: scale(0.95); }
 .modal-overlay.show { 
   opacity: 1; pointer-events: all; visibility: visible;
 }
@@ -448,16 +470,25 @@ body {
 .ios-step-icon {
   width: 40px;
   height: 40px;
-  background: var(--bg-dark);
-  border: 1px solid var(--accent-gold);
+  background: var(--bg-carbon);
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.2rem;
-  flex-shrink: 0;
-  box-shadow: 0 0 10px var(--accent-gold-glow);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
+
+/* INTERACTIVIDAD MANIFIESTO */
+.ov-item:hover {
+  background: rgba(255,215,0,0.08) !important;
+}
+.ov-item:active {
+  transform: scale(0.98);
+  background: rgba(255,215,0,0.15) !important;
+}
+
+
 .ios-step-text {
   font-size: 0.85rem;
   color: #ccc;

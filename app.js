@@ -1065,14 +1065,20 @@
         totalSecs += sets * exTime;
         totalSecs += (sets - 1) * 60; 
         
+        // Sanitización para el modal
+        const safeN = (ex.n || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeImg = (ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./'))) ? ex.m : '';
+
         html += `
-         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:10px;">
+         <div class="ov-item" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:10px; cursor:pointer; transition: background 0.2s;">
            <div style="padding-right:10px; flex:1;">
              <div style="color:#fff; font-weight:600; font-size:0.85rem; line-height:1.2;">${ex.n}</div>
              <div style="color:#555; text-transform:uppercase; font-size:0.65rem; letter-spacing:1px; margin-top:2px;">Atributo: ${STAT_LABELS[ex.s] || 'Base'}</div>
            </div>
-           <div style="text-align:right; min-width:85px;">
+           <div style="text-align:right; min-width:85px; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
              <span style="color:var(--accent-gold); font-family:'Cinzel'; font-size:0.95rem; font-weight:700;">${sets}x${ex.r.toUpperCase()}</span>
+             <span style="font-size:0.6rem; color:#444;">👁️ VER</span>
            </div>
          </div>`;
      });
