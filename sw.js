@@ -1,7 +1,7 @@
 // ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
 // para forzar la actualización en los teléfonos que ya tienen la app instalada.
 // Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
-const CACHE_NAME = 'zen-ryu-pwa-v31';
+const CACHE_NAME = 'zen-ryu-pwa-v32';
 
 // Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
