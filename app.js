@@ -497,9 +497,10 @@
           btnCond.innerHTML = `
             <div class="mission-status"><span style="color:var(--accent-gold);">SENDERO DEL GUERRERO</span> <span style="color:var(--accent-gold);">⚡</span></div>
             <h2 class="mission-title" style="font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.2);">ACONDICIONAMIENTO<br>MARCIAL</h2>
-            <div class="mission-stats">
+            <div class="mission-stats" style="justify-content:center;">
               <span>FORJA DEL TEMPLO</span> <span>/</span> <span>PODER INTEGRAL</span>
-            </div>`;
+            </div>
+            <div class="mission-cta">🔥 FORJAR ENTRENAMIENTO DE HOY</div>`;
       }
     }
   }
