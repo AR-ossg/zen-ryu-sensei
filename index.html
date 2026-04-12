@@ -621,27 +621,42 @@
     </div>
   </div>
 
-  <div id="codex-modal" class="modal-overlay" style=" z-index:10005;">
-    <div class="modal-content" style="text-align: left; max-height: 85vh; overflow-y:auto; padding:25px;">
-      <h2 style="color:var(--accent-gold); margin-bottom: 15px; text-align:center; font-family:'Cinzel';">📜 CÓDICE LORE
-      </h2>
-      <p style="font-size:0.85rem; color:#ccc; line-height: 1.6; margin-bottom:15px; text-align:center;">
-        Estos son los estadios de la iluminación marcial. Tu disciplina diaria forja tu evolución en silencio.
-      </p>
-      <div id="codex-list" style="margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px;">
-        <!-- Injected via JS -->
+  <div id="codex-modal" class="modal-overlay" style="z-index:10005;">
+    <div class="codex-fullscreen">
+      <!-- Header -->
+      <div class="codex-header">
+        <div style="font-size:0.6rem; color:#888; letter-spacing:3px; text-transform:uppercase; font-weight:700;">EL CAMINO DE LA ILUMINACIÓN</div>
+        <h2 style="color:var(--accent-gold); font-family:'Cinzel'; font-size:1.6rem; margin:5px 0 0 0; text-shadow:0 0 15px rgba(255,215,0,0.3);">📜 CÓDICE LORE</h2>
       </div>
-      <div
-        style="background:#111; border:1px solid #333; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
-        <span style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.1rem;">BITÁCORA TOTAL</span><br>
-        <span style="color:#aaa; font-size:0.8rem;">Sesiones Históricas: <strong id="codex-sessions"
-            style="color:#fff;">0</strong></span>
-        <div id="codex-history"
-          style="margin-top:12px; font-size:0.75rem; text-align:left; border-top:1px dashed #333; padding-top:12px; max-height:120px; overflow-y:auto; scrollbar-width:thin;">
-          <!-- History Injected Here -->
+
+      <!-- Carousel Container -->
+      <div class="codex-carousel-wrapper">
+        <div id="codex-carousel" class="codex-carousel">
+          <!-- Rank slides injected by JS -->
         </div>
       </div>
-      <button class="btn-primary" onclick="closeModal('codex-modal')">CERRAR CÓDICE</button>
+
+      <!-- Navigation Arrows -->
+      <button id="codex-prev" class="codex-arrow codex-arrow-left" onclick="codexSlide(-1)">‹</button>
+      <button id="codex-next" class="codex-arrow codex-arrow-right" onclick="codexSlide(1)">›</button>
+
+      <!-- Dot Indicators -->
+      <div id="codex-dots" class="codex-dots"></div>
+
+      <!-- Footer with Bitácora + Close -->
+      <div class="codex-footer">
+        <div style="display:flex; justify-content:center; gap:20px; align-items:center; margin-bottom:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:0.55rem; color:#888; letter-spacing:1px; text-transform:uppercase;">SESIONES</div>
+            <div id="codex-sessions" style="color:var(--accent-gold); font-family:monospace; font-size:1.2rem; font-weight:bold;">0</div>
+          </div>
+          <div style="width:1px; height:25px; background:#333;"></div>
+          <div id="codex-history" style="max-width:200px; max-height:50px; overflow-y:auto; font-size:0.65rem; color:#888; scrollbar-width:thin; text-align:left;">
+            <!-- History Injected Here -->
+          </div>
+        </div>
+        <button class="btn-primary" onclick="closeModal('codex-modal')" style="letter-spacing:2px;">CERRAR CÓDICE</button>
+      </div>
     </div>
   </div>
 

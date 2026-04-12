@@ -631,32 +631,128 @@
     openModal('rank-ascension-modal');
   }
 
-  function buildCodexRankHtml() {
-    let html = '';
+  let codexCurrentSlide = 0;
+
+  function buildCodexSlides() {
+    let slides = '';
+    let dots = '';
     rankTitles.forEach((r, idx) => {
       const isAcquired = player.rankIndex >= idx;
       const isCurrent = player.rankIndex === idx;
       const color = r.color || '#FFD700';
-      if (isAcquired) {
-        html += '<div style="background:#111; border:1px solid ' + (isCurrent ? color : 'rgba(255,255,255,0.08)') + '; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:' + (isCurrent ? '0 0 20px ' + color + '33' : 'none') + '; position:relative;">';
-        if (isCurrent) html += '<div style="position:absolute;top:12px;right:12px;background:' + color + ';color:#000;font-size:0.5rem;font-weight:900;padding:3px 8px;border-radius:4px;letter-spacing:1.5px;">ACTUAL</div>';
-        html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">';
-        html += '<span style="font-size:2.8rem;text-shadow:0 0 12px ' + color + ';">' + r.icon + '</span>';
-        html += '<div><div style="font-family:\'Cinzel\';font-size:1rem;color:' + (isCurrent ? color : '#fff') + ';font-weight:700;margin-bottom:2px;">' + r.title + '</div>';
-        html += '<div style="font-size:0.6rem;color:#555;letter-spacing:1px;text-transform:uppercase;">Límite Nivel ' + (r.max === 999 ? 'Máximo' : r.max) + '</div></div></div>';
-        html += '<p style="font-style:italic;color:' + color + ';font-size:0.8rem;line-height:1.5;padding:10px 12px;border-left:2px solid ' + color + ';margin-bottom:10px;background:' + color + '11;border-radius:0 6px 6px 0;">' + (r.wisdom || '') + '</p>';
-        html += '<p style="color:#aaa;font-size:0.8rem;line-height:1.6;margin:0;">' + (r.lore || '') + '</p>';
-        html += '</div>';
-      } else {
-        html += '<div style="background:#0a0a0a;border:1px dashed #1a1a1a;border-radius:14px;padding:16px;margin-bottom:14px;opacity:0.45;">';
-        html += '<div style="display:flex;align-items:center;gap:14px;">';
-        html += '<span style="font-size:2.8rem;filter:grayscale(1) brightness(0.25);">' + r.icon + '</span>';
-        html += '<div><div style="font-family:\'Cinzel\';font-size:0.95rem;color:#333;font-weight:700;">??? RANGO SELLADO</div>';
-        html += '<div style="font-size:0.65rem;color:#2a2a2a;letter-spacing:1px;margin-top:3px;">Supera el Examen Marcial para revelar este conocimiento</div></div></div></div>';
+
+      let cardClass = 'codex-rank-card';
+      if (isCurrent) cardClass += ' is-current';
+      if (!isAcquired) cardClass += ' is-locked';
+
+      slides += '<div class="codex-slide">';
+      slides += '<div class="' + cardClass + '" style="border-color:' + (isCurrent ? color : (isAcquired ? 'rgba(255,255,255,0.08)' : '#1a1a1a')) + ';">';
+
+      if (isCurrent) {
+        slides += '<div class="codex-current-badge" style="background:' + color + ';">ACTUAL</div>';
       }
+
+      // Slide number indicator
+      slides += '<div style="font-size:0.55rem; color:#555; letter-spacing:2px; text-align:center; margin-bottom:12px; text-transform:uppercase;">' + (idx + 1) + ' / ' + rankTitles.length + '</div>';
+
+      if (isAcquired) {
+        slides += '<div class="codex-rank-icon" style="text-shadow:0 0 20px ' + color + ';">' + r.icon + '</div>';
+        slides += '<div class="codex-rank-name" style="color:' + (isCurrent ? color : '#fff') + ';">' + r.title + '</div>';
+        slides += '<div class="codex-rank-cap">Límite Nivel ' + (r.max === 999 ? 'Máximo' : r.max) + '</div>';
+        slides += '<div class="codex-rank-wisdom" style="border-left-color:' + color + '; color:' + color + ';">"' + (r.wisdom || '') + '"</div>';
+        slides += '<div class="codex-rank-lore">' + (r.lore || '') + '</div>';
+      } else {
+        slides += '<div class="codex-rank-icon is-locked">' + r.icon + '</div>';
+        slides += '<div class="codex-rank-name" style="color:#333;">??? RANGO SELLADO</div>';
+        slides += '<div class="codex-rank-cap" style="color:#2a2a2a;">Supera el Examen Marcial para revelar este conocimiento</div>';
+      }
+
+      slides += '</div>'; // close card
+      slides += '</div>'; // close slide
+
+      // Dots
+      let dotClass = 'codex-dot';
+      if (isAcquired) dotClass += ' acquired';
+      dots += '<div class="' + dotClass + '" onclick="codexGoTo(' + idx + ')"></div>';
     });
-    return html;
+    return { slides, dots };
   }
+
+  function updateCodexDots(activeIdx) {
+    const dotsContainer = document.getElementById('codex-dots');
+    if (!dotsContainer) return;
+    const allDots = dotsContainer.querySelectorAll('.codex-dot');
+    allDots.forEach((d, i) => {
+      d.classList.toggle('active', i === activeIdx);
+    });
+  }
+
+  window.codexSlide = function (direction) {
+    const carousel = document.getElementById('codex-carousel');
+    if (!carousel) return;
+    const slideWidth = carousel.clientWidth;
+    const maxSlide = rankTitles.length - 1;
+    codexCurrentSlide = Math.max(0, Math.min(maxSlide, codexCurrentSlide + direction));
+    carousel.scrollTo({ left: codexCurrentSlide * slideWidth, behavior: 'smooth' });
+    updateCodexDots(codexCurrentSlide);
+  };
+
+  window.codexGoTo = function (idx) {
+    const carousel = document.getElementById('codex-carousel');
+    if (!carousel) return;
+    codexCurrentSlide = idx;
+    const slideWidth = carousel.clientWidth;
+    carousel.scrollTo({ left: codexCurrentSlide * slideWidth, behavior: 'smooth' });
+    updateCodexDots(codexCurrentSlide);
+  };
+
+  window.updateCodexUI = function () {
+    const carouselEl = document.getElementById('codex-carousel');
+    const dotsEl = document.getElementById('codex-dots');
+    if (!carouselEl) return;
+
+    const { slides, dots } = buildCodexSlides();
+    carouselEl.innerHTML = slides;
+    if (dotsEl) dotsEl.innerHTML = dots;
+
+    document.getElementById('codex-sessions').innerText = player.workoutCount;
+
+    let hxHtml = workoutHistory.slice(-5).reverse().map(h => {
+      const dateStr = h.date || '';
+      const typeStr = h.type || (h.routine ? 'Entrenamiento' : 'Sesión');
+      return '<div style="margin-bottom:4px; border-left:2px solid var(--accent-gold); padding-left:6px;"><span style="color:var(--text-dim); font-size:0.6rem;">' + dateStr + '</span> <span style="color:#ccc;">' + typeStr + '</span></div>';
+    }).join('');
+    if (workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
+    let hxContainer = document.getElementById('codex-history');
+    if (hxContainer) hxContainer.innerHTML = hxHtml;
+
+    // Track scroll position to update dots
+    carouselEl.onscroll = function () {
+      const slideWidth = carouselEl.clientWidth;
+      if (slideWidth === 0) return;
+      const newIdx = Math.round(carouselEl.scrollLeft / slideWidth);
+      if (newIdx !== codexCurrentSlide) {
+        codexCurrentSlide = newIdx;
+        updateCodexDots(codexCurrentSlide);
+      }
+    };
+  };
+
+  window.openCodexModal = function () {
+    updateCodexUI();
+    openModal('codex-modal');
+    // Auto-scroll to current rank slide after a brief delay for DOM rendering
+    setTimeout(() => {
+      codexCurrentSlide = player.rankIndex;
+      const carousel = document.getElementById('codex-carousel');
+      if (carousel) {
+        const slideWidth = carousel.clientWidth;
+        carousel.scrollTo({ left: codexCurrentSlide * slideWidth, behavior: 'auto' });
+      }
+      updateCodexDots(codexCurrentSlide);
+    }, 100);
+  };
+
 
   window.openInfoModal = function (name, desc, imgUrl) {
     document.getElementById('info-title').innerText = name;
@@ -690,26 +786,6 @@
     closeModal('info-modal');
     document.getElementById('info-img-container').innerHTML = '';
   });
-
-  window.updateCodexUI = function () {
-    const listEl = document.getElementById('codex-list');
-    if (!listEl) return;
-    listEl.innerHTML = buildCodexRankHtml();
-    document.getElementById('codex-sessions').innerText = player.workoutCount;
-    let hxHtml = workoutHistory.map(h => {
-      const dateStr = h.date || '';
-      const typeStr = h.type || (h.routine ? 'Entrenamiento' : 'Sesión');
-      return '<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">' + dateStr + '</span><br><span style="color:#fff;">' + typeStr + '</span></div>';
-    }).join('');
-    if (workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
-    let hxContainer = document.getElementById('codex-history');
-    if (hxContainer) hxContainer.innerHTML = hxHtml;
-  };
-
-  window.openCodexModal = function () {
-    openModal('codex-modal');
-  };
-
 
   // ====== BIBLIOTECA MARCIAL ======
   let currentLibraryTab = 'str';

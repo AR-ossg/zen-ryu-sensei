@@ -1176,6 +1176,255 @@ body {
   margin-bottom: 2px;
 }
 
+/* ===================== CODEX HORIZONTAL CAROUSEL ===================== */
+.codex-fullscreen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-dark);
+  position: relative;
+  overflow: hidden;
+}
+
+.codex-header {
+  text-align: center;
+  padding: 20px 20px 12px 20px;
+  border-bottom: 1px solid rgba(255,215,0,0.15);
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #0a0a0a, transparent);
+}
+
+.codex-carousel-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.codex-carousel {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.codex-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.codex-slide {
+  min-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 30px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.codex-rank-card {
+  width: 100%;
+  max-width: 380px;
+  background: #111;
+  border-radius: 18px;
+  padding: 28px 22px;
+  border: 1px solid rgba(255,215,0,0.2);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  position: relative;
+  overflow: hidden;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.codex-rank-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  opacity: 0.6;
+}
+
+.codex-rank-card.is-current {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 30px rgba(255,215,0,0.15), 0 8px 40px rgba(0,0,0,0.6);
+}
+
+.codex-rank-card.is-locked {
+  opacity: 0.4;
+  border-color: #1a1a1a;
+  border-style: dashed;
+  background: #0a0a0a;
+}
+
+.codex-rank-icon {
+  font-size: 4rem;
+  display: block;
+  text-align: center;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.codex-rank-icon.is-locked {
+  filter: grayscale(1) brightness(0.25);
+}
+
+.codex-rank-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.codex-rank-cap {
+  font-size: 0.6rem;
+  color: #555;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.codex-rank-wisdom {
+  font-style: italic;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent-gold);
+  margin-bottom: 14px;
+  background: rgba(255,215,0,0.04);
+  border-radius: 0 8px 8px 0;
+  text-align: left;
+}
+
+.codex-rank-lore {
+  color: #aaa;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.codex-current-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 0.5rem;
+  font-weight: 900;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 1.5px;
+  color: #000;
+}
+
+/* Arrows */
+.codex-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,215,0,0.3);
+  color: var(--accent-gold);
+  font-size: 2rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  line-height: 1;
+  padding: 0;
+  padding-bottom: 3px;
+}
+
+.codex-arrow:hover {
+  background: rgba(255,215,0,0.15);
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+}
+
+.codex-arrow:active {
+  transform: translateY(-50%) scale(0.9);
+}
+
+.codex-arrow-left {
+  left: 10px;
+}
+
+.codex-arrow-right {
+  right: 10px;
+}
+
+/* Dots */
+.codex-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.codex-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333;
+  border: 1px solid #555;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.codex-dot.active {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 8px rgba(255,215,0,0.5);
+  transform: scale(1.3);
+}
+
+.codex-dot.acquired {
+  background: #555;
+  border-color: #777;
+}
+
+/* Footer */
+.codex-footer {
+  padding: 12px 20px 20px 20px;
+  border-top: 1px solid rgba(255,215,0,0.1);
+  flex-shrink: 0;
+  background: linear-gradient(to top, #0a0a0a, transparent);
+}
+
+@media (max-width: 400px) {
+  .codex-slide {
+    padding: 15px 18px;
+  }
+  .codex-rank-card {
+    padding: 22px 16px;
+  }
+  .codex-rank-icon {
+    font-size: 3rem;
+  }
+  .codex-rank-name {
+    font-size: 1.1rem;
+  }
+}
+/* ===================== END CODEX CAROUSEL ===================== */
+
 .golden-coin {
   display: inline-flex;
   align-items: center;
