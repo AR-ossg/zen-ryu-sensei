@@ -30,14 +30,39 @@
   ];
 
   const STORE_ITEMS = [
+    // ===== AURAS =====
     { id: 'aura_zafiro', type: 'aura', name: 'Aura Zafiro', desc: 'Remplaza el dorado del Dojo con un frío resplandor azul.', price: 500, icon: '🔵', meta: '#00ccff' },
     { id: 'aura_abismal', type: 'aura', name: 'Aura Abismal', desc: 'Sume el Dojo en una atmósfera de veneno oscuro.', price: 500, icon: '🟣', meta: '#aa00ff' },
+    { id: 'aura_carmesi', type: 'aura', name: 'Aura Carmesí', desc: 'El color de la sangre guerrera tiñe cada rincón del Templo.', price: 600, icon: '🔴', meta: '#ff2244' },
+    { id: 'aura_jade', type: 'aura', name: 'Aura Jade Imperial', desc: 'El verde sagrado de los emperadores antiguos envuelve el Dojo.', price: 700, icon: '🟢', meta: '#00cc66' },
+    { id: 'aura_hielo', type: 'aura', name: 'Aura Escarcha Boreal', desc: 'Un frío glacial del norte ancestral recorre las paredes del Templo.', price: 750, icon: '🧊', meta: '#88ddff' },
+    { id: 'aura_solar', type: 'aura', name: 'Aura Solar Divina', desc: 'La energía del sol naciente calcina toda oscuridad.', price: 800, icon: '☀️', meta: '#ff8800' },
+    { id: 'aura_sombra', type: 'aura', name: 'Aura Sombra Eterna', desc: 'Solo los más dignos entrenan sumidos en la nada absoluta.', price: 1000, icon: '🌑', meta: '#555577' },
+    { id: 'aura_sangre', type: 'aura', name: 'Aura Sangre de Dragón', desc: 'El ichor del último dragón resplandece en cada fibra del Dojo.', price: 1500, icon: '🐉', meta: '#cc0033' },
+
+    // ===== MÚSICA =====
     { id: 'mus_taiko', type: 'music', name: 'Sinfonía Taiko', desc: 'Desbloquea tambores de guerra en la Emisora Astral.', price: 150, icon: '🥁', meta: 'audio-taiko' },
     { id: 'mus_synth', type: 'music', name: 'Cyber-Dojo Beat', desc: 'Desbloquea pulsos synthwave en la Emisora.', price: 150, icon: '🎹', meta: 'audio-synth' },
+    { id: 'mus_ambient', type: 'music', name: 'Niebla del Templo', desc: 'Sonidos ambientales de un monasterio perdido entre montañas.', price: 200, icon: '🌫️', meta: 'audio-ambient' },
+    { id: 'mus_epic', type: 'music', name: 'Crónica Épica', desc: 'Composición orquestal para tus entrenamientos más intensos.', price: 300, icon: '⚔️', meta: 'audio-epic' },
+    { id: 'mus_lofi', type: 'music', name: 'Lo-fi del Guerrero', desc: 'Beats relajados para sesiones de estiramiento y recuperación.', price: 250, icon: '🎧', meta: 'audio-lofi' },
+    { id: 'mus_tribal', type: 'music', name: 'Ritual Primordial', desc: 'Percusión tribal ancestral que despierta el instinto de combate.', price: 350, icon: '🪘', meta: 'audio-tribal' },
+
+    // ===== DIARIO / LORE =====
     { id: 'lore_v1', type: 'lore', name: 'Tomo I: La Caída', desc: 'Lee el primer fragmento del Maestro Dragón ZEN.', price: 200, icon: '📜', meta: 'La historia comienza cuando mi cuerpo dejó de doler y empezó a arder. No hablo de un ardor poético, hablo del ácido láctico devorando los filamentos de mi músculo hasta la parálisis. Me llamaban prodigio, pero el prodigio es solo una excusa de los mediocres para no entrenar hasta sangrar. El templo original no cayó por un asedio, cayó porque nadie más pudo mantener el ritmo. Cuando logres mil flexiones al alba, entenderás por qué.' },
     { id: 'lore_v2', type: 'lore', name: 'Tomo II: El Arte Vacío', desc: 'Secretos prohibidos de la respiración en letargo.', price: 400, icon: '📜', meta: 'Cuando el pulmón colapsa, la mente intenta sobrevivir. La "Respiración Vacía", el secreto peor guardado del linaje, no consiste en inhalar más aire, sino en aceptar la falta de él. Cuando cuelgas de una barra, tu corazón late a 180 pulsaciones. Es ahí donde encuentras el silencio. Si tu espíritu flaquea antes que tu agarre, ya estabas muerto antes de empezar.' },
+    { id: 'lore_v3', type: 'lore', name: 'Tomo III: La Forja Interior', desc: 'La verdad sobre el dolor como herramienta de evolución.', price: 500, icon: '📜', meta: 'El dolor no es tu enemigo; es el único maestro que nunca miente. Aprendí esto la noche en que mi rodilla cedió durante el centésimo salto. No lloré por la lesión, lloré porque sabía que tendría que empezar de nuevo. Y ahí radica el secreto: cada reconstrucción te hace más fuerte que el original. Los huesos se sueldan más densos, los tendones se adaptan, y el espíritu... el espíritu se vuelve inquebrantable. No le temas al suelo; témele a la cobardía de no volver a levantarte.' },
+    { id: 'lore_v4', type: 'lore', name: 'Tomo IV: El Abismo del Ego', desc: 'Revelaciones sobre la vanidad del guerrero moderno.', price: 600, icon: '📜', meta: 'El ego es la enfermedad silenciosa que corroe al guerrero desde dentro. He visto a titanes caer no por debilidad muscular, sino porque su reflejo en el espejo se convirtió en su único oponente. El verdadero Maestro entrena en la oscuridad, donde nadie aplaude, donde nadie observa. La disciplina que nace del aplauso muere con el silencio. Pero la disciplina que nace del vacío... esa es eterna. Destruye tu necesidad de validación y encontrarás una fuerza que ningún suplemento podrá darte jamás.' },
+    { id: 'lore_v5', type: 'lore', name: 'Tomo V: El Último Sendero', desc: 'El capítulo final del Manuscrito Prohibido.', price: 800, icon: '📜', meta: 'Si estás leyendo esto, has caminado más lejos que el noventa y nueve por ciento. Pero el último sendero no tiene mapa. No hay rutina, no hay programa, no hay gurú que pueda guiarte aquí. Es el territorio donde el cuerpo se convierte en templo y la mente se funde con el movimiento. Cada repetición es una oración. Cada gota de sudor es una ofrenda. No entrenas para vivir más, sino para vivir con más intensidad. El dragón no nace; se forja. Y tú, que has llegado hasta aquí, ya sientes sus escamas bajo tu piel.' },
+
+    // ===== RELIQUIAS =====
     { id: 'relic_oni', type: 'relic', name: 'Máscara Oni Destrozada', desc: 'Reliquia coleccionable de altísimo prestigio.', price: 1000, icon: '👹', meta: '' },
-    { id: 'relic_blade', type: 'relic', name: 'Hoja Ancestral Oxidada', desc: 'Un testigo silencioso de innumerables batallas y sudor.', price: 1000, icon: '🗡️', meta: '' }
+    { id: 'relic_blade', type: 'relic', name: 'Hoja Ancestral Oxidada', desc: 'Un testigo silencioso de innumerables batallas y sudor.', price: 1000, icon: '🗡️', meta: '' },
+    { id: 'relic_scroll', type: 'relic', name: 'Pergamino del Fundador', desc: 'El manuscrito original con las 36 formas del puño vacío.', price: 1200, icon: '📋', meta: '' },
+    { id: 'relic_magatama', type: 'relic', name: 'Magatama del Abismo', desc: 'Joya curvada usada por los generales de la sombra como talismán.', price: 1500, icon: '🌀', meta: '' },
+    { id: 'relic_incense', type: 'relic', name: 'Incienso del Templo Perdido', desc: 'Aromas de un dojo destruido hace mil años que aún persisten.', price: 800, icon: '🕯️', meta: '' },
+    { id: 'relic_fang', type: 'relic', name: 'Colmillo del Primer Dragón', desc: 'El mito dice que quien lo posea jamás sentirá miedo ante la fatiga.', price: 2000, icon: '🦷', meta: '' },
+    { id: 'relic_crown', type: 'relic', name: 'Corona del Monarca Caído', desc: 'Solo los que dominan las cuatro disciplinas son dignos de portarla.', price: 2500, icon: '👑', meta: '' }
   ];
 
   let workoutHistory = [];
@@ -1546,6 +1571,14 @@
     if (taikoBtn) taikoBtn.style.display = player.unlockedItems.includes('mus_taiko') ? 'inline-block' : 'none';
     const synthBtn = document.getElementById('audio-synth');
     if (synthBtn) synthBtn.style.display = player.unlockedItems.includes('mus_synth') ? 'inline-block' : 'none';
+    const ambientBtn = document.getElementById('audio-ambient');
+    if (ambientBtn) ambientBtn.style.display = player.unlockedItems.includes('mus_ambient') ? 'inline-block' : 'none';
+    const epicBtn = document.getElementById('audio-epic');
+    if (epicBtn) epicBtn.style.display = player.unlockedItems.includes('mus_epic') ? 'inline-block' : 'none';
+    const lofiBtn = document.getElementById('audio-lofi');
+    if (lofiBtn) lofiBtn.style.display = player.unlockedItems.includes('mus_lofi') ? 'inline-block' : 'none';
+    const tribalBtn = document.getElementById('audio-tribal');
+    if (tribalBtn) tribalBtn.style.display = player.unlockedItems.includes('mus_tribal') ? 'inline-block' : 'none';
   };
 
   window.readLore = function (id) {
