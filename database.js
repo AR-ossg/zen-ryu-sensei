@@ -593,20 +593,6 @@ const EXERCISE_DB = [
     baseVal: 30, scale: 1.0,
     desc: "1. Estocada profunda, una mano al piso. 2. La otra mano empuja rodilla hacia afuera mientras giras el torso al cielo.",
     m: "./img/techniques/flex_3.png", alt: null
-  },,
-  {
-    id: "flex_27", n: "Cauce Abierto", real: "Estiramiento de Rana (Frog Stretch)",
-    s: "flex", lvl_min: 18, lvl_max: 45, t: "time", domain: "mobility",
-    baseVal: 45, scale: 1.0,
-    desc: "1. Rodillas muy abiertas en el piso, pies en 90 grados hacia afuera. 2. Empuja cadera suavemente hacia atrás. Ideal para splits.",
-    m: "./img/techniques/flex_1.png", alt: null
-  },
-  {
-    id: "flex_28", n: "Ala del Dragón", real: "Lizard Twist (Torsión de Cadera)",
-    s: "flex", lvl_min: 40, lvl_max: 70, t: "time", domain: "mobility",
-    baseVal: 30, scale: 1.0,
-    desc: "1. Estocada profunda, una mano al piso. 2. La otra mano empuja rodilla hacia afuera mientras giras el torso al cielo.",
-    m: "./img/techniques/flex_3.png", alt: null
   },
   {
     id: "flex_12", n: "Carga del Lagarto", real: "Lizard Stretch (Codos en piso)",

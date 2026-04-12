@@ -1,63 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Zen Ryu Sensei 5.0</title>
-  
+
   <link rel="manifest" href="./manifest.json?v=6">
   <link rel="apple-touch-icon" href="./icon.png?v=6">
   <link rel="icon" type="image/png" href="./icon.png?v=6">
   <!-- Cinzel and Inter fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
 
   <!-- ONBOARDING WIZARD -->
-  <div id="onboarding-wizard" class="modal-overlay" style=" z-index:20000; background: var(--bg-dark); overflow:hidden;">
+  <div id="onboarding-wizard" class="modal-overlay"
+    style=" z-index:20000; background: var(--bg-dark); overflow:hidden;">
     <div class="scanline-bg"></div>
-    
+
     <!-- AUDIO ASSETS FOR SYSTEM OVERRIDE -->
-    <audio id="sys-sync-sound" src="https://cdn.freesound.org/previews/235/235882_2977461-hq.mp3" preload="auto"></audio>
-    <audio id="sys-complete-sound" src="https://cdn.freesound.org/previews/320/320655_5260872-hq.mp3" preload="auto"></audio>
+    <audio id="sys-sync-sound" src="https://cdn.freesound.org/previews/235/235882_2977461-hq.mp3"
+      preload="auto"></audio>
+    <audio id="sys-complete-sound" src="https://cdn.freesound.org/previews/320/320655_5260872-hq.mp3"
+      preload="auto"></audio>
 
     <div class="wizard-step active-step wizard-card" id="step-1">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">SISTEMA INICIADO: CALIBRACIÓN 1/5</div>
-      <img src="./icon.png" id="dragon-welcome-img" class="holo-image" style="width:100px; height:100px; border-radius:50%; object-position:center; margin: 0 auto 15px auto;" onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
-      <div id="dragon-emoji-fallback" style="display:none; font-size:6rem; margin-bottom:15px; text-shadow: 0 0 30px rgba(255,215,0,0.5);">👁️</div>
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        SISTEMA INICIADO: CALIBRACIÓN 1/5</div>
+      <img src="./icon.png" id="dragon-welcome-img" class="holo-image"
+        style="width:100px; height:100px; border-radius:50%; object-position:center; margin: 0 auto 15px auto;"
+        onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
+      <div id="dragon-emoji-fallback"
+        style="display:none; font-size:6rem; margin-bottom:15px; text-shadow: 0 0 30px rgba(255,215,0,0.5);">👁️</div>
       <h2 class="system-title">EL DESPERTAR</h2>
-      <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.6; text-align:center;">El acero solo nace tras el fuego. Tu llegada al Templo marca el inicio de una transformación; antes de guiar tu camino, el Oráculo debe conocer la firmeza de tu raíz. <br><br><b>¿Bajo qué nombre será recordada tu leyenda?</b></p>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.6; text-align:center;">El acero solo
+        nace tras el fuego. Tu llegada al Templo marca el inicio de una transformación; antes de guiar tu camino, el
+        Oráculo debe conocer la firmeza de tu raíz. <br><br><b>¿Bajo qué nombre será recordada tu leyenda?</b></p>
       <input type="text" id="ob-name" class="wizard-input" placeholder="TU TÍTULO AQUÍ">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(1)" style="letter-spacing:2px;">INICIAR SENDA</button>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(1)" style="letter-spacing:2px;">INICIAR
+        SENDA</button>
     </div>
 
     <!-- FASE 2: Fuerza -->
     <div class="wizard-step hidden-step wizard-card" id="step-2">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: FIRMEZA 2/5</div>
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        CALIBRACIÓN: FIRMEZA 2/5</div>
       <h2 class="system-title">FUERZA DE LA MONTAÑA</h2>
-      <img src="./img/techniques/str_2.png" class="holo-image" onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">La montaña no se mueve ante el viento.<br>Desciende y asciende hasta que tu voluntad se imponga al cuerpo. ¿Cuántas <b>flexiones</b> resistes?</p>
+      <img src="./img/techniques/str_2.png" class="holo-image"
+        onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">La montaña no se
+        mueve ante el viento.<br>Desciende y asciende hasta que tu voluntad se imponga al cuerpo. ¿Cuántas
+        <b>flexiones</b> resistes?
+      </p>
       <input type="number" id="ob-str" class="wizard-input" placeholder="Repeticiones" min="0">
       <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR VOLUNTAD</button>
     </div>
 
     <!-- FASE 3: Velocidad -->
     <div class="wizard-step hidden-step wizard-card" id="step-3">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: EL RAYO 3/5</div>
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        CALIBRACIÓN: EL RAYO 3/5</div>
       <h2 class="system-title">VELOCIDAD DE LA SOMBRA</h2>
-      <img src="./img/techniques/spd_3.png" class="holo-image" onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El rayo precede al trueno. La explosividad es la clave.<br>Durante 60 latidos, descubre cuántos <b>Burpees</b> puede resistir el motor de tu aliento.</p>
+      <img src="./img/techniques/spd_3.png" class="holo-image"
+        onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El rayo precede
+        al trueno. La explosividad es la clave.<br>Durante 60 latidos, descubre cuántos <b>Burpees</b> puede resistir el
+        motor de tu aliento.</p>
       <input type="number" id="ob-spd" class="wizard-input" placeholder="Burpees Totales" min="0">
       <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR VELOCIDAD</button>
     </div>
 
     <!-- FASE 4: Flexibilidad -->
     <div class="wizard-step hidden-step wizard-card" id="step-4">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: EL BAMBÚ 4/5</div>
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        CALIBRACIÓN: EL BAMBÚ 4/5</div>
       <h2 class="system-title">FLUIDEZ DEL ESPÍRITU</h2>
-      <img src="./img/techniques/flex_1.png" class="holo-image" onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El bambú que no se dobla, se rompe.<br>Alcanza la tierra con tus manos descubriendo tu límite de elasticidad.</p>
+      <img src="./img/techniques/flex_1.png" class="holo-image"
+        onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El bambú que no
+        se dobla, se rompe.<br>Alcanza la tierra con tus manos descubriendo tu límite de elasticidad.</p>
       <select id="ob-flex" class="wizard-select">
         <option value="1">🌱 Inflexible (No llego a las rodillas)</option>
         <option value="5">🌿 Rígido (Llego a las espinillas)</option>
@@ -69,48 +100,84 @@
 
     <!-- FASE 5: Resistencia -->
     <div class="wizard-step hidden-step wizard-card" id="step-5">
-      <div style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">CALIBRACIÓN: EL SENDERO 5/5</div>
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        CALIBRACIÓN: EL SENDERO 5/5</div>
       <h2 class="system-title">RESISTENCIA DEL GUERRERO</h2>
-      <img src="./img/techniques/run_1.png" class="holo-image" onerror="this.src='https://c.tenor.com/u7qFk9kX_V0AAAAC/running-run.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El camino largo revela al verdadero maestro.<br>¿Cuántos minutos eres capaz de correr antes de que el fuego queme tu aliento?</p>
+      <img src="./img/techniques/run_1.png" class="holo-image"
+        onerror="this.src='https://c.tenor.com/u7qFk9kX_V0AAAAC/running-run.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El camino largo
+        revela al verdadero maestro.<br>¿Cuántos minutos eres capaz de correr antes de que el fuego queme tu aliento?
+      </p>
       <input type="number" id="ob-end" class="wizard-input" placeholder="Minutos (aprox)" min="0">
-      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:10px;">FORJAR EL ACCESO</button>
+      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:10px;">FORJAR EL
+        ACCESO</button>
     </div>
   </div>
 
   <!-- TOP NAV BAR STATUS -->
   <header class="top-status-bar">
-    <div class="status-left">
+    <div class="status-left" onclick="openProfileModal()" style="cursor:pointer;" title="Abrir Bóveda del Perfil">
       <div id="avatar">🌰</div>
       <div class="user-class">
         <span class="status-badge" id="player-rank-title">SEMILLA INACTIVA</span>
         <span class="user-name" id="player-name">Desconocido</span>
+        <div id="dashboard-badges" style="display:flex; gap:3px; margin-top:2px;">
+          <!-- 3 Badge slots -->
+          <div class="badge-slot" onclick="event.stopPropagation(); openBadgeModal(0)"
+            style="width:28px; height:28px; background:rgba(255,255,255,0.05); border:1px solid var(--accent-gold); border-radius:5px; display:flex; justify-content:center; align-items:center; font-size:1.1rem; box-shadow:0 0 10px rgba(255,215,0,0.2);">
+          </div>
+          <div class="badge-slot" onclick="event.stopPropagation(); openBadgeModal(1)"
+            style="width:28px; height:28px; background:rgba(255,255,255,0.05); border:1px solid var(--accent-gold); border-radius:5px; display:flex; justify-content:center; align-items:center; font-size:1.1rem; box-shadow:0 0 10px rgba(255,215,0,0.2);">
+          </div>
+          <div class="badge-slot" onclick="event.stopPropagation(); openBadgeModal(2)"
+            style="width:28px; height:28px; background:rgba(255,255,255,0.05); border:1px solid var(--accent-gold); border-radius:5px; display:flex; justify-content:center; align-items:center; font-size:1.1rem; box-shadow:0 0 10px rgba(255,215,0,0.2);">
+          </div>
+        </div>
       </div>
     </div>
-    <div class="status-right">
-      <div class="status-box">NIVEL<span id="player-level" style="color:var(--accent-gold);">1</span></div>
-      <div class="status-box">RUTINAS<span id="player-sessions" style="color:#fff;">0</span></div>
+    <div class="status-right" style="gap: 5px;">
+      <div class="status-box" style="display:flex; align-items:center; gap:3px;">
+        <span id="streak-icon" style="filter:grayscale(1); opacity:0.5; font-size:0.9rem; margin-top:-2px;">🔥</span>
+        <span id="player-streak" style="font-size:0.9rem; color:#ccc;">0</span>
+      </div>
+      <div class="status-box"
+        style="display:flex; align-items:center; gap:3px; background:rgba(255,215,0,0.1); border-color:var(--accent-gold);">
+        <span class="golden-coin" style="width:14px; height:14px; font-size:0.5rem; margin-top:-2px;">Z</span>
+        <span id="player-coins" style="font-size:0.9rem; color:var(--accent-gold);">0</span>
+      </div>
+      <div class="status-box" style="display:flex; flex-direction:column; justify-content:center; gap:0;">
+        <span style="font-size:0.45rem;">NVL</span>
+        <span id="player-level" style="color:var(--accent-gold); margin-top:0;">1</span>
+      </div>
     </div>
   </header>
 
   <!-- HOME VIEW (Dashboard) -->
   <main id="home-view" class="active-view" style="padding-bottom: 120px;">
-    
+
     <div class="hero-title-container">
       <h1 class="hero-title">ZEN RYU<br>SENSEI</h1>
       <div class="hero-subtitle">CALISTENIA MARCIAL</div>
     </div>
-    
+
 
     <!-- PERGAMINO DEL DRAGÓN -->
-    <div class="glass-panel" style="margin-bottom: 15px; border-color: var(--accent-gold); background: linear-gradient(180deg, rgba(30,30,30,0.8) 0%, rgba(10,10,10,0.95) 100%);">
-      <div style="text-align:center; color: var(--accent-gold); font-family: 'Cinzel'; font-size: 1.1rem; margin-bottom: 10px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 5px;">🐉 Sabiduría del Oráculo</div>
-      <div id="maestro-quote" style="font-size: 0.9rem; font-style: italic; text-align: center; color: #ccc; font-family: 'Cinzel', serif; line-height: 1.5;"></div>
+    <div class="glass-panel"
+      style="margin-bottom: 15px; border-color: var(--accent-gold); background: linear-gradient(180deg, rgba(30,30,30,0.8) 0%, rgba(10,10,10,0.95) 100%);">
+      <div
+        style="text-align:center; color: var(--accent-gold); font-family: 'Cinzel'; font-size: 1.1rem; margin-bottom: 10px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 5px;">
+        🐉 Sabiduría del Oráculo</div>
+      <div id="maestro-quote"
+        style="font-size: 0.9rem; font-style: italic; text-align: center; color: #ccc; font-family: 'Cinzel', serif; line-height: 1.5;">
+      </div>
     </div>
 
     <div class="mission-card" ontouchstart="" style="margin-bottom: 30px; cursor:pointer;" id="btn-start-conditioning">
-      <div class="mission-status"><span style="color:var(--accent-gold);">SENDERO DEL GUERRERO</span> <span style="color:var(--accent-gold);">⚡</span></div>
-      <h2 class="mission-title" style="font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.2);">ACONDICIONAMIENTO<br>MARCIAL</h2>
+      <div class="mission-status"><span style="color:var(--accent-gold);">SENDERO DEL GUERRERO</span> <span
+          style="color:var(--accent-gold);">⚡</span></div>
+      <h2 class="mission-title" style="font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.2);">
+        ACONDICIONAMIENTO<br>MARCIAL</h2>
       <div class="mission-stats" style="justify-content:center;">
         <span>FORJA DEL TEMPLO</span> <span>/</span> <span>PODER INTEGRAL</span>
       </div>
@@ -119,31 +186,74 @@
 
     <!-- STATS PANEL HUD -->
     <div class="glass-panel">
-      <div class="stats-header" style="justify-content:center; letter-spacing:4px; font-size:0.75rem; margin-bottom:5px;">
+      <div class="stats-header"
+        style="justify-content:center; letter-spacing:4px; font-size:0.75rem; margin-bottom:5px;">
         PERFIL DEL GUERRERO
       </div>
-      <div style="font-size:0.55rem; color:var(--accent-gold); text-align:center; margin-bottom:12px; opacity:0.9; letter-spacing:1px; text-transform:uppercase; font-weight:700;">
+      <div
+        style="font-size:0.55rem; color:var(--accent-gold); text-align:center; margin-bottom:12px; opacity:0.9; letter-spacing:1px; text-transform:uppercase; font-weight:700;">
         Toca un atributo para forjar una sesión especializada
       </div>
       <div class="stats-grid">
-        <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">🦾</span><span>Fuerza</span> <span id="stat-str" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-str" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
-        <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">⚡</span><span>Velocidad</span> <span id="stat-spd" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-spd" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
-        <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">🧘‍♂️</span><span>Flexibilidad</span> <span id="stat-flex" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-flex" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
-        <div class="hud-stat" style="position:relative;"><span style="font-size:1.2rem; margin-bottom:4px;">🛡️</span><span>Resistencia</span> <span id="stat-end" class="hud-val">Lvl 1</span><div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;"><div id="bar-end" style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);"></div></div></div>
+        <div class="hud-stat" style="position:relative;"><span
+            style="font-size:1.2rem; margin-bottom:4px;">🦾</span><span>Fuerza</span> <span id="stat-str"
+            class="hud-val">Lvl 1</span>
+          <div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;">
+            <div id="bar-str"
+              style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
+            </div>
+          </div>
+        </div>
+        <div class="hud-stat" style="position:relative;"><span
+            style="font-size:1.2rem; margin-bottom:4px;">⚡</span><span>Velocidad</span> <span id="stat-spd"
+            class="hud-val">Lvl 1</span>
+          <div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;">
+            <div id="bar-spd"
+              style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
+            </div>
+          </div>
+        </div>
+        <div class="hud-stat" style="position:relative;"><span
+            style="font-size:1.2rem; margin-bottom:4px;">🧘‍♂️</span><span>Flexibilidad</span> <span id="stat-flex"
+            class="hud-val">Lvl 1</span>
+          <div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;">
+            <div id="bar-flex"
+              style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
+            </div>
+          </div>
+        </div>
+        <div class="hud-stat" style="position:relative;"><span
+            style="font-size:1.2rem; margin-bottom:4px;">🛡️</span><span>Resistencia</span> <span id="stat-end"
+            class="hud-val">Lvl 1</span>
+          <div style="width:80%; height:3px; background:#222; margin-top:6px; border-radius:2px;">
+            <div id="bar-end"
+              style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
+            </div>
+          </div>
+        </div>
       </div>
       <div class="xp-section">
-        <div class="xp-labels"><span>PROGRESO DE RANGO</span> <span id="xp-text-mini" style="color:var(--accent-gold);">0 XP</span></div>
-        <div class="xp-bar-container"><div id="xp-bar" class="xp-bar-fill"></div></div>
+        <div class="xp-labels"><span>PROGRESO DE RANGO</span> <span id="xp-text-mini"
+            style="color:var(--accent-gold);">0 XP</span></div>
+        <div class="xp-bar-container">
+          <div id="xp-bar" class="xp-bar-fill"></div>
+        </div>
       </div>
     </div>
 
     <!-- EMISORA ASTRAL -->
     <div class="glass-panel" style="margin-bottom: 20px;">
-      <div class="stats-header"><span class="dot" style="background:#55f; box-shadow:0 0 5px #55f;"></span> EMISORA ASTRAL</div>
+      <div class="stats-header"><span class="dot" style="background:#55f; box-shadow:0 0 5px #55f;"></span> EMISORA
+        ASTRAL</div>
       <div class="radio-controls">
         <button class="radio-btn" data-url="https://cdn.freesound.org/previews/467/467316_16058-hq.mp3">MEDITAR</button>
         <button class="radio-btn" data-url="https://cdn.freesound.org/previews/217/217575_2132540-hq.mp3">FUEGO</button>
-        <button class="radio-btn" data-url="https://cdn.freesound.org/previews/519/519067_11264728-hq.mp3">COMBATE</button>
+        <button class="radio-btn"
+          data-url="https://cdn.freesound.org/previews/519/519067_11264728-hq.mp3">COMBATE</button>
+        <button class="radio-btn" id="audio-taiko" style="display:none;"
+          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">TAIKO 🥁</button>
+        <button class="radio-btn" id="audio-synth" style="display:none;"
+          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3">SYNTH 🎹</button>
         <button id="radio-stop" class="radio-btn stop">⏹</button>
       </div>
       <audio id="audio-player" src="" preload="none" loop></audio>
@@ -153,71 +263,124 @@
 
     <!-- BOTTOM FIXED NAV (HOME ONLY) -->
     <nav class="bottom-nav">
-       <div class="nav-item" onclick="openLibraryModal()">
-          <span class="nav-icon">📚</span>
-          <span class="nav-label">TÉCNICAS</span>
-       </div>
-       <div class="nav-item" onclick="openCodexModal()">
-          <span class="nav-icon">📜</span>
-          <span class="nav-label">CÓDICE</span>
-       </div>
-       <div class="nav-item" onclick="openModal('settings-modal')">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-label">AJUSTES</span>
-       </div>
+      <div class="nav-item" onclick="openLibraryModal()">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">TÉCNICAS</span>
+      </div>
+      <div class="nav-item" onclick="openCodexModal()">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">CÓDICE</span>
+      </div>
+      <div class="nav-item" onclick="openStoreModal()">
+        <span class="nav-icon"
+          style="font-size:1.2rem; filter:drop-shadow(0 0 2px var(--accent-gold)); margin-bottom:-2px;">⚖️</span>
+        <span class="nav-label" style="color:var(--accent-gold);">BAZAR</span>
+      </div>
+      <div class="nav-item" onclick="openModal('settings-modal')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">AJUSTES</span>
+      </div>
     </nav>
   </main>
 
-<!-- ROUTINE OVERVIEW VIEW -->
+  <!-- ROUTINE OVERVIEW VIEW -->
   <main id="routine-overview-view" class="hidden-view">
-    <div id="loader" style="display: none; font-size: 1.1rem; text-align:center; padding: 20px; font-family:'Cinzel',serif; color:var(--accent-gold); animation: float 2s infinite;">El Maestro está forjando tu rutina...</div>
-    
-    <div id="overview-content" style="display:none; margin-top:20px; padding-bottom:100px;">
-       <h2 style="font-family:'Cinzel'; color:var(--accent-gold); text-align:center; margin-bottom: 20px; font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.3);">MISIÓN FORJADA</h2>
-       
-       <div class="glass-panel" style="margin: 0 20px 20px 20px; padding:15px;">
-          <div class="stats-header" style="justify-content:center; letter-spacing:4px; font-weight:900; color:var(--accent-gold);">MANIFIESTO TÉCNICO</div>
-          <div style="display:flex; justify-content:space-around; text-align:center; margin-bottom: 15px;">
-             <div><div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">TIEMPO EST.</div><div id="ov-time" style="color:#fff; font-family:monospace; font-size:1.2rem; font-weight:bold;">0m</div></div>
-             <div><div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">EJERCICIOS</div><div id="ov-count" style="color:#fff; font-family:monospace; font-size:1.2rem; font-weight:bold;">0</div></div>
-             <div><div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">ENFOQUE</div><div id="ov-focus" style="color:var(--accent-gold); font-size:0.9rem; font-weight:bold; margin-top:4px;">MIXTO</div></div>
-          </div>
-          <div id="ov-list" style="max-height: 48vh; overflow-y:auto; border-top:1px dashed #333; padding-top:15px; margin-top:5px; font-size:0.85rem;">
-             <!-- Inyectado por JS -->
-          </div>
-       </div>
+    <div id="loader"
+      style="display: none; font-size: 1.1rem; text-align:center; padding: 20px; font-family:'Cinzel',serif; color:var(--accent-gold); animation: float 2s infinite;">
+      El Maestro está forjando tu rutina...</div>
 
-       <div style="padding: 0 20px;">
-          <button id="btn-start-focus" class="btn-primary" style="margin-bottom:15px; padding:18px; font-size:1.1rem; border-color:var(--accent-gold); background:linear-gradient(135deg, #b8860b, #5a4205); box-shadow: 0 0 20px rgba(255,215,0,0.2);">🔥 COMENZAR MISIÓN</button>
-          <div style="display:flex; gap:10px;">
-             <button id="btn-reforge-routine" class="btn-secondary" style="margin-top:0;">🔄 REFORJAR</button>
-             <button id="btn-cancel-overview" class="btn-secondary" style="margin-top:0; border-color:var(--accent-red); color:#ff5555;">RETIRARSE</button>
+    <div id="overview-content" style="display:none; margin-top:20px; padding-bottom:100px;">
+      <h2
+        style="font-family:'Cinzel'; color:var(--accent-gold); text-align:center; margin-bottom: 20px; font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.3);">
+        MISIÓN FORJADA</h2>
+
+      <div class="glass-panel" style="margin: 0 20px 20px 20px; padding:15px;">
+        <div class="stats-header"
+          style="justify-content:center; letter-spacing:4px; font-weight:900; color:var(--accent-gold);">MANIFIESTO
+          TÉCNICO</div>
+        <div style="display:flex; justify-content:space-around; text-align:center; margin-bottom: 15px;">
+          <div>
+            <div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">TIEMPO EST.</div>
+            <div id="ov-time" style="color:#fff; font-family:monospace; font-size:1.2rem; font-weight:bold;">0m</div>
           </div>
-       </div>
+          <div>
+            <div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">EJERCICIOS</div>
+            <div id="ov-count" style="color:#fff; font-family:monospace; font-size:1.2rem; font-weight:bold;">0</div>
+          </div>
+          <div>
+            <div style="font-size:0.6rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">ENFOQUE</div>
+            <div id="ov-focus" style="color:var(--accent-gold); font-size:0.9rem; font-weight:bold; margin-top:4px;">
+              MIXTO</div>
+          </div>
+        </div>
+        <div id="ov-list"
+          style="max-height: 48vh; overflow-y:auto; border-top:1px dashed #333; padding-top:15px; margin-top:5px; font-size:0.85rem;">
+          <!-- Inyectado por JS -->
+        </div>
+      </div>
+
+      <div style="padding: 0 20px;">
+        <button id="btn-start-focus" class="btn-primary"
+          style="margin-bottom:15px; padding:18px; font-size:1.1rem; border-color:var(--accent-gold); background:linear-gradient(135deg, #b8860b, #5a4205); box-shadow: 0 0 20px rgba(255,215,0,0.2);">🔥
+          COMENZAR MISIÓN</button>
+        <div style="display:flex; gap:10px;">
+          <button id="btn-reforge-routine" class="btn-secondary" style="margin-top:0;">🔄 REFORJAR</button>
+          <button id="btn-cancel-overview" class="btn-secondary"
+            style="margin-top:0; border-color:var(--accent-red); color:#ff5555;">RETIRARSE</button>
+        </div>
+      </div>
     </div>
   </main>
 
   <!-- ROUTINE FOCUS VIEW (CAROUSEL) -->
   <main id="routine-focus-view" class="hidden-view">
     <div style="padding: 15px 20px; display:flex; justify-content:space-between; align-items:center;">
-       <div id="focus-progress-text" style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.1rem; font-weight:bold; text-shadow:0 0 5px rgba(255,215,0,0.3);">EJERCICIO 1 DE 5</div>
-       <button id="btn-cancel-focus" style="background:none; border:none; color:#ff5555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; cursor:pointer; font-weight:bold;">ABANDONAR</button>
+      <div id="focus-progress-text"
+        style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.1rem; font-weight:bold; text-shadow:0 0 5px rgba(255,215,0,0.3);">
+        EJERCICIO 1 DE 5</div>
+      <button id="btn-cancel-focus"
+        style="background:none; border:none; color:#ff5555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; cursor:pointer; font-weight:bold;">ABANDONAR</button>
     </div>
-    
-    <div id="focus-exercises-container" style="position:relative; width:100%; height:calc(100vh - 100px); overflow:hidden; padding:0 20px;">
-       <!-- Inyectado por JS -->
+
+    <div id="focus-exercises-container"
+      style="position:relative; width:100%; height:calc(100vh - 100px); overflow:hidden; padding:0 20px;">
+      <!-- Inyectado por JS -->
     </div>
 
     <!-- Finalización -->
-    <div id="focus-finish-container" style="display:none; padding: 20px; text-align:center; position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; background:rgba(0,0,0,0.9); flex-direction:column; justify-content:center; align-items:center;">
-       <div class="wizard-card" style="box-shadow: 0 0 50px rgba(255,215,0,0.4), inset 0 0 30px rgba(0,0,0,1); border: 2px solid var(--accent-gold);">
-         <div style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(255,215,0,0.3); padding-bottom:10px;">MISIÓN CUMPLIDA</div>
-         <div class="avatar-glow" style="margin-bottom:20px; display:flex; justify-content:center;">
-           <img src="./victory_coin.png" style="width:230px; height:230px; object-fit:cover; border-radius:50%; box-shadow: 0 0 40px rgba(255,180,0,0.4); filter: drop-shadow(0 0 25px rgba(255,180,0,0.6)); animation: float 3s ease-in-out infinite;">
-         </div>
-         <h2 class="system-title" style="font-size:2.4rem; text-transform:uppercase; margin-bottom:30px;">ESPÍRITU<br>FORJADO</h2>
-         <button id="btn-finish-routine" class="btn-complete-massive" style="background:var(--accent-green); color:#000; box-shadow: 0 0 30px rgba(40,167,69,0.8); text-shadow:0 0 2px #fff;">✔️ RECLAMAR VICTORIA</button>
-       </div>
+    <div id="focus-finish-container"
+      style="display:none; padding: 20px; text-align:center; position:fixed; top:0; left:0; width:100%; height:100%; z-index:100000; background:rgba(0,0,0,0.95); flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);">
+      <div class="wizard-card"
+        style="box-shadow: 0 0 50px rgba(255,215,0,0.4), inset 0 0 30px rgba(0,0,0,1); border: 2px solid var(--accent-gold);">
+        <div
+          style="font-size:0.6rem; color:var(--accent-gold); letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(255,215,0,0.3); padding-bottom:10px;">
+          MISIÓN CUMPLIDA</div>
+        <div class="avatar-glow" style="margin-bottom:20px; display:flex; justify-content:center;">
+          <img src="./victory_coin.png"
+            style="width:230px; height:230px; object-fit:cover; border-radius:50%; box-shadow: 0 0 40px rgba(255,180,0,0.4); filter: drop-shadow(0 0 25px rgba(255,180,0,0.6)); animation: float 3s ease-in-out infinite;">
+        </div>
+        <h2 class="system-title" style="font-size:2.4rem; text-transform:uppercase; margin-bottom:15px;">
+          ESPÍRITU<br>FORJADO</h2>
+        <div id="victory-rewards"
+          style="margin-bottom: 25px; padding: 12px; background: rgba(0,0,0,0.6); border: 1px solid var(--accent-gold); border-radius: 12px; display:flex; gap:20px; justify-content:center; align-items:center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
+          <div style="text-align:center; line-height:1.2;">
+            <span class="golden-coin"
+              style="width:36px; height:36px; font-size:1.2rem; filter:drop-shadow(0 0 8px rgba(255,215,0,0.6)); margin-bottom: 5px;">Z</span><br>
+            <span id="reward-coins"
+              style="color:var(--accent-gold); font-weight:900; font-size:1.2rem; font-family:monospace;">+0</span>
+          </div>
+          <div style="width:1px; height:35px; background:rgba(255,215,0,0.2);"></div>
+          <div style="text-align:center; line-height:1.2;">
+            <span id="reward-streak-icon" style="font-size:1.6rem;">🔥</span><br>
+            <span id="reward-streak"
+              style="color:#ff5555; font-weight:900; font-size:0.8rem; letter-spacing:1px; text-transform:uppercase;">Racha
+              x1</span>
+          </div>
+        </div>
+        <button id="btn-finish-routine" class="btn-complete-massive"
+          style="background:var(--accent-green); color:#000; box-shadow: 0 0 30px rgba(40,167,69,0.8); text-shadow:0 0 2px #fff;">✔️
+          RECLAMAR VICTORIA</button>
+      </div>
     </div>
   </main>
 
@@ -237,9 +400,13 @@
   </div>
 
   <div id="notification-modal" class="modal-overlay" style="z-index: 90000;">
-    <div class="wizard-card" style="box-shadow: 0 20px 60px rgba(0,0,0,1), inset 0 0 20px rgba(200,0,0,0.1); border-color:#555;">
-      <h2 id="noti-title" style="color:var(--accent-gold); margin-bottom: 15px; font-family:'Cinzel', serif; font-size: 1.5rem; text-shadow:0 0 10px rgba(255,215,0,0.4);">SISTEMA</h2>
-      <p id="noti-msg" style="font-size:0.95rem; color:#ccc; line-height:1.6; margin-bottom: 25px; padding: 0 10px;"></p>
+    <div class="wizard-card"
+      style="box-shadow: 0 20px 60px rgba(0,0,0,1), inset 0 0 20px rgba(200,0,0,0.1); border-color:#555;">
+      <h2 id="noti-title"
+        style="color:var(--accent-gold); margin-bottom: 15px; font-family:'Cinzel', serif; font-size: 1.5rem; text-shadow:0 0 10px rgba(255,215,0,0.4);">
+        SISTEMA</h2>
+      <p id="noti-msg" style="font-size:0.95rem; color:#ccc; line-height:1.6; margin-bottom: 25px; padding: 0 10px;">
+      </p>
       <div id="noti-buttons" style="display:flex; gap:10px; justify-content:center;">
         <button id="noti-cancel" class="btn-secondary" style="display:none; flex:1;">CANCELAR</button>
         <button id="noti-close" class="btn-primary" style="border-width:2px; flex:1;">CONTINUAR</button>
@@ -249,9 +416,13 @@
 
   <div id="info-modal" class="modal-overlay">
     <div class="modal-content" style="max-height: 80vh; overflow-y:auto; padding:25px;">
-      <h2 id="info-title" style="color: var(--accent-gold); margin-bottom: 15px; font-size:1.3rem; font-family:'Cinzel'; text-transform:uppercase;"></h2>
+      <h2 id="info-title"
+        style="color: var(--accent-gold); margin-bottom: 15px; font-size:1.3rem; font-family:'Cinzel'; text-transform:uppercase;">
+      </h2>
       <div id="info-img-container" style="margin-bottom: 15px;"></div>
-      <p id="info-desc" style="font-size: 0.9rem; margin-bottom: 20px; color:#ddd; font-style:italic; line-height: 1.5; border-left:2px solid var(--accent-red); padding-left:12px; text-align: left;"></p>
+      <p id="info-desc"
+        style="font-size: 0.9rem; margin-bottom: 20px; color:#ddd; font-style:italic; line-height: 1.5; border-left:2px solid var(--accent-red); padding-left:12px; text-align: left;">
+      </p>
       <button id="info-close" class="btn-primary">ESTUDIADO</button>
     </div>
   </div>
@@ -261,8 +432,10 @@
 
   <div id="ios-install-modal" class="modal-overlay" style="z-index:40001;">
     <div class="modal-content" style="max-width: 420px; padding: 30px 25px;">
-      <h2 style="color:var(--accent-gold); margin-bottom: 30px; font-family:'Cinzel'; font-size: 1.5rem; letter-spacing: 2px;">VÍA DE ASCENSIÓN (iOS)</h2>
-      
+      <h2
+        style="color:var(--accent-gold); margin-bottom: 30px; font-family:'Cinzel'; font-size: 1.5rem; letter-spacing: 2px;">
+        VÍA DE ASCENSIÓN (iOS)</h2>
+
       <div class="ios-step">
         <div class="ios-step-icon">📤</div>
         <div class="ios-step-text">
@@ -302,14 +475,142 @@
     </div>
   </div>
 
+  <div id="store-modal" class="modal-overlay" style="z-index: 55000;">
+    <div class="modal-content" style="padding: 0; min-height: 300px;">
+      <div class="store-header"
+        style="background: #0a0b0a; border-bottom: 2px solid var(--accent-gold); padding: 25px 20px; text-align:center; position:sticky; top:0; z-index:10; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+        <h2 style="color:var(--accent-gold); font-family:'Cinzel', serif; font-size: 1.8rem; margin-bottom: 5px;">BAZAR
+          DEL ORÁCULO</h2>
+        <div style="font-size:0.8rem; color:#888; letter-spacing:2px; font-weight:bold; margin-bottom:15px;">INTERCAMBIO
+          DE VIRTUDES</div>
+        <div
+          style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,215,0,0.1); border:1px solid var(--accent-gold); padding:5px 15px; border-radius:15px;">
+          <span class="golden-coin" style="width:16px; height:16px; font-size:0.5rem; margin-top:-2px;">Z</span>
+          <span id="store-coin-display"
+            style="color:var(--accent-gold); font-weight:bold; font-family:monospace; font-size:1.1rem;">0</span>
+        </div>
+      </div>
+      <!-- Pestañas del Bazar -->
+      <div style="display:flex; border-bottom:1px solid #333; background:#0a0a0a;">
+        <div class="store-tab active-tab" onclick="switchStoreTab('aura', this)"
+          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:var(--accent-gold); border-bottom:2px solid var(--accent-gold); cursor:pointer; font-weight:bold;">
+          AURAS</div>
+        <div class="store-tab" onclick="switchStoreTab('music', this)"
+          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          MÚSICA</div>
+        <div class="store-tab" onclick="switchStoreTab('lore', this)"
+          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          DIARIO</div>
+        <div class="store-tab" onclick="switchStoreTab('relic', this)"
+          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          RELIQUIAS</div>
+      </div>
+
+      <div id="store-items-container" style="padding: 20px; max-height:60vh; overflow-y:auto;">
+        <!-- JS Injected Items -->
+      </div>
+      <div style="padding: 15px; text-align:center; border-top:1px solid #333; background:#0a0a0a;">
+        <button class="btn-primary" onclick="closeModal('store-modal')" style="width:100%; letter-spacing:2px;">SALIR DEL BAZAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lore-modal" class="modal-overlay" style="z-index: 60000;">
+    <div class="modal-content"
+      style="max-height:90vh; background: #111; border: 1px solid var(--accent-gold); box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 0 20px rgba(255,215,0,0.2);">
+      <div style="text-align:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
+        <div style="font-family:'Cinzel', serif; color:#555; letter-spacing:4px; font-size:0.7rem;">EL DIARIO PROHIBIDO
+        </div>
+        <h2 id="lore-title"
+          style="color:var(--accent-gold); font-family:'Cinzel', serif; font-size: 1.4rem; margin-top:5px;">CAPÍTULO #
+        </h2>
+      </div>
+      <div id="lore-body"
+        style="font-family:'Crimson Text', serif; color:#ddd; font-size:1.1rem; line-height:1.7; text-align:justify; overflow-y:auto; max-height:55vh; padding:0 10px;">
+        <!-- Injected Lore -->
+      </div>
+      <button class="btn-primary" onclick="closeModal('lore-modal')" style="margin-top:20px; width:100%; letter-spacing:2px;">CERRAR TOMO</button>
+    </div>
+  </div>
+
+  <div id="profile-modal" class="modal-overlay" style="z-index: 55000;">
+    <div class="modal-content" style="max-height:90vh; height:90vh; padding:0; background:#0d0d0d; border:1px solid #333; display:flex; flex-direction:column; overflow:hidden;">
+      <style>
+        .profile-tab { transition: all 0.3s; }
+        .profile-tab:hover { background: rgba(255,215,0,0.05); }
+      </style>
+      <div class="vault-header"
+        style="background: #0a0b0a; padding: 25px 20px; text-align:center; border-bottom: 2px solid var(--accent-gold); position:sticky; top:0; z-index:10; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+        <h2 style="color:var(--accent-gold); font-family:'Cinzel', serif; margin-bottom:5px; text-shadow: 0 0 10px rgba(255,215,0,0.3);">BÓVEDA DEL GUERRERO</h2>
+        <p style="color:#aaa; font-size:0.7rem; letter-spacing:2px; text-transform:uppercase;">Colección y Personalización</p>
+      </div>
+
+      <!-- Pestañas -->
+      <div style="display:flex; border-bottom:1px solid #333;">
+        <div class="profile-tab active-tab" onclick="switchProfileTab('tab-auras', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:var(--accent-gold); border-bottom:2px solid var(--accent-gold); cursor:pointer;">
+          AURAS</div>
+        <div class="profile-tab" onclick="switchProfileTab('tab-lore', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
+          EL DIARIO</div>
+        <div class="profile-tab" onclick="switchProfileTab('tab-relics', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
+          RELIQUIAS</div>
+      </div>
+
+      <div id="tab-auras" class="profile-tab-content"
+        style="padding:20px; flex:1; overflow-y:auto; display:block;">
+        <!-- Auras Injected here -->
+      </div>
+      <div id="tab-lore" class="profile-tab-content"
+        style="padding:20px; flex:1; overflow-y:auto; display:none;">
+        <!-- Lore Injected here -->
+      </div>
+      <div id="tab-relics" class="profile-tab-content"
+        style="padding:20px; flex:1; overflow-y:auto; display:none; text-align:center;">
+        <!-- Relics Injected here -->
+      </div>
+
+      <div style="padding: 16px 20px; border-top:1px solid #222; background:#070707; flex-shrink:0;">
+        <button class="btn-primary" onclick="closeModal('profile-modal')" 
+          style="width:100%; letter-spacing:2px; font-weight:900;">VOLVER AL DOJO</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="badge-modal" class="modal-overlay" style="z-index: 58000;">
+    <div class="modal-content" style="max-height:85vh;">
+      <h3 style="color:var(--accent-gold); font-family:'Cinzel', serif; text-align:center; margin-bottom:10px;">
+        SELECCIONAR INSIGNIA</h3>
+      <p style="text-align:center; color:#888; font-size:0.8rem; margin-bottom:20px;">Elige el logro que quieres
+        exhibir.</p>
+
+      <div id="badge-selection-container"
+        style="display:grid; grid-template-columns:repeat(auto-fit, minmax(60px, 1fr)); gap:15px; max-height:50vh; overflow-y:auto; padding-bottom:15px;">
+        <!-- Badges injected here -->
+      </div>
+
+      <button class="btn-secondary" onclick="closeModal('badge-modal')"
+        style="width:100%; border-color:#555; color:#aaa; margin-top:10px;">CANCELAR</button>
+      <button class="btn-primary" onclick="unequipBadgeSlot()"
+        style="width:100%; background:#422; color:#f55; border-color:#f55; margin-top:10px; font-size:0.7rem;">QUITAR
+        INSIGNIA</button>
+    </div>
+  </div>
+
   <div id="settings-modal" class="modal-overlay" style=" z-index:45000;">
     <div class="modal-content" style="text-align:center;">
       <h2 style="color:var(--accent-gold); margin-bottom: 10px; font-family:'Cinzel';">SISTEMA PWA</h2>
-      <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Respalda tu progreso para que nunca pierdas años de entrenamiento físico.</p>
-      <button class="btn-secondary" onclick="exportSave()" style="margin-bottom:10px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR DATOS</button>
-      <button class="btn-secondary" onclick="document.getElementById('import-file').click()" style="margin-bottom:10px; border-color:#ff5555; color:#ff5555;">📁 IMPORTAR DATOS</button>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Respalda tu progreso para que nunca pierdas años de
+        entrenamiento físico.</p>
+      <button class="btn-secondary" onclick="exportSave()"
+        style="margin-bottom:10px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR
+        DATOS</button>
+      <button class="btn-secondary" onclick="document.getElementById('import-file').click()"
+        style="margin-bottom:10px; border-color:#ff5555; color:#ff5555;">📁 IMPORTAR DATOS</button>
       <input type="file" id="import-file" style="display:none" accept=".json" onchange="importSave(event)">
-      <button class="btn-secondary" onclick="debugSystem()" style="margin-bottom:20px; border-color:#aaa; color:#aaa; font-size:0.7rem;">🔄 BUSCAR ACTUALIZACIONES</button>
+      <button class="btn-secondary" onclick="debugSystem()"
+        style="margin-bottom:20px; border-color:#aaa; color:#aaa; font-size:0.7rem;">🔄 BUSCAR ACTUALIZACIONES</button>
       <button class="btn-primary" onclick="closeModal('settings-modal')">CERRAR</button>
     </div>
   </div>
@@ -322,17 +623,21 @@
 
   <div id="codex-modal" class="modal-overlay" style=" z-index:10005;">
     <div class="modal-content" style="text-align: left; max-height: 85vh; overflow-y:auto; padding:25px;">
-      <h2 style="color:var(--accent-gold); margin-bottom: 15px; text-align:center; font-family:'Cinzel';">📜 CÓDICE LORE</h2>
+      <h2 style="color:var(--accent-gold); margin-bottom: 15px; text-align:center; font-family:'Cinzel';">📜 CÓDICE LORE
+      </h2>
       <p style="font-size:0.85rem; color:#ccc; line-height: 1.6; margin-bottom:15px; text-align:center;">
         Estos son los estadios de la iluminación marcial. Tu disciplina diaria forja tu evolución en silencio.
       </p>
       <div id="codex-list" style="margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px;">
         <!-- Injected via JS -->
       </div>
-      <div style="background:#111; border:1px solid #333; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
+      <div
+        style="background:#111; border:1px solid #333; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
         <span style="font-family:'Cinzel'; color:var(--accent-gold); font-size:1.1rem;">BITÁCORA TOTAL</span><br>
-        <span style="color:#aaa; font-size:0.8rem;">Sesiones Históricas: <strong id="codex-sessions" style="color:#fff;">0</strong></span>
-        <div id="codex-history" style="margin-top:12px; font-size:0.75rem; text-align:left; border-top:1px dashed #333; padding-top:12px; max-height:120px; overflow-y:auto; scrollbar-width:thin;">
+        <span style="color:#aaa; font-size:0.8rem;">Sesiones Históricas: <strong id="codex-sessions"
+            style="color:#fff;">0</strong></span>
+        <div id="codex-history"
+          style="margin-top:12px; font-size:0.75rem; text-align:left; border-top:1px dashed #333; padding-top:12px; max-height:120px; overflow-y:auto; scrollbar-width:thin;">
           <!-- History Injected Here -->
         </div>
       </div>
@@ -340,117 +645,155 @@
     </div>
   </div>
 
-  <div id="library-modal" class="modal-overlay" style=" z-index:10005;">
-    <div class="modal-content" style="text-align: left; max-height: 85vh; overflow-y:auto; padding:15px; background:var(--bg-dark); max-width:500px;">
-      <h2 style="color:var(--accent-gold); margin-bottom: 10px; text-align:center; font-family:'Cinzel';">📚 BIBLIOTECA MARCIAL</h2>
-      <p style="font-size:0.85rem; color:#ccc; line-height: 1.5; margin-bottom:20px; text-align:center;">
-        Las técnicas más avanzadas están ocultas. Evoluciona para revelar sus secretos.
-      </p>
-      <div id="library-list">
+  <div id="library-modal" class="modal-overlay" style="z-index: 60000;">
+    <div class="modal-content"
+      style="text-align: left; padding:0; background:var(--bg-dark); max-width:500px; min-height:400px; border: 1px solid #333;">
+      <div class="vault-header" style="background:#0a0b0a; padding: 20px; text-align:center; border-bottom:2px solid var(--accent-gold); position:sticky; top:0; z-index:10;">
+        <h2 style="color:var(--accent-gold); font-family:'Cinzel', serif; margin-bottom:5px;">BIBLIOTECA MARCIAL</h2>
+        <p style="color:#888; font-size:0.7rem; letter-spacing:1px;">DOCUMENTACIÓN DE TÉCNICAS</p>
+      </div>
+
+      <!-- Pestañas de la Biblioteca -->
+      <div style="display:flex; border-bottom:1px solid #222; background:#070707;">
+        <div class="lib-tab active-tab" onclick="switchLibraryTab('str', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.6rem; color:var(--accent-gold); border-bottom:2px solid var(--accent-gold); cursor:pointer; font-weight:bold;">
+          FUERZA</div>
+        <div class="lib-tab" onclick="switchLibraryTab('spd', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.6rem; color:#666; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          VELOCIDAD</div>
+        <div class="lib-tab" onclick="switchLibraryTab('flex', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.6rem; color:#666; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          FLEX</div>
+        <div class="lib-tab" onclick="switchLibraryTab('end', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.6rem; color:#666; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          RESIST.</div>
+      </div>
+
+      <div id="library-list" style="padding: 20px; max-height:60vh; overflow-y:auto;">
         <!-- Injected via JS -->
       </div>
-      <button class="btn-primary" onclick="closeModal('library-modal')">CERRAR BIBLIOTECA</button>
+      
+      <div style="padding: 15px; background:#070707; border-top:1px solid #222; text-align:center;">
+        <button class="btn-primary" onclick="closeModal('library-modal')" style="width:100%; letter-spacing:2px;">CERRAR BIBLIOTECA</button>
+      </div>
     </div>
   </div>
 
-  <div id="install-gate" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:35000; flex-direction:column; padding:20px; background:rgba(0,0,0,0.97); justify-content:center; align-items:center; backdrop-filter:blur(10px);">
-    <h2 style="color:#fff; text-align:center; margin-bottom:10px; font-family:'Cinzel'; font-size:1.8rem; text-shadow:0 0 15px rgba(255,255,255,0.3);">ZEN RYU SENSEI</h2>
-    <p style="color:#aaa; font-size:0.95rem; text-align:center; margin-bottom:30px; max-width:400px; line-height: 1.5;">Para desbloquear todo el potencial offline de tu entrenamiento, instala nuestra plataforma nativa ahora mismo.</p>
-    
-    <div id="btn-install-pwa" class="mission-card" ontouchstart="" style="margin-bottom: 25px; border-color: #007bff; background: linear-gradient(135deg, rgba(0,123,255,0.25), rgba(0,0,0,0.8)); cursor:pointer; padding: 20px; box-shadow: 0 0 15px rgba(0,123,255,0.4); width:100%; max-width:400px; margin-left:auto; margin-right:auto;">
-      <div class="mission-status" style="margin-bottom:10px; justify-content:center;"><span style="color:#4da3ff; font-weight:bold; letter-spacing:2px;">SISTEMA NATIVO</span></div>
-      <h2 class="mission-title" style="color:#007bff; font-size: 1.6rem; text-shadow:0 0 12px rgba(0,123,255,0.6); text-align:center;">INSTALAR APP OFICIAL</h2>
+  <div id="install-gate"
+    style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:35000; flex-direction:column; padding:20px; background:rgba(0,0,0,0.97); justify-content:center; align-items:center; backdrop-filter:blur(10px);">
+    <h2
+      style="color:#fff; text-align:center; margin-bottom:10px; font-family:'Cinzel'; font-size:1.8rem; text-shadow:0 0 15px rgba(255,255,255,0.3);">
+      ZEN RYU SENSEI</h2>
+    <p style="color:#aaa; font-size:0.95rem; text-align:center; margin-bottom:30px; max-width:400px; line-height: 1.5;">
+      Para desbloquear todo el potencial offline de tu entrenamiento, instala nuestra plataforma nativa ahora mismo.</p>
+
+    <div id="btn-install-pwa" class="mission-card" ontouchstart=""
+      style="margin-bottom: 25px; border-color: #007bff; background: linear-gradient(135deg, rgba(0,123,255,0.25), rgba(0,0,0,0.8)); cursor:pointer; padding: 20px; box-shadow: 0 0 15px rgba(0,123,255,0.4); width:100%; max-width:400px; margin-left:auto; margin-right:auto;">
+      <div class="mission-status" style="margin-bottom:10px; justify-content:center;"><span
+          style="color:#4da3ff; font-weight:bold; letter-spacing:2px;">SISTEMA NATIVO</span></div>
+      <h2 class="mission-title"
+        style="color:#007bff; font-size: 1.6rem; text-shadow:0 0 12px rgba(0,123,255,0.6); text-align:center;">INSTALAR
+        APP OFICIAL</h2>
       <div class="mission-stats" style="margin-bottom:0; justify-content:center;">
         <span style="color:#4da3ff;">OFFLINE Y RÁPIDA EN TU PANTALLA</span>
       </div>
     </div>
-    
-    <button class="btn-secondary" style="max-width:300px; margin:0 auto;" onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
+
+    <button class="btn-secondary" style="max-width:300px; margin:0 auto;"
+      onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
   </div>
 
   <script src="./database.js?v=10"></script>
   <script src="./app.js?v=10"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10').catch(e => {}));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10').catch(e => { }));
     }
   </script>
   <!-- RANK ASCENSION MODAL -->
   <div id="rank-ascension-modal" class="modal-overlay" style="z-index:70000; background:rgba(0,0,0,0.98);">
     <div class="rank-ascension-card">
-      <div id="asc-rank-label" style="font-size:0.55rem; letter-spacing:4px; text-transform:uppercase; margin-bottom:12px; font-weight:900;">⬆ NUEVO RANGO DESBLOQUEADO</div>
+      <div id="asc-rank-label"
+        style="font-size:0.55rem; letter-spacing:4px; text-transform:uppercase; margin-bottom:12px; font-weight:900;">⬆
+        NUEVO RANGO DESBLOQUEADO</div>
       <div id="asc-rank-icon" style="font-size:5rem; margin-bottom:16px; display:block; line-height:1;"></div>
-      <div id="asc-rank-title" style="font-family:'Cinzel',serif; font-size:1.8rem; font-weight:800; color:#fff; margin-bottom:20px; line-height:1.1; letter-spacing:1px;"></div>
-      <p id="asc-rank-wisdom" style="font-style:italic; font-size:0.9rem; line-height:1.6; padding:12px 14px; border-left:3px solid #FFD700; margin-bottom:16px; background:rgba(255,215,0,0.06); border-radius:0 8px 8px 0; text-align:left;"></p>
-      <p id="asc-rank-lore" style="color:#bbb; font-size:0.85rem; line-height:1.7; margin-bottom:28px; text-align:left;"></p>
-      <button class="btn-primary" onclick="closeModal('rank-ascension-modal')" style="letter-spacing:3px; font-size:0.85rem;">ACEPTAR EL SENDERO</button>
+      <div id="asc-rank-title"
+        style="font-family:'Cinzel',serif; font-size:1.8rem; font-weight:800; color:#fff; margin-bottom:20px; line-height:1.1; letter-spacing:1px;">
+      </div>
+      <p id="asc-rank-wisdom"
+        style="font-style:italic; font-size:0.9rem; line-height:1.6; padding:12px 14px; border-left:3px solid #FFD700; margin-bottom:16px; background:rgba(255,215,0,0.06); border-radius:0 8px 8px 0; text-align:left;">
+      </p>
+      <p id="asc-rank-lore"
+        style="color:#bbb; font-size:0.85rem; line-height:1.7; margin-bottom:28px; text-align:left;"></p>
+      <button class="btn-primary" onclick="closeModal('rank-ascension-modal')"
+        style="letter-spacing:3px; font-size:0.85rem;">ACEPTAR EL SENDERO</button>
     </div>
   </div>
 
   <div id="global-lightbox" onclick="closeLightbox()"><img id="global-lightbox-img" src=""></div>
   <script>
-    window.openModal = function(id) { 
-        if(window.UISoundEngine) window.UISoundEngine.playSwoosh();
-        document.getElementById(id).classList.add('show'); 
+    window.openModal = function (id) {
+      if (window.UISoundEngine) window.UISoundEngine.playSwoosh();
+      document.getElementById(id).classList.add('show');
     };
-    window.closeModal = function(id) { 
-        if(window.UISoundEngine) window.UISoundEngine.playSwoosh();
-        document.getElementById(id).classList.remove('show'); 
+    window.closeModal = function (id) {
+      if (window.UISoundEngine) window.UISoundEngine.playSwoosh();
+      document.getElementById(id).classList.remove('show');
     };
     let currentNotiCallback = null;
     let currentNotiCancelCallback = null;
 
-    function showNotification(msg, title, callback = null) {
-        document.getElementById('noti-title').innerText = title || "NOTIFICACIÓN";
-        document.getElementById('noti-msg').innerText = msg;
-        document.getElementById('noti-close').innerText = "CONTINUAR";
-        document.getElementById('noti-cancel').style.display = 'none';
-        openModal('notification-modal');
-        currentNotiCallback = callback;
-        currentNotiCancelCallback = null;
+    function showNotification(msg, title, callback = null, showCancel = false, cancelCallback = null) {
+      document.getElementById('noti-title').innerText = title || "NOTIFICACIÓN";
+      document.getElementById('noti-msg').innerText = msg;
+      
+      const closeBtn = document.getElementById('noti-close');
+      const cancelBtn = document.getElementById('noti-cancel');
+      
+      closeBtn.innerText = showCancel ? "ACEPTAR" : "CONTINUAR";
+      cancelBtn.style.display = showCancel ? 'block' : 'none';
+      
+      openModal('notification-modal');
+      currentNotiCallback = callback;
+      currentNotiCancelCallback = cancelCallback;
     }
 
-    window.showConfirm = function(msg, title, onConfirm, onCancel = null) {
-        document.getElementById('noti-title').innerText = title || "CONFIRMACIÓN";
-        document.getElementById('noti-msg').innerText = msg;
-        document.getElementById('noti-close').innerText = "ACEPTAR";
-        document.getElementById('noti-cancel').style.display = 'block';
-        openModal('notification-modal');
-        currentNotiCallback = onConfirm;
-        currentNotiCancelCallback = onCancel;
+    window.showConfirm = function (msg, title, onConfirm, onCancel = null) {
+      showNotification(msg, title, onConfirm, true, onCancel);
     };
 
     document.getElementById('noti-close').addEventListener('click', () => {
-        closeModal('notification-modal');
-        if(currentNotiCallback) {
-            const cb = currentNotiCallback;
-            currentNotiCallback = null;
-            cb();
-        }
+      closeModal('notification-modal');
+      if (currentNotiCallback) {
+        const cb = currentNotiCallback;
+        currentNotiCallback = null;
+        cb();
+      }
     });
 
     document.getElementById('noti-cancel').addEventListener('click', () => {
-        closeModal('notification-modal');
-        if(currentNotiCancelCallback) {
-            const ccb = currentNotiCancelCallback;
-            currentNotiCancelCallback = null;
-            ccb();
-        }
+      closeModal('notification-modal');
+      if (currentNotiCancelCallback) {
+        const ccb = currentNotiCancelCallback;
+        currentNotiCancelCallback = null;
+        ccb();
+      }
     });
 
-    window.openLightbox = function(src) { 
-        document.getElementById('global-lightbox-img').src = src; 
-        document.getElementById('global-lightbox').classList.add('show'); 
+    window.openLightbox = function (src) {
+      document.getElementById('global-lightbox-img').src = src;
+      document.getElementById('global-lightbox').classList.add('show');
     };
-    window.closeLightbox = function() { document.getElementById('global-lightbox').classList.remove('show'); };
-    
-    window.debugSystem = function() {
-        showConfirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?", "ACTUALIZACIÓN", () => { window.location.reload(); });
+    window.closeLightbox = function () { document.getElementById('global-lightbox').classList.remove('show'); };
+
+    window.debugSystem = function () {
+      showConfirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?", "ACTUALIZACIÓN", () => { window.location.reload(); });
     };
-    window.playCompleteSound = function() {
-        const audio = document.getElementById('sys-complete-sound');
-        if(audio) { audio.currentTime = 0; audio.play().catch(e=>console.log("Audio play prevented:", e)); }
+    window.playCompleteSound = function () {
+      const audio = document.getElementById('sys-complete-sound');
+      if (audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Audio play prevented:", e)); }
     };
   </script>
 </body>
+
 </html>

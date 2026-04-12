@@ -1,6 +1,6 @@
 // app.js
 
-(function() {
+(function () {
   let player = {
     name: "",
     rankIndex: 0,
@@ -10,8 +10,35 @@
       flex: { lvl: 1, xp: 0 },
       end: { lvl: 1, xp: 0 }
     },
-    workoutCount: 0
+    workoutCount: 0,
+    coins: 0,
+    streak: 0,
+    lastWorkoutDate: null,
+    unlockedItems: [],
+    activeAura: null,
+    unlockedBadges: [],
+    equippedBadges: [null, null, null]
   };
+
+  const BADGE_DB = [
+    { id: 'b_streak_3', name: 'Llama Naciente', icon: '🔥', desc: 'Alcanza una racha de 3 días.', goal: (p) => p.streak >= 3 },
+    { id: 'b_streak_7', name: 'Llama Eterna', icon: '🏮', desc: 'Alcanza una racha de 7 días.', goal: (p) => p.streak >= 7 },
+    { id: 'b_lvl_5', name: 'Iniciado ZEN', icon: '🥋', desc: 'Alcanza el nivel 5 de fuerza/res.', goal: (p) => p.stats.str.lvl >= 5 || p.stats.end.lvl >= 5 },
+    { id: 'b_lvl_10', name: 'Guerrero de Élite', icon: '🗡️', desc: 'Alcanza el nivel 10 en cualquier estadística.', goal: (p) => Object.values(p.stats).some(s => s.lvl >= 10) },
+    { id: 'b_rich', name: 'Bolsillos de Oro', icon: '💰', desc: 'Acumula 1000 Monedas Zen.', goal: (p) => p.coins >= 1000 },
+    { id: 'b_library', name: 'Científico del Dojo', icon: '🧠', desc: 'Realiza 10 entrenamientos totales.', goal: (p) => p.workoutCount >= 10 }
+  ];
+
+  const STORE_ITEMS = [
+    { id: 'aura_zafiro', type: 'aura', name: 'Aura Zafiro', desc: 'Remplaza el dorado del Dojo con un frío resplandor azul.', price: 500, icon: '🔵', meta: '#00ccff' },
+    { id: 'aura_abismal', type: 'aura', name: 'Aura Abismal', desc: 'Sume el Dojo en una atmósfera de veneno oscuro.', price: 500, icon: '🟣', meta: '#aa00ff' },
+    { id: 'mus_taiko', type: 'music', name: 'Sinfonía Taiko', desc: 'Desbloquea tambores de guerra en la Emisora Astral.', price: 150, icon: '🥁', meta: 'audio-taiko' },
+    { id: 'mus_synth', type: 'music', name: 'Cyber-Dojo Beat', desc: 'Desbloquea pulsos synthwave en la Emisora.', price: 150, icon: '🎹', meta: 'audio-synth' },
+    { id: 'lore_v1', type: 'lore', name: 'Tomo I: La Caída', desc: 'Lee el primer fragmento del Maestro Dragón ZEN.', price: 200, icon: '📜', meta: 'La historia comienza cuando mi cuerpo dejó de doler y empezó a arder. No hablo de un ardor poético, hablo del ácido láctico devorando los filamentos de mi músculo hasta la parálisis. Me llamaban prodigio, pero el prodigio es solo una excusa de los mediocres para no entrenar hasta sangrar. El templo original no cayó por un asedio, cayó porque nadie más pudo mantener el ritmo. Cuando logres mil flexiones al alba, entenderás por qué.' },
+    { id: 'lore_v2', type: 'lore', name: 'Tomo II: El Arte Vacío', desc: 'Secretos prohibidos de la respiración en letargo.', price: 400, icon: '📜', meta: 'Cuando el pulmón colapsa, la mente intenta sobrevivir. La "Respiración Vacía", el secreto peor guardado del linaje, no consiste en inhalar más aire, sino en aceptar la falta de él. Cuando cuelgas de una barra, tu corazón late a 180 pulsaciones. Es ahí donde encuentras el silencio. Si tu espíritu flaquea antes que tu agarre, ya estabas muerto antes de empezar.' },
+    { id: 'relic_oni', type: 'relic', name: 'Máscara Oni Destrozada', desc: 'Reliquia coleccionable de altísimo prestigio.', price: 1000, icon: '👹', meta: '' },
+    { id: 'relic_blade', type: 'relic', name: 'Hoja Ancestral Oxidada', desc: 'Un testigo silencioso de innumerables batallas y sudor.', price: 1000, icon: '🗡️', meta: '' }
+  ];
 
   let workoutHistory = [];
 
@@ -22,19 +49,19 @@
     end: 'RESISTENCIA'
   };
 
-  window.debugSystem = function() {
+  window.debugSystem = function () {
     if (confirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?")) {
-       if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(registrations => {
-             for(let registration of registrations) { registration.unregister(); }
-          });
-       }
-       if (window.caches) {
-          caches.keys().then(names => {
-             for (let name of names) caches.delete(name);
-          });
-       }
-       location.replace(location.origin + location.pathname + '?v=' + Date.now());
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) { registration.unregister(); }
+        });
+      }
+      if (window.caches) {
+        caches.keys().then(names => {
+          for (let name of names) caches.delete(name);
+        });
+      }
+      location.replace(location.origin + location.pathname + '?v=' + Date.now());
     }
   };
 
@@ -48,64 +75,64 @@
 
   // --- NATIVE INDEXEDDB WRAPPER ---
   const zendb = {
-     db: null,
-     init: function() {
-         return new Promise((resolve, reject) => {
-             let req = indexedDB.open("ZenRyuDB", 1);
-             req.onupgradeneeded = (e) => {
-                 let tdb = e.target.result;
-                 if(!tdb.objectStoreNames.contains("history")) {
-                     tdb.createObjectStore("history", { autoIncrement: true });
-                 }
-             };
-             req.onsuccess = (e) => {
-                 this.db = e.target.result;
-                 resolve(this.db);
-             };
-             req.onerror = (e) => reject(e);
-         });
-     },
-     addHistory: function(entry, specificDate) {
-         return new Promise((resolve, reject) => {
-             if(!this.db) return resolve();
-             let tx = this.db.transaction("history", "readwrite");
-             let store = tx.objectStore("history");
-             // entry can be a full {date,type} object or a legacy routineObj string
-             const record = (typeof entry === 'object' && entry.type)
-               ? entry
-               : { date: specificDate || new Date().toISOString(), type: entry || 'Entrenamiento' };
-             store.add(record);
-             tx.oncomplete = () => resolve();
-             tx.onerror = (e) => reject(e);
-         });
-     },
-     getAllHistory: function() {
-         return new Promise((resolve, reject) => {
-             if(!this.db) return resolve([]);
-             let tx = this.db.transaction("history", "readonly");
-             let store = tx.objectStore("history");
-             let req = store.getAll();
-             req.onsuccess = () => resolve(req.result);
-             req.onerror = (e) => reject(e);
-         });
-     },
-     clearHistory: function() {
-         return new Promise((resolve, reject) => {
-             if(!this.db) return resolve();
-             let tx = this.db.transaction("history", "readwrite");
-             let store = tx.objectStore("history");
-             let req = store.clear();
-             req.onsuccess = () => resolve();
-             req.onerror = (e) => reject(e);
-         });
-     }
+    db: null,
+    init: function () {
+      return new Promise((resolve, reject) => {
+        let req = indexedDB.open("ZenRyuDB", 1);
+        req.onupgradeneeded = (e) => {
+          let tdb = e.target.result;
+          if (!tdb.objectStoreNames.contains("history")) {
+            tdb.createObjectStore("history", { autoIncrement: true });
+          }
+        };
+        req.onsuccess = (e) => {
+          this.db = e.target.result;
+          resolve(this.db);
+        };
+        req.onerror = (e) => reject(e);
+      });
+    },
+    addHistory: function (entry, specificDate) {
+      return new Promise((resolve, reject) => {
+        if (!this.db) return resolve();
+        let tx = this.db.transaction("history", "readwrite");
+        let store = tx.objectStore("history");
+        // entry can be a full {date,type} object or a legacy routineObj string
+        const record = (typeof entry === 'object' && entry.type)
+          ? entry
+          : { date: specificDate || new Date().toISOString(), type: entry || 'Entrenamiento' };
+        store.add(record);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+      });
+    },
+    getAllHistory: function () {
+      return new Promise((resolve, reject) => {
+        if (!this.db) return resolve([]);
+        let tx = this.db.transaction("history", "readonly");
+        let store = tx.objectStore("history");
+        let req = store.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = (e) => reject(e);
+      });
+    },
+    clearHistory: function () {
+      return new Promise((resolve, reject) => {
+        if (!this.db) return resolve();
+        let tx = this.db.transaction("history", "readwrite");
+        let store = tx.objectStore("history");
+        let req = store.clear();
+        req.onsuccess = () => resolve();
+        req.onerror = (e) => reject(e);
+      });
+    }
   };
 
-  window.exportSave = async function() {
+  window.exportSave = async function () {
     let dbHistory = [];
-    try { dbHistory = await zendb.getAllHistory(); } catch(e) {}
+    try { dbHistory = await zendb.getAllHistory(); } catch (e) { }
     const saveData = { player: player, history: dbHistory, exportDate: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(saveData)], {type: "application/json"});
+    const blob = new Blob([JSON.stringify(saveData)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -117,27 +144,27 @@
     showNotification("Respaldo exportado exitosamente.", "Sistema PWA");
   }
 
-  window.importSave = function(event) {
+  window.importSave = function (event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = async function (e) {
       try {
         const data = JSON.parse(e.target.result);
         if (data.player && typeof data.player === 'object') {
-            localStorage.setItem("zenWarriorPwaSave", JSON.stringify(data.player));
-            if (data.history && data.history.length > 0) {
-               await zendb.init().catch(e=>{});
-               await zendb.clearHistory();
-               for (let r of data.history) {
-                 // Support both new {date,type} and old {date,routine} formats
-                 await zendb.addHistory({ date: r.date, type: r.type || 'Entrenamiento' });
-               }
+          localStorage.setItem("zenWarriorPwaSave", JSON.stringify(data.player));
+          if (data.history && data.history.length > 0) {
+            await zendb.init().catch(e => { });
+            await zendb.clearHistory();
+            for (let r of data.history) {
+              // Support both new {date,type} and old {date,routine} formats
+              await zendb.addHistory({ date: r.date, type: r.type || 'Entrenamiento' });
             }
-            alert("Perfil restituido de forma segura. La academia se reiniciará para cargar tus habilidades.");
-            location.reload();
+          }
+          alert("Perfil restituido de forma segura. La academia se reiniciará para cargar tus habilidades.");
+          location.reload();
         } else { alert("Archivo no válido para Zen Ryu Sensei."); }
-      } catch(err) { alert("Error leyendo el archivo."); }
+      } catch (err) { alert("Error leyendo el archivo."); }
     };
     reader.readAsText(file);
     event.target.value = "";
@@ -221,41 +248,52 @@
 
   async function loadPlayer() {
     await zendb.init().catch(e => console.log("IDB skipped"));
-    
+
     let oldHx = localStorage.getItem("zenWarriorHistory");
     if (oldHx) {
-      try { 
-        let parsedHx = JSON.parse(oldHx); 
+      try {
+        let parsedHx = JSON.parse(oldHx);
         for (let h of parsedHx) {
           // Old format: {date, type}  — preserve both fields
           await zendb.addHistory({ date: h.date, type: h.type || 'Entrenamiento' });
         }
         localStorage.removeItem("zenWarriorHistory");
-      } catch(e) {}
+      } catch (e) { }
     }
-    try { workoutHistory = await zendb.getAllHistory(); } catch(e) {}
+    try { workoutHistory = await zendb.getAllHistory(); } catch (e) { }
 
     let saved = localStorage.getItem("zenWarriorPwaSave");
     if (saved) {
       let savedPlayer = JSON.parse(saved);
       if (savedPlayer.level !== undefined && savedPlayer.rankIndex === undefined) {
-         player.name = savedPlayer.name;
-         player.workoutCount = savedPlayer.workoutCount || 0;
-         let rawLvl = savedPlayer.level;
-         let rIdx = rankTitles.findIndex(r => rawLvl <= r.max);
-         player.rankIndex = rIdx === -1 ? rankTitles.length - 1 : rIdx;
-         player.stats = {
-           str: { lvl: rawLvl, xp: 0 }, spd: { lvl: rawLvl, xp: 0 },
-           flex: { lvl: rawLvl, xp: 0 }, end: { lvl: rawLvl, xp: 0 }
-         };
+        player.name = savedPlayer.name;
+        player.workoutCount = savedPlayer.workoutCount || 0;
+        let rawLvl = savedPlayer.level;
+        let rIdx = rankTitles.findIndex(r => rawLvl <= r.max);
+        player.rankIndex = rIdx === -1 ? rankTitles.length - 1 : rIdx;
+        player.stats = {
+          str: { lvl: rawLvl, xp: 0 }, spd: { lvl: rawLvl, xp: 0 },
+          flex: { lvl: rawLvl, xp: 0 }, end: { lvl: rawLvl, xp: 0 }
+        };
       } else {
-         player = Object.assign(player, savedPlayer);
-         if (!player.stats.str.lvl) {
-            player.stats = { str: {lvl:1,xp:0}, spd: {lvl:1,xp:0}, flex: {lvl:1,xp:0}, end: {lvl:1,xp:0} };
-         }
+        player = Object.assign(player, savedPlayer);
+        if (!player.stats.str.lvl) {
+          player.stats = { str: { lvl: 1, xp: 0 }, spd: { lvl: 1, xp: 0 }, flex: { lvl: 1, xp: 0 }, end: { lvl: 1, xp: 0 } };
+        }
       }
       if (typeof player.workoutCount === 'undefined') player.workoutCount = 0;
+      if (typeof player.coins === 'undefined') player.coins = 0;
+      if (typeof player.streak === 'undefined') player.streak = 0;
+      if (typeof player.lastWorkoutDate === 'undefined') player.lastWorkoutDate = null;
+      if (!player.unlockedItems) player.unlockedItems = [];
+      if (!player.activeAura) player.activeAura = null;
+      if (!player.unlockedBadges) player.unlockedBadges = [];
+      if (!player.equippedBadges) player.equippedBadges = [null, null, null];
+
       document.getElementById('onboarding-wizard').classList.add('hide');
+      applyInventory();
+      checkBadges();
+      updateBadgesUI();
       updateUI();
       updateCodexUI();
       updateLibraryUI();
@@ -269,7 +307,7 @@
   const isStandalone = () => ('standalone' in window.navigator && window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
 
   let deferredPrompt = null;
-  
+
   // Capturamos el evento de Android para el 1-clic
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -279,33 +317,33 @@
   window.addEventListener('load', () => {
     let btnInstall = document.getElementById('btn-install-pwa');
     let gate = document.getElementById('install-gate');
-    
+
     const isIOS = () => {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     };
 
     // Siempre lo mostramos si NO estamos en la app instalada (standalone)
     if (btnInstall && gate && !isStandalone()) {
       gate.style.display = 'flex';
-      
+
       btnInstall.addEventListener('click', async () => {
-        if(navigator.vibrate) navigator.vibrate(50);
-        
+        if (navigator.vibrate) navigator.vibrate(50);
+
         if (deferredPrompt) {
-            // Si Android/Chrome nos dio el prompt nativo, lo usamos (1-clic)
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                gate.style.display = 'none';
-            }
-            deferredPrompt = null;
+          // Si Android/Chrome nos dio el prompt nativo, lo usamos (1-clic)
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            gate.style.display = 'none';
+          }
+          deferredPrompt = null;
         } else if (isIOS()) {
-            // Si es iOS, mostramos la ventana elegante específica
-            openModal('ios-install-modal');
+          // Si es iOS, mostramos la ventana elegante específica
+          openModal('ios-install-modal');
         } else {
-            // Caso general (Android sin prompt nativo o PC)
-            openModal('pwa-modal');
+          // Caso general (Android sin prompt nativo o PC)
+          openModal('pwa-modal');
         }
       });
     }
@@ -313,14 +351,14 @@
 
   function switchView(viewToShow, viewToHide) {
     console.log(`ZenRyu: switchView ${viewToHide} -> ${viewToShow}`);
-    if(window.UISoundEngine) window.UISoundEngine.playSwoosh();
+    if (window.UISoundEngine) window.UISoundEngine.playSwoosh();
     const hideEl = document.getElementById(viewToHide);
     const showEl = document.getElementById(viewToShow);
-    
+
     if (!hideEl || !showEl) {
-       console.warn("ZenRyu: View transition failed, one or more elements missing.", {viewToShow, viewToHide});
-       if(showEl) showEl.className = 'active-view';
-       return;
+      console.warn("ZenRyu: View transition failed, one or more elements missing.", { viewToShow, viewToHide });
+      if (showEl) showEl.className = 'active-view';
+      return;
     }
 
     // 1st rAF: aplica hidden-view y permite al browser hacer flush del layout
@@ -334,24 +372,24 @@
   }
 
   // SOUNDS & NOTIFICATIONS
-  window.playSysSound = function() {
+  window.playSysSound = function () {
     const snd = document.getElementById('sys-sync-sound');
-    if(snd) {
+    if (snd) {
       snd.currentTime = 0;
-      snd.play().catch(() => {});
+      snd.play().catch(() => { });
     }
   };
 
-  window.playCompleteSound = function() {
+  window.playCompleteSound = function () {
     const snd = document.getElementById('sys-complete-sound');
-    if(snd) {
+    if (snd) {
       snd.currentTime = 0;
-      snd.play().catch(() => {});
+      snd.play().catch(() => { });
     }
   };
 
   // ONBOARDING WIZARD
-  window.nextWizardStep = function(currentStep) {
+  window.nextWizardStep = function (currentStep) {
     console.log(`ZenRyu: nextWizardStep ${currentStep}`);
     let inputsCheck = {
       1: 'ob-name',
@@ -359,16 +397,16 @@
       3: 'ob-spd',
       4: 'ob-flex'
     };
-    
+
     let el = document.getElementById(inputsCheck[currentStep]);
-    if(el && el.value.trim() === '') {
+    if (el && el.value.trim() === '') {
       showNotification("Por honor, no dejes campos en blanco.", "Aviso");
       return;
     }
 
     const currentEl = document.getElementById('step-' + currentStep);
     const nextEl = document.getElementById('step-' + (currentStep + 1));
-    
+
     if (currentEl && nextEl) {
       currentEl.classList.remove('active-step');
       currentEl.classList.add('hidden-step');
@@ -377,9 +415,9 @@
     }
   }
 
-  window.finishWizard = function() {
+  window.finishWizard = function () {
     let endVal = document.getElementById('ob-end').value;
-    if(endVal.trim() === '') {
+    if (endVal.trim() === '') {
       showNotification("No escapes del ejercicio final.", "Aviso");
       return;
     }
@@ -398,7 +436,7 @@
     let maxInitLvl = Math.max(lvlStr, lvlSpd, lvlFlex, lvlEnd);
     let startIdx = rankTitles.findIndex(r => maxInitLvl <= r.max);
     player.rankIndex = startIdx === -1 ? rankTitles.length - 1 : startIdx;
-    
+
     let allowedCap = rankTitles[player.rankIndex].max;
     player.stats = {
       str: { lvl: Math.min(lvlStr, allowedCap), xp: 0 },
@@ -406,9 +444,9 @@
       flex: { lvl: Math.min(lvlFlex, allowedCap), xp: 0 },
       end: { lvl: Math.min(lvlEnd, allowedCap), xp: 0 }
     };
-    
+
     player.workoutCount = 0;
-    
+
     savePlayer();
     document.getElementById('onboarding-wizard').classList.add('hide');
     updateUI();
@@ -428,47 +466,65 @@
     let rObj = getCurrentRank();
     document.getElementById('player-rank-title').innerText = rObj.title;
     document.getElementById('avatar').innerText = rObj.icon;
-    
+
     let minLvl = Math.min(player.stats.str.lvl, player.stats.spd.lvl, player.stats.flex.lvl, player.stats.end.lvl);
     document.getElementById('player-level').innerText = minLvl;
-    document.getElementById('player-sessions').innerText = player.workoutCount;
+
+    let strk = document.getElementById('player-streak');
+    if (strk) strk.innerText = player.streak || 0;
+
+    let coins = document.getElementById('player-coins');
+    if (coins) coins.innerText = player.coins || 0;
+
+    let streakIcon = document.getElementById('streak-icon');
+    if (streakIcon) {
+      let todayStr = new Date().toISOString().split('T')[0];
+      if (player.lastWorkoutDate && typeof player.lastWorkoutDate === 'string' && player.lastWorkoutDate.startsWith(todayStr)) {
+        streakIcon.style.filter = "none";
+        streakIcon.style.opacity = "1";
+      } else {
+        streakIcon.style.filter = "grayscale(1)";
+        streakIcon.style.opacity = "0.5";
+      }
+    }
+    if (window.updateBadgesUI) window.updateBadgesUI();
 
     let cap = rObj.max;
     ['str', 'spd', 'flex', 'end'].forEach(s => {
-       const statEl = document.getElementById('stat-' + s);
-       if (statEl) {
-         statEl.innerText = "Lvl " + player.stats[s].lvl;
-         // HUEVO DE PASCUA: Entrenamiento especializado al tocar el nombre/nivel
-         const parent = statEl.closest('.hud-stat');
-         if(parent) {
-            parent.onclick = () => startSpecializedTraining(s);
-         }
-       }
-       let bar = document.getElementById('bar-' + s);
-       if (bar) {
-          if (player.stats[s].lvl >= cap) {
-             bar.style.width = "100%";
-             bar.style.background = "#ff5555";
-             bar.style.boxShadow = "0 0 5px #ff5555";
-          } else {
-             bar.style.width = (player.stats[s].xp / (player.stats[s].lvl * 100)) * 100 + "%";
-             bar.style.background = "var(--accent-gold)";
-             bar.style.boxShadow = "0 0 5px var(--accent-gold)";
-          }
-       }
+      const statEl = document.getElementById('stat-' + s);
+      if (statEl) {
+        statEl.innerText = "Lvl " + player.stats[s].lvl;
+        // HUEVO DE PASCUA: Entrenamiento especializado al tocar el nombre/nivel
+        const parent = statEl.closest('.hud-stat');
+        if (parent) {
+          parent.onclick = () => startSpecializedTraining(s);
+        }
+      }
+      let bar = document.getElementById('bar-' + s);
+      if (bar) {
+        if (player.stats[s].lvl >= cap) {
+          bar.style.width = "100%";
+          bar.style.background = "#ff5555";
+          bar.style.boxShadow = "0 0 5px #ff5555";
+        } else {
+          bar.style.width = (player.stats[s].xp / (player.stats[s].lvl * 100)) * 100 + "%";
+          bar.style.background = "var(--accent-gold)";
+          bar.style.boxShadow = "0 0 5px var(--accent-gold)";
+        }
+      }
     });
 
     let examModeReady = checkExamPending();
-    
+
     if (examModeReady) {
-      if(document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `¡EXAMEN DISPONIBLE!`;
+      if (document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `¡EXAMEN DISPONIBLE!`;
       document.getElementById('xp-bar').style.width = '100%';
       document.getElementById('xp-bar').style.background = 'linear-gradient(90deg, #ff0000, #ff5555)';
-      
+
       let btnCond = document.getElementById('btn-start-conditioning');
-      if(btnCond) {
-          btnCond.style.borderColor = '#ff0000';
-          btnCond.innerHTML = `
+      if (btnCond) {
+        btnCond.style.borderColor = '#ff0000';
+        btnCond.innerHTML = `
             <div class="mission-status"><span style="color:#ff0000;">PRUEBA DE ASCENSO</span> <span></span></div>
             <h2 class="mission-title" style="color:#ff0000;">EXAMEN<br>MARCIAL</h2>
             <div class="mission-stats" style="color:#ff5555;">
@@ -479,22 +535,22 @@
       let cap = rObj.max;
       let prevCap = player.rankIndex === 0 ? 0 : rankTitles[player.rankIndex - 1].max;
       let totalNeeded = (cap - prevCap) * 4;
-      let totalGained = 
+      let totalGained =
         Math.max(0, player.stats.str.lvl - prevCap) +
         Math.max(0, player.stats.spd.lvl - prevCap) +
         Math.max(0, player.stats.flex.lvl - prevCap) +
         Math.max(0, player.stats.end.lvl - prevCap);
-      
+
       let percent = Math.min((totalGained / totalNeeded) * 100, 100);
-      
-      if(document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `PROGRESO DE RANGO: ${Math.floor(percent)}%`;
+
+      if (document.getElementById('xp-text-mini')) document.getElementById('xp-text-mini').innerText = `PROGRESO DE RANGO: ${Math.floor(percent)}%`;
       document.getElementById('xp-bar').style.width = percent + '%';
       document.getElementById('xp-bar').style.background = 'linear-gradient(90deg, #b8860b, var(--accent-gold))';
-      
+
       let btnCond = document.getElementById('btn-start-conditioning');
-      if(btnCond) {
-          btnCond.style.borderColor = '';
-          btnCond.innerHTML = `
+      if (btnCond) {
+        btnCond.style.borderColor = '';
+        btnCond.innerHTML = `
             <div class="mission-status"><span style="color:var(--accent-gold);">SENDERO DEL GUERRERO</span> <span style="color:var(--accent-gold);">⚡</span></div>
             <h2 class="mission-title" style="font-size:1.8rem; text-shadow:0 0 10px rgba(255,215,0,0.2);">ACONDICIONAMIENTO<br>MARCIAL</h2>
             <div class="mission-stats" style="justify-content:center;">
@@ -506,99 +562,63 @@
   }
 
   function gainXP(amount, statAlias) {
-    if (checkExamPending()) return; 
-    
+    if (checkExamPending()) return;
+
     let cap = getCurrentRank().max;
     let stat = player.stats[statAlias];
-    
+
     if (stat.lvl >= cap) {
-       if (window.sessionState && window.sessionState.active) {
-          window.sessionState.reachedCap = true;
-       } else {
-          showNotification("Esta capacidad ha llegado a su tope momentáneo. Necesitas evolucionar tus otras disciplinas físicas y luego superar el Examen Final para ascender de Rango.", "Cuerpo al Límite");
-       }
-       return;
+      if (window.sessionState && window.sessionState.active) {
+        window.sessionState.reachedCap = true;
+      } else {
+        showNotification("Esta capacidad ha llegado a su tope momentáneo. Necesitas evolucionar tus otras disciplinas físicas y luego superar el Examen Final para ascender de Rango.", "Cuerpo al Límite");
+      }
+      return;
     }
-    
+
     stat.xp += amount;
     if (window.sessionState && window.sessionState.active) {
-       window.sessionState.gainedXP[statAlias] += amount;
+      window.sessionState.gainedXP[statAlias] += amount;
     }
-    
+
     let requiredXp = stat.lvl * 100;
-    
+
     if (stat.xp >= requiredXp) {
       stat.xp -= requiredXp;
       stat.lvl++;
-      
+
       if (window.sessionState && window.sessionState.active) {
-         window.sessionState.levelUps.push({ stat: statAlias, lvl: stat.lvl });
+        window.sessionState.levelUps.push({ stat: statAlias, lvl: stat.lvl });
       } else {
-         showNotification(`¡Tu disciplina en ${STAT_LABELS[statAlias]} ha evolucionado al Nivel ${stat.lvl}!`, "🌟 DESBLOQUEO FÍSICO");
-         updateLibraryUI();
+        showNotification(`¡Tu disciplina en ${STAT_LABELS[statAlias]} ha evolucionado al Nivel ${stat.lvl}!`, "🌟 DESBLOQUEO FÍSICO");
+        updateLibraryUI();
       }
-      
+
       if (checkExamPending()) {
-         if (window.sessionState && window.sessionState.active) {
-            window.sessionState.rankUpReady = true;
-         } else {
-            showNotification("Estás bloqueado en la cúspide de tu rango. Es hora de demostrar si eres digno del siguiente paso en el escalafón. Tu próxima Misión de Acondicionamiento será un EXAMEN DE ASCENSO.", "Examen Máximo Disponible");
-         }
+        if (window.sessionState && window.sessionState.active) {
+          window.sessionState.rankUpReady = true;
+        } else {
+          showNotification("Estás bloqueado en la cúspide de tu rango. Es hora de demostrar si eres digno del siguiente paso en el escalafón. Tu próxima Misión de Acondicionamiento será un EXAMEN DE ASCENSO.", "Examen Máximo Disponible");
+        }
       }
     }
-    
+
     savePlayer();
     updateUI();
   }
 
-  let currentNotiCallback = null;
-  let currentCancelCallback = null;
-  function showNotification(msg, title, callback = null, showCancel = false, cancelCallback = null) {
-    document.getElementById('noti-title').innerText = title;
-    document.getElementById('noti-msg').innerText = msg;
-    
-    const cancelBtn = document.getElementById('noti-cancel');
-    if(showCancel) {
-      cancelBtn.style.display = 'block';
-    } else {
-      cancelBtn.style.display = 'none';
-    }
-
-    openModal('notification-modal');
-    currentNotiCallback = callback;
-    currentCancelCallback = cancelCallback;
-  }
-
-  document.getElementById('noti-close').addEventListener('click', () => {
-    closeModal('notification-modal');
-    if(currentNotiCallback) {
-        const cb = currentNotiCallback;
-        currentNotiCallback = null;
-        currentCancelCallback = null;
-        cb();
-    }
-  });
-
-  document.getElementById('noti-cancel').addEventListener('click', () => {
-    closeModal('notification-modal');
-    if(currentCancelCallback) {
-        const cb = currentCancelCallback;
-        currentNotiCallback = null;
-        currentCancelCallback = null;
-        cb();
-    }
-  });
+  // NOTA: La lógica de notificaciones ahora se gestiona globalmente en index.html
 
   function showAscensionCard(rankObj) {
     const color = rankObj.color || '#FFD700';
-    document.getElementById('asc-rank-icon').textContent  = rankObj.icon;
+    document.getElementById('asc-rank-icon').textContent = rankObj.icon;
     document.getElementById('asc-rank-title').textContent = rankObj.title.toUpperCase();
     document.getElementById('asc-rank-wisdom').textContent = '"' + (rankObj.wisdom || '') + '"';
-    document.getElementById('asc-rank-lore').textContent   = rankObj.lore || '';
+    document.getElementById('asc-rank-lore').textContent = rankObj.lore || '';
     const card = document.querySelector('.rank-ascension-card');
     if (card) {
       card.style.borderColor = color;
-      card.style.boxShadow   = '0 0 40px ' + color + '55, 0 20px 60px rgba(0,0,0,1)';
+      card.style.boxShadow = '0 0 40px ' + color + '55, 0 20px 60px rgba(0,0,0,1)';
     }
     const wisdomEl = document.getElementById('asc-rank-wisdom');
     if (wisdomEl) { wisdomEl.style.borderLeftColor = color; wisdomEl.style.color = color; }
@@ -615,7 +635,7 @@
     let html = '';
     rankTitles.forEach((r, idx) => {
       const isAcquired = player.rankIndex >= idx;
-      const isCurrent  = player.rankIndex === idx;
+      const isCurrent = player.rankIndex === idx;
       const color = r.color || '#FFD700';
       if (isAcquired) {
         html += '<div style="background:#111; border:1px solid ' + (isCurrent ? color : 'rgba(255,255,255,0.08)') + '; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:' + (isCurrent ? '0 0 20px ' + color + '33' : 'none') + '; position:relative;">';
@@ -638,22 +658,22 @@
     return html;
   }
 
-  window.openInfoModal = function(name, desc, imgUrl) {
+  window.openInfoModal = function (name, desc, imgUrl) {
     document.getElementById('info-title').innerText = name;
-    
+
     let items = desc.split(/\d+\.\s*/).filter(i => i.trim() !== '');
     let listHtml = '';
     if (items.length > 1) {
       listHtml = '<ol style="padding-left: 20px; font-family: \'Inter\', sans-serif;">';
       items.forEach(item => {
-          listHtml += `<li style="margin-bottom: 12px; color: #ccc;">${item.trim()}</li>`;
+        listHtml += `<li style="margin-bottom: 12px; color: #ccc;">${item.trim()}</li>`;
       });
       listHtml += '</ol>';
     } else {
       listHtml = `<p style="line-height:1.5; color:#ccc;">${desc}</p>`;
     }
     document.getElementById('info-desc').innerHTML = listHtml;
-    
+
     let imgContainer = document.getElementById('info-img-container');
     if (imgUrl && (imgUrl.startsWith('http') || imgUrl.startsWith('./'))) {
       imgContainer.innerHTML = `
@@ -671,9 +691,9 @@
     document.getElementById('info-img-container').innerHTML = '';
   });
 
-  window.updateCodexUI = function() {
+  window.updateCodexUI = function () {
     const listEl = document.getElementById('codex-list');
-    if(!listEl) return;
+    if (!listEl) return;
     listEl.innerHTML = buildCodexRankHtml();
     document.getElementById('codex-sessions').innerText = player.workoutCount;
     let hxHtml = workoutHistory.map(h => {
@@ -681,41 +701,65 @@
       const typeStr = h.type || (h.routine ? 'Entrenamiento' : 'Sesión');
       return '<div style="margin-bottom:8px; border-left:2px solid var(--accent-gold); padding-left:8px;"><span style="color:var(--text-dim);">' + dateStr + '</span><br><span style="color:#fff;">' + typeStr + '</span></div>';
     }).join('');
-    if(workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
+    if (workoutHistory.length === 0) hxHtml = "<span style='color:#666; font-style:italic;'>Aún no hay gestas registradas.</span>";
     let hxContainer = document.getElementById('codex-history');
-    if(hxContainer) hxContainer.innerHTML = hxHtml;
+    if (hxContainer) hxContainer.innerHTML = hxHtml;
   };
 
-  window.openCodexModal = function() {
+  window.openCodexModal = function () {
     openModal('codex-modal');
   };
 
 
-  window.updateLibraryUI = function() {
-    const listEl = document.getElementById('library-list');
-    if(!listEl) return;
-    let content = '';
-    
-    EXERCISE_DB.forEach(ex => {
-        let pLvl = player.stats[ex.s]?.lvl || 1;
-        let isLocked = ex.lvl_min > pLvl;
-        let displayName = isLocked ? "??? (Técnica Bloqueada)" : ex.n + " - " + ex.real;
-        let displayDesc = isLocked ? `Requiere Nivel ${ex.lvl_min} físico de ${STAT_LABELS[ex.s] || ex.s} para desbloquear.` : ex.desc;
-        let imgStyle = isLocked ? "filter: blur(8px) grayscale(1) brightness(0.5); opacity: 0.6;" : "";
-        let borderCol = isLocked ? '#222' : 'var(--accent-gold)';
-        
-        let typeBadge = '';
-        if(ex.s === "str") typeBadge = '<span style="background:#8f2020; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FUERZA</span>';
-        if(ex.s === "spd") typeBadge = '<span style="background:#5555ff; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">VELOCIDAD</span>';
-        if(ex.s === "end") typeBadge = '<span style="background:#555555; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">RESISTENCIA</span>';
-        if(ex.s === "flex") typeBadge = '<span style="background:#28a745; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FLEXIBILIDAD</span>';
+  // ====== BIBLIOTECA MARCIAL ======
+  let currentLibraryTab = 'str';
 
-        content += `
-        <div ontouchstart="" onclick="openExerciseDetail('${ex.id || ex.n.replace(/[^a-z]/gi,'')}')" style="cursor:pointer; background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center; transition: transform 0.1s ease; active:transform scale(0.98)" 
+  window.openLibraryModal = function () {
+    updateLibraryUI();
+    openModal('library-modal');
+  };
+
+  window.switchLibraryTab = function (stat, el) {
+    currentLibraryTab = stat;
+    document.querySelectorAll('.lib-tab').forEach(t => {
+      t.classList.remove('active-tab');
+      t.style.color = '#666';
+      t.style.borderBottomColor = 'transparent';
+    });
+    el.classList.add('active-tab');
+    el.style.color = 'var(--accent-gold)';
+    el.style.borderBottomColor = 'var(--accent-gold)';
+    updateLibraryUI();
+  };
+
+  window.updateLibraryUI = function () {
+    const listEl = document.getElementById('library-list');
+    if (!listEl) return;
+    let content = '';
+
+    // Filtrar por stat de la pestaña actual
+    const filteredDB = EXERCISE_DB.filter(ex => ex.s === currentLibraryTab);
+
+    filteredDB.forEach(ex => {
+      let pLvl = player.stats[ex.s]?.lvl || 1;
+      let isLocked = ex.lvl_min > pLvl;
+      let displayName = isLocked ? "??? (Técnica Bloqueada)" : ex.n + " - " + ex.real;
+      let displayDesc = isLocked ? `Requiere Nivel ${ex.lvl_min} físico de ${STAT_LABELS[ex.s] || ex.s} para desbloquear.` : ex.desc;
+      let imgStyle = isLocked ? "filter: blur(8px) grayscale(1) brightness(0.5); opacity: 0.6;" : "";
+      let borderCol = isLocked ? '#222' : 'var(--accent-gold)';
+
+      let typeBadge = '';
+      if (ex.s === "str") typeBadge = '<span style="background:#8f2020; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FUERZA</span>';
+      if (ex.s === "spd") typeBadge = '<span style="background:#5555ff; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">VELOCIDAD</span>';
+      if (ex.s === "end") typeBadge = '<span style="background:#555555; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">RESISTENCIA</span>';
+      if (ex.s === "flex") typeBadge = '<span style="background:#28a745; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">FLEXIBILIDAD</span>';
+
+      content += `
+        <div ontouchstart="" onclick="openExerciseDetail('${ex.id || ex.n.replace(/[^a-z]/gi, '')}')" style="cursor:pointer; background:#151515; border: 1px solid ${borderCol}; border-radius:8px; padding:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center; transition: transform 0.1s ease; active:transform scale(0.98)" 
           ontouchstart="this.style.transform='scale(0.98)';" 
           ontouchend="this.style.transform='';">
           <div style="width:70px; height:70px; flex-shrink:0; border-radius:6px; overflow:hidden; border:1px solid #333; background:#111; display:flex; align-items:center; justify-content:center;">
-             <img src="${ex.m}" loading="lazy" style="width:100%; height:100%; object-fit:cover; ${imgStyle}" onerror="this.style.display='none'; this.parentElement.innerHTML+='<span style=\\'font-size:1.5rem; opacity:0.4;\\'>${ex.s==='str'?'🦾':ex.s==='spd'?'⚡':ex.s==='end'?'🛡️':'🧘‍♂️'}</span>';">
+             <img src="${ex.m}" loading="lazy" style="width:100%; height:100%; object-fit:cover; ${imgStyle}" onerror="this.style.display='none'; this.parentElement.innerHTML+='<span style=\\'font-size:1.5rem; opacity:0.4;\\'>${ex.s === 'str' ? '🦾' : ex.s === 'spd' ? '⚡' : ex.s === 'end' ? '🛡️' : '🧘‍♂️'}</span>';">
           </div>
           <div style="flex-grow:1;">
              <h3 style="color:${isLocked ? '#666' : '#fff'}; font-family:'Cinzel'; font-size:0.9rem; margin:0 0 5px 0; line-height:1.2;">${displayName}</h3>
@@ -723,22 +767,23 @@
              <p style="color:${isLocked ? '#ff5555' : '#888'}; font-size:0.75rem; line-height:1.4; margin:0;">${displayDesc}</p>
           </div>
         </div>`;
-        window._exDB = window._exDB || {};
-        if(!isLocked) window._exDB[ex.id || ex.n.replace(/[^a-z]/gi,'')] = ex;
+      window._exDB = window._exDB || {};
+      if (!isLocked) window._exDB[ex.id || ex.n.replace(/[^a-z]/gi, '')] = ex;
     });
 
     listEl.innerHTML = content;
   };
 
-  window.openLibraryModal = function() {
+  window.openLibraryModal = function () {
+    updateLibraryUI();
     openModal('library-modal');
   };
 
-  window.openExerciseDetail = function(exId) {
+  window.openExerciseDetail = function (exId) {
     const ex = (window._exDB || {})[exId];
     if (!ex) return;
-    let statNames = {str:'Fuerza', spd:'Velocidad', end:'Resistencia', flex:'Flexibilidad'};
-    let statColors = {str:'#8f2020', spd:'#5555ff', end:'#555', flex:'#28a745'};
+    let statNames = { str: 'Fuerza', spd: 'Velocidad', end: 'Resistencia', flex: 'Flexibilidad' };
+    let statColors = { str: '#8f2020', spd: '#5555ff', end: '#555', flex: '#28a745' };
     let html = `
       <div style="text-align:center; padding-bottom:5px;">
         <img src="${ex.m}" onclick="openLightbox('${ex.m}')" style="width:100%; max-height:220px; object-fit:cover; border-radius:10px; cursor:zoom-in; margin-bottom:15px; border:1px solid var(--glass-border);" onerror="this.style.display='none'; document.getElementById('ex-detail-img-fallback').style.display='flex';">
@@ -759,11 +804,11 @@
   // ORÁCULO OFFLINE (MOTOR PROCEDIMENTAL)
   function generateOfflineRoutine(type, focusStat = null) {
     document.getElementById('loader').style.display = 'block';
-    
+
     setTimeout(() => {
       let selected = [];
       const statsOrder = ['str', 'spd', 'end', 'flex'];
-      
+
       // El volumen es ahora estático por petición del guerrero:
       // Cuerpo Completo = 8 ejercicios (2 de cada uno)
       // Especializado = 6 ejercicios (del mismo stat)
@@ -773,12 +818,12 @@
       targetStats.forEach(stat => {
         // 1. Filtrar base de datos según nivel individual y stat
         let validForStat = EXERCISE_DB.filter(ex => {
-           let pLvl = player.stats[stat]?.lvl || 1;
-           let topLimit = window.isExamRoutine ? ex.lvl_max + 10 : ex.lvl_max;
-           return ex.s === stat && pLvl >= ex.lvl_min && pLvl <= topLimit;
+          let pLvl = player.stats[stat]?.lvl || 1;
+          let topLimit = window.isExamRoutine ? ex.lvl_max + 10 : ex.lvl_max;
+          return ex.s === stat && pLvl >= ex.lvl_min && pLvl <= topLimit;
         });
-        
-        if(validForStat.length === 0) {
+
+        if (validForStat.length === 0) {
           validForStat = EXERCISE_DB.filter(ex => ex.s === stat);
         }
 
@@ -796,12 +841,12 @@
         let isExam = window.isExamRoutine;
         let pLvl = player.stats[ex.s]?.lvl || 1;
         let virtualLevel = isExam ? ex.lvl_max : pLvl;
-        
+
         let factor = (virtualLevel - ex.lvl_min) * ex.scale;
         let finalVal = Math.floor(Math.max(ex.baseVal, ex.baseVal + factor));
         let numSets = type === 'mobility' ? 2 : (player.rankIndex >= 2 ? 4 : 3);
-        if(isExam) numSets += 1;
-        
+        if (isExam) numSets += 1;
+
         return {
           id: ex.id,
           n: `${ex.n} (${ex.real})`,
@@ -826,17 +871,17 @@
 
   const startRoutineHandler = (type = 'conditioning', focusStat = null) => {
     let examPending = checkExamPending();
-    if(examPending && type === 'conditioning') {
-       showNotification("El Oráculo observa tu espíritu. Estás a punto de iniciar una Prueba de Ascenso. Sé absolutamente sincero: marca como terminada una serie SÓLO si realmente lograste el esfuerzo estricto y la técnica correcta. Engañar al sistema hoy significa lesionarte mañana en niveles superiores. El honor no admite auto-trampas.", "Examen Marcial de Honor", () => {
-           window.isExamRoutine = true;
-           initRoutineGeneration(type, focusStat);
-       });
-       return;
+    if (examPending && type === 'conditioning') {
+      showNotification("El Oráculo observa tu espíritu. Estás a punto de iniciar una Prueba de Ascenso. Sé absolutamente sincero: marca como terminada una serie SÓLO si realmente lograste el esfuerzo estricto y la técnica correcta. Engañar al sistema hoy significa lesionarte mañana en niveles superiores. El honor no admite auto-trampas.", "Examen Marcial de Honor", () => {
+        window.isExamRoutine = true;
+        initRoutineGeneration(type, focusStat);
+      });
+      return;
     } else if (examPending && type === 'mobility') {
-       showNotification("Debes probar tu valía física en el Examen de Ascenso antes de recuperar el aliento en la movilidad.", "Disciplina");
-       return;
+      showNotification("Debes probar tu valía física en el Examen de Ascenso antes de recuperar el aliento en la movilidad.", "Disciplina");
+      return;
     }
-    
+
     window.isExamRoutine = false;
     window.currentFocusStat = focusStat; // Guardar el foco para la sesión actual
     initRoutineGeneration(type, focusStat);
@@ -848,37 +893,37 @@
     generateOfflineRoutine(type, focusStat);
   }
 
-  if(document.getElementById('btn-start-conditioning')) document.getElementById('btn-start-conditioning').addEventListener('click', () => startRoutineHandler('conditioning'));
-  
-  window.startSpecializedTraining = function(statAlias) {
+  if (document.getElementById('btn-start-conditioning')) document.getElementById('btn-start-conditioning').addEventListener('click', () => startRoutineHandler('conditioning'));
+
+  window.startSpecializedTraining = function (statAlias) {
     startRoutineHandler('conditioning', statAlias);
   };
 
   function penalizeRankExit() {
-     let cap = getCurrentRank().max;
-     ['str','spd','flex','end'].forEach(s => {
-        player.stats[s].lvl = Math.max(1, cap - 1);
-        player.stats[s].xp = (cap - 1) * 80;
-     });
-     savePlayer();
-     updateUI();
-     showNotification("Un guerrero conoce sus límites. Te has retirado del Examen de Ascenso. Has retrocedido en tu maestría para forjarte de nuevo.", "Retorno a las Sombras");
+    let cap = getCurrentRank().max;
+    ['str', 'spd', 'flex', 'end'].forEach(s => {
+      player.stats[s].lvl = Math.max(1, cap - 1);
+      player.stats[s].xp = (cap - 1) * 80;
+    });
+    savePlayer();
+    updateUI();
+    showNotification("Un guerrero conoce sus límites. Te has retirado del Examen de Ascenso. Has retrocedido en tu maestría para forjarte de nuevo.", "Retorno a las Sombras");
   }
 
   document.getElementById('btn-cancel-overview').addEventListener('click', () => {
-    if(window.isExamRoutine) penalizeRankExit();
+    if (window.isExamRoutine) penalizeRankExit();
     switchView('home-view', 'routine-overview-view');
   });
 
   document.getElementById('btn-cancel-focus').addEventListener('click', () => {
-    if(window.isExamRoutine) {
+    if (window.isExamRoutine) {
       showNotification(
         "Un guerrero debe ser sincero con sus capacidades. Si sientes que no puedes completar este examen con honor y técnica perfecta, puedes retirarte hoy para volver más fuerte mañana. Pero ten en cuenta: retirarte de una Prueba de Ascenso conlleva una penalización en tu maestría actual.",
         "El Juicio del Maestro",
         () => {
-           penalizeRankExit();
-           window.sessionState.active = false;
-           switchView('home-view', 'routine-focus-view');
+          penalizeRankExit();
+          window.sessionState.active = false;
+          switchView('home-view', 'routine-focus-view');
         },
         true
       );
@@ -887,161 +932,156 @@
       switchView('home-view', 'routine-focus-view');
     }
   });
-  
+
   document.getElementById('btn-reforge-routine').addEventListener('click', () => {
     let currentType = currentRoutine[0]?.domain || 'conditioning';
     let currentFocus = window.currentFocusStat || null; // Recuperar el foco si existe
     document.getElementById('overview-content').style.display = 'none';
     generateOfflineRoutine(currentType, currentFocus);
   });
-  
-  document.getElementById('btn-start-focus').addEventListener('click', () => {
-     window.sessionState = {
-        active: true,
-        gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
-        levelUps: [],
-        rankUpReady: false,
-        reachedCap: false
-     };
-     switchView('routine-focus-view', 'routine-overview-view');
-     
-     const cancelBtn = document.getElementById('btn-cancel-focus');
-     cancelBtn.style.display = 'block';
-     
-     if (window.isExamRoutine) {
-        cancelBtn.innerText = "RETIRADA HONORABLE";
-        cancelBtn.style.color = "#ff3333";
-        cancelBtn.style.textShadow = "0 0 10px rgba(255,0,0,0.5)";
-     } else {
-        cancelBtn.innerText = "ABANDONAR";
-        cancelBtn.style.color = "#ff5555";
-        cancelBtn.style.textShadow = "none";
-     }
 
-     renderFocusExercises(currentRoutine);
+  document.getElementById('btn-start-focus').addEventListener('click', () => {
+    window.sessionState = {
+      active: true,
+      gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
+      levelUps: [],
+      rankUpReady: false,
+      reachedCap: false
+    };
+    switchView('routine-focus-view', 'routine-overview-view');
+
+    const cancelBtn = document.getElementById('btn-cancel-focus');
+    cancelBtn.style.display = 'block';
+
+    if (window.isExamRoutine) {
+      cancelBtn.innerText = "RETIRADA HONORABLE";
+      cancelBtn.style.color = "#ff3333";
+      cancelBtn.style.textShadow = "0 0 10px rgba(255,0,0,0.5)";
+    } else {
+      cancelBtn.innerText = "ABANDONAR";
+      cancelBtn.style.color = "#ff5555";
+      cancelBtn.style.textShadow = "none";
+    }
+
+    renderFocusExercises(currentRoutine);
   });
 
   function processSessionResults() {
-     console.log("ZenRyu: Starting session completion sequence.");
-     window.sessionState.active = false;
-     if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-     
-     // 1. Force trophy screen hide
-     console.log("ZenRyu: Hiding trophy container.");
-     const finContainer = document.getElementById('focus-finish-container');
-     if(finContainer) {
+    console.log("ZenRyu: Starting session completion sequence.");
+    window.sessionState.active = false;
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+
+    const finContainer = document.getElementById('focus-finish-container');
+    if (finContainer) {
+      finContainer.style.filter = "brightness(0.2) blur(4px)";
+      finContainer.style.transition = "filter 0.5s ease";
+    }
+
+    let rewardsText = "";
+    let gainedXp = false;
+    for (let s in window.sessionState.gainedXP) {
+      if (window.sessionState.gainedXP[s] > 0) {
+        rewardsText += `• ${STAT_LABELS[s]}: +${window.sessionState.gainedXP[s]} XP\n`;
+        gainedXp = true;
+      }
+    }
+
+    let levelUpsText = "";
+    window.sessionState.levelUps.forEach(lu => {
+      levelUpsText += `• ${STAT_LABELS[lu.stat]} ha subido al Nivel ${lu.lvl}!\n`;
+    });
+
+    let steps = [];
+    if (gainedXp || levelUpsText) {
+      let fullMsg = "Has completado la forja física de hoy.\n\n";
+      if (gainedXp) fullMsg += "EXPERIENCIA GANADA:\n" + rewardsText + "\n";
+      if (levelUpsText) fullMsg += "DESBLOQUEOS:\n" + levelUpsText;
+
+      steps.push({ title: "🎖 RESUMEN DE PROGRESO", msg: fullMsg });
+    }
+
+    if (window.sessionState.reachedCap) {
+      steps.push({ title: "Cuerpo al Límite", msg: "Has alcanzado el tope en esta disciplina. Forja tus otras capacidades para desbloquear el Examen de Ascenso." });
+    }
+
+    if (window.sessionState.rankUpReady) {
+      steps.push({ title: "Examen Disponible", msg: "Has alcanzado la cúspide de tu rango. Próxima misión será un EXAMEN DE ASCENSO." });
+    }
+
+    let currentType = (currentRoutine && currentRoutine[0] && currentRoutine[0].domain) ? currentRoutine[0].domain : 'conditioning';
+    let typeName = window.isExamRoutine ? "Examen Marcial" : (currentType === 'mobility' ? "Flexibilidad Activa" : "Acondicionamiento Físico");
+
+    const finishAndSwitchMap = () => {
+      const finContainer = document.getElementById('focus-finish-container');
+      if (finContainer) {
         finContainer.style.display = 'none';
+        finContainer.style.filter = 'none';
         finContainer.classList.remove('pulse-glow');
-     }
+      }
 
-     // 2. Build consolidated rewards message
-     let rewardsText = "";
-     let gainedXp = false;
-     for (let s in window.sessionState.gainedXP) {
-         if (window.sessionState.gainedXP[s] > 0) {
-             rewardsText += `• ${STAT_LABELS[s]}: +${window.sessionState.gainedXP[s]} XP\n`;
-             gainedXp = true;
-         }
-     }
-     
-     let levelUpsText = "";
-     window.sessionState.levelUps.forEach(lu => {
-         levelUpsText += `• ${STAT_LABELS[lu.stat]} ha subido al Nivel ${lu.lvl}!\n`;
-     });
+      try {
+        const focusContainer = document.getElementById('focus-exercises-container');
+        if (focusContainer) focusContainer.innerHTML = '';
+        
+        let histEntry = {
+          date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          type: typeName
+        };
+        workoutHistory.unshift(histEntry);
+        if (workoutHistory.length > 50) workoutHistory.pop();
 
-     let steps = [];
-     if (gainedXp || levelUpsText) {
-         let fullMsg = "Has completado la forja física de hoy.\n\n";
-         if (gainedXp) fullMsg += "EXPERIENCIA GANADA:\n" + rewardsText + "\n";
-         if (levelUpsText) fullMsg += "DESBLOQUEOS:\n" + levelUpsText;
+        zendb.addHistory(histEntry).catch(e => console.error("ZenRyu: DB Error", e));
+        player.workoutCount++;
+        savePlayer();
+        updateUI();
+        updateCodexUI();
 
-         steps.push({
-             title: "🎖 RESUMEN DE PROGRESO",
-             msg: fullMsg
-         });
-     }
+        switchView('home-view', 'routine-focus-view');
 
-     if (window.sessionState.reachedCap) {
-         steps.push({
-             title: "Cuerpo al Límite",
-             msg: "Has alcanzado el tope en esta disciplina. Forja tus otras capacidades para desbloquear el Examen de Ascenso."
-         });
-     }
+        window.isExamRoutine = false;
+        window.currentFocusStat = null;
+        window.sessionState = {
+          active: false,
+          gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
+          levelUps: [],
+          rankUpReady: false,
+          reachedCap: false
+        };
+      } catch (e) {
+        console.error("ZenRyu: Critical error in finishAndSwitchMap", e);
+        switchView('home-view', 'routine-focus-view');
+      }
+    };
 
-     if (window.sessionState.rankUpReady) {
-         steps.push({
-             title: "Examen Disponible",
-             msg: "Has alcanzado la cúspide de tu rango. Próxima misión será un EXAMEN DE ASCENSO."
-         });
-     }
+    const executeFinalStep = () => {
+      if (window.isExamRoutine) {
+        if (player.rankIndex < rankTitles.length - 1) {
+          player.rankIndex++;
+        }
+        ['str', 'spd', 'flex', 'end'].forEach(s => { player.stats[s].xp = 0; });
+        initAudio();
+        playFanfare();
+        if (typeof throwConfetti === 'function') throwConfetti();
+        
+        finishAndSwitchMap();
+        setTimeout(() => {
+          showAscensionCard(getCurrentRank());
+        }, 600);
+      } else {
+        finishAndSwitchMap();
+      }
+    };
 
-     let currentType = (currentRoutine && currentRoutine[0] && currentRoutine[0].domain) ? currentRoutine[0].domain : 'conditioning';
-     let typeName = window.isExamRoutine ? "Examen Marcial" : (currentType === 'mobility' ? "Flexibilidad Activa" : "Acondicionamiento Físico");
+    const nextStep = () => {
+      if (steps.length === 0) {
+        executeFinalStep();
+      } else {
+        let step = steps.shift();
+        showNotification(step.msg, step.title, nextStep);
+      }
+    };
 
-     const finishAndSwitchMap = () => {
-         try {
-             console.log("ZenRyu: Executing finishAndSwitchMap.");
-             
-             // Clear UI
-             const focusContainer = document.getElementById('focus-exercises-container');
-             if(focusContainer) focusContainer.innerHTML = '';
-
-             // History
-             let histEntry = {
-               date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-               type: typeName
-             };
-             workoutHistory.unshift(histEntry);
-             if(workoutHistory.length > 50) workoutHistory.pop();
-
-             zendb.addHistory(histEntry).catch(e => console.error("ZenRyu: DB Error", e));
-             player.workoutCount++;
-             savePlayer();
-             updateUI();
-             updateCodexUI();
-             
-             console.log("ZenRyu: Navigation check - showing home-view.");
-             switchView('home-view', 'routine-focus-view');
-
-             // Final Reset of state
-             window.sessionState = {
-                active: false,
-                gainedXP: { str: 0, spd: 0, flex: 0, end: 0 },
-                levelUps: [],
-                rankUpReady: false,
-                reachedCap: false
-             };
-         } catch (e) {
-             console.error("ZenRyu: Critical error in finishAndSwitchMap", e);
-             // Safety fallback
-             switchView('home-view', 'routine-focus-view');
-         }
-     };
-
-     const executeFinalStep = () => {
-         if(window.isExamRoutine) {
-            player.rankIndex++; 
-            ['str','spd','flex','end'].forEach(s => { player.stats[s].xp = 0; });
-            initAudio();
-            playFanfare();
-            throwConfetti();
-            showAscensionCard(getCurrentRank());
-            finishAndSwitchMap();
-         } else {
-            finishAndSwitchMap();
-         }
-     };
-
-     const nextStep = () => {
-         if (steps.length === 0) {
-             executeFinalStep();
-         } else {
-             let step = steps.shift();
-             showNotification(step.msg, step.title, nextStep);
-         }
-     };
-
-     nextStep();
+    nextStep();
   }
 
   document.getElementById('btn-finish-routine').addEventListener('click', () => {
@@ -1049,28 +1089,28 @@
   });
 
   function renderOverview(exercises) {
-     const ovList = document.getElementById('ov-list');
-     let totalSecs = 0;
-     let focusObj = {};
-     let html = '';
-     
-     exercises.forEach((ex, idx) => {
-        focusObj[ex.s] = (focusObj[ex.s] || 0) + 1;
-        let sets = ex.sets || 3;
-        
-        let exTime = 45; 
-        if(ex.t === 'time' || ex.t === 'tiempo') { exTime = parseInt(ex.val); } 
-        else { exTime = (parseInt(ex.val) * 3); } 
-        
-        totalSecs += sets * exTime;
-        totalSecs += (sets - 1) * 60; 
-        
-        // Sanitización para el modal
-        const safeN = (ex.n || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const safeImg = (ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./'))) ? ex.m : '';
+    const ovList = document.getElementById('ov-list');
+    let totalSecs = 0;
+    let focusObj = {};
+    let html = '';
 
-        html += `
+    exercises.forEach((ex, idx) => {
+      focusObj[ex.s] = (focusObj[ex.s] || 0) + 1;
+      let sets = ex.sets || 3;
+
+      let exTime = 45;
+      if (ex.t === 'time' || ex.t === 'tiempo') { exTime = parseInt(ex.val); }
+      else { exTime = (parseInt(ex.val) * 3); }
+
+      totalSecs += sets * exTime;
+      totalSecs += (sets - 1) * 60;
+
+      // Sanitización para el modal
+      const safeN = (ex.n || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const safeImg = (ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./'))) ? ex.m : '';
+
+      html += `
          <div class="ov-item" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:10px; cursor:pointer; transition: background 0.2s;">
            <div style="padding-right:10px; flex:1;">
              <div style="color:#fff; font-weight:600; font-size:0.85rem; line-height:1.2;">${ex.n}</div>
@@ -1081,28 +1121,28 @@
              <span style="font-size:0.6rem; color:#444;">👁️ VER</span>
            </div>
          </div>`;
-     });
-     
-     totalSecs += exercises.length * 60; // transiciones y preparacion
-     let estMins = Math.ceil(totalSecs / 60);
-     document.getElementById('ov-time').innerText = estMins + 'm';
-     document.getElementById('ov-count').innerText = exercises.length;
-     
-     let focusStatsFound = Object.keys(focusObj);
-     let focusLabel = 'MIXTO';
-     if (focusStatsFound.length === 1) {
-         focusLabel = STAT_LABELS[focusStatsFound[0]] || 'MIXTO';
-     } else if (focusStatsFound.length > 2) {
-         focusLabel = 'CUERPO COMPLETO';
-     } else {
-         let predominant = focusStatsFound.reduce((a, b) => focusObj[a] > focusObj[b] ? a : b);
-         focusLabel = STAT_LABELS[predominant] || 'MIXTO';
-     }
+    });
 
-     document.getElementById('ov-focus').innerText = focusLabel;
-     
-     ovList.innerHTML = html;
-     document.getElementById('overview-content').style.display = 'block';
+    totalSecs += exercises.length * 60; // transiciones y preparacion
+    let estMins = Math.ceil(totalSecs / 60);
+    document.getElementById('ov-time').innerText = estMins + 'm';
+    document.getElementById('ov-count').innerText = exercises.length;
+
+    let focusStatsFound = Object.keys(focusObj);
+    let focusLabel = 'MIXTO';
+    if (focusStatsFound.length === 1) {
+      focusLabel = STAT_LABELS[focusStatsFound[0]] || 'MIXTO';
+    } else if (focusStatsFound.length > 2) {
+      focusLabel = 'CUERPO COMPLETO';
+    } else {
+      let predominant = focusStatsFound.reduce((a, b) => focusObj[a] > focusObj[b] ? a : b);
+      focusLabel = STAT_LABELS[predominant] || 'MIXTO';
+    }
+
+    document.getElementById('ov-focus').innerText = focusLabel;
+
+    ovList.innerHTML = html;
+    document.getElementById('overview-content').style.display = 'block';
   }
 
   let currentFocusIndex = 0;
@@ -1114,28 +1154,28 @@
 
     let fullHtml = '';
     exercises.forEach((ex, index) => {
-      const isTime    = ex.t === 'time' || ex.t === 'tiempo';
+      const isTime = ex.t === 'time' || ex.t === 'tiempo';
       const numericVal = parseInt(ex.val) || 0;
-      
+
       let timerBtn = '';
-      if(isTime && numericVal > 0) {
-         timerBtn = `<div style="display:flex; gap:8px;">
+      if (isTime && numericVal > 0) {
+        timerBtn = `<div style="display:flex; gap:8px;">
             <button class="btn-secondary" style="border-color:var(--accent-gold); color:var(--accent-gold); width:50%;" onclick="openTimer(${numericVal})">⏱️ ESFUERZO</button>
             <button class="btn-secondary" style="border-color:#555; width:50%;" onclick="openTimer(60)">⏱️ RECUPERACIÓN</button>
          </div>`;
       } else {
-         timerBtn = `<button class="btn-secondary" style="width:100%; border-color:#555;" onclick="openTimer(60)">⏱️ RECUPERACIÓN 60s</button>`;
+        timerBtn = `<button class="btn-secondary" style="width:100%; border-color:#555;" onclick="openTimer(60)">⏱️ RECUPERACIÓN 60s</button>`;
       }
 
-      const safeImg  = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
+      const safeImg = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
       const safeDesc = (ex.desc || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
-      const safeN    = (ex.n    || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
-      const altBtn   = (ex.alt && !window.isExamRoutine)
+      const safeN = (ex.n || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
+      const altBtn = (ex.alt && !window.isExamRoutine)
         ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:8px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ADAPTAR TÉCNICA</button>`
         : '';
 
-      const baseLvl  = ex.lvl_min || 1;
-      const baseXP   = Math.round(Math.max(20, baseLvl * 1.5 + ex.sets * 2));
+      const baseLvl = ex.lvl_min || 1;
+      const baseXP = Math.round(Math.max(20, baseLvl * 1.5 + ex.sets * 2));
       const xpReward = window.isExamRoutine ? Math.round(baseXP * 1.5) : baseXP;
 
       fullHtml += `
@@ -1162,12 +1202,12 @@
   }
 
   function updateFocusProgress() {
-     let el = document.getElementById('focus-progress-text');
-     if(el) el.innerText = `EJERCICIO ${currentFocusIndex + 1} DE ${currentRoutine.length}`;
+    let el = document.getElementById('focus-progress-text');
+    if (el) el.innerText = `EJERCICIO ${currentFocusIndex + 1} DE ${currentRoutine.length}`;
   }
 
-  window.completeFocusTask = function(index, statAlias, xpReward) {
-    if(navigator.vibrate) navigator.vibrate(50);
+  window.completeFocusTask = function (index, statAlias, xpReward) {
+    if (navigator.vibrate) navigator.vibrate(50);
     let s = "str";
     if (statAlias.toLowerCase().includes("spd")) s = "spd";
     if (statAlias.toLowerCase().includes("flex")) s = "flex";
@@ -1175,75 +1215,419 @@
 
     const xp = (typeof xpReward === 'number' && xpReward > 0) ? xpReward : 20;
     gainXP(xp, s);
-    
+
     if (!window.sessionState || !window.sessionState.active) {
-       showNotification(`Tu disciplina ha forjado +${xp} XP en ${STAT_LABELS[s]}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
+      showNotification(`Tu disciplina ha forjado +${xp} XP en ${STAT_LABELS[s]}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
     }
 
     let currentCard = document.getElementById(`ex-${index}`);
-    if(currentCard) {
-       currentCard.style.opacity = '0';
-       currentCard.style.transform = 'translateX(-50px)';
-       currentCard.style.pointerEvents = 'none';
+    if (currentCard) {
+      currentCard.style.opacity = '0';
+      currentCard.style.transform = 'translateX(-50px)';
+      currentCard.style.pointerEvents = 'none';
     }
-    
+
     currentFocusIndex++;
-    
-    if(currentFocusIndex < currentRoutine.length) {
-       let nextCard = document.getElementById(`ex-${currentFocusIndex}`);
-       if(nextCard) {
-          nextCard.style.opacity = '1';
-          nextCard.style.transform = 'translateX(0)';
-          nextCard.style.pointerEvents = 'all';
-       }
-       updateFocusProgress();
+
+    if (currentFocusIndex < currentRoutine.length) {
+      let nextCard = document.getElementById(`ex-${currentFocusIndex}`);
+      if (nextCard) {
+        nextCard.style.opacity = '1';
+        nextCard.style.transform = 'translateX(0)';
+        nextCard.style.pointerEvents = 'all';
+      }
+      updateFocusProgress();
     } else {
-       document.getElementById('focus-progress-text').innerText = "RUTINA COMPLETADA";
-       document.getElementById('btn-cancel-focus').style.display = 'none';
-       let finContainer = document.getElementById('focus-finish-container');
-       finContainer.style.display = 'flex';
-       finContainer.classList.add('pulse-glow');
+      document.getElementById('focus-progress-text').innerText = "RUTINA COMPLETADA";
+      document.getElementById('btn-cancel-focus').style.display = 'none';
+
+      // Recompensas
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      let earnedCoins = 50;
+
+      if (player.lastWorkoutDate) {
+        const lastDate = new Date(player.lastWorkoutDate);
+        const lastWorkout = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+        const diffTime = todayDate - lastWorkout;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) { player.streak = (player.streak || 0) + 1; }
+        else if (diffDays > 1) { player.streak = 1; }
+      } else {
+        player.streak = 1;
+      }
+      player.lastWorkoutDate = today.toISOString();
+      player.coins = (player.coins || 0) + earnedCoins;
+      savePlayer();
+
+      const rwCoins = document.getElementById('reward-coins');
+      const rwStreak = document.getElementById('reward-streak');
+      const rwStreakIcon = document.getElementById('reward-streak-icon');
+      if (rwCoins) rwCoins.innerText = '+' + earnedCoins;
+      if (rwStreak) rwStreak.innerText = 'Racha x' + player.streak;
+      if (rwStreakIcon) rwStreakIcon.style.filter = "none";
+
+      updateUI();
+      if (window.checkBadges) window.checkBadges();
+
+      let finContainer = document.getElementById('focus-finish-container');
+      finContainer.style.display = 'flex';
+      finContainer.classList.add('pulse-glow');
+
+      let rwContainer = document.getElementById('victory-rewards');
+      if (rwContainer) rwContainer.style.display = 'flex';
     }
   }
 
-  window.mutateExercise = function(index, baseId) {
+  window.mutateExercise = function (index, baseId) {
     let exObj = EXERCISE_DB.find(x => x.id === baseId);
-    if(exObj && exObj.alt) {
-       let current = currentRoutine[index];
-       current.n = `${exObj.alt.n} (${exObj.alt.real})`;
-       current.desc = exObj.alt.desc;
-       current.m = exObj.alt.m || ""; 
-       current.alt = null; // ya fue mutado
-       renderFocusExercises(currentRoutine); // re-render
-       
-       for(let i=0; i<currentRoutine.length; i++) {
-           let c = document.getElementById(`ex-${i}`);
-           if(c) {
-               if(i === currentFocusIndex) {
-                   c.style.opacity = '1'; c.style.transform = 'translateX(0)'; c.style.pointerEvents = 'all';
-               } else {
-                   c.style.opacity = '0'; c.style.transform = 'translateX(50px)'; c.style.pointerEvents = 'none';
-               }
-           }
-       }
-       showNotification("El Oráculo ha adaptado la técnica a tus circunstancias.", "Mutación Física");
+    if (exObj && exObj.alt) {
+      let current = currentRoutine[index];
+      current.n = `${exObj.alt.n} (${exObj.alt.real})`;
+      current.desc = exObj.alt.desc;
+      current.m = exObj.alt.m || "";
+      current.alt = null; // ya fue mutado
+      renderFocusExercises(currentRoutine); // re-render
+
+      for (let i = 0; i < currentRoutine.length; i++) {
+        let c = document.getElementById(`ex-${i}`);
+        if (c) {
+          if (i === currentFocusIndex) {
+            c.style.opacity = '1'; c.style.transform = 'translateX(0)'; c.style.pointerEvents = 'all';
+          } else {
+            c.style.opacity = '0'; c.style.transform = 'translateX(50px)'; c.style.pointerEvents = 'none';
+          }
+        }
+      }
+      showNotification("El Oráculo ha adaptado la técnica a tus circunstancias.", "Mutación Física");
     }
   }
 
-  // AUDIO RADIO
+  // AUDIO RADIO — Event Delegation: escuchar en el CONTENEDOR para que los botones
+  // que nacen ocultos (Taiko/Synth) también funcionen al ser revelados por el bazar
   const audio = document.getElementById('audio-player');
-  document.querySelectorAll('.radio-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+  const radioContainer = document.querySelector('.radio-controls');
+  if (radioContainer) {
+    radioContainer.addEventListener('click', function (e) {
+      const btn = e.target.closest('.radio-btn');
+      if (!btn) return;
+
+      if (navigator.vibrate) navigator.vibrate(50);
+      console.log("ZenRyu: Radio click -> ", btn.innerText.trim());
+
+      // Reset UI
       document.querySelectorAll('.radio-btn').forEach(b => b.classList.remove('active'));
-      if (this.id === 'radio-stop') {
+
+      if (btn.id === 'radio-stop') {
         audio.pause();
         return;
       }
-      this.classList.add('active');
-      audio.src = this.getAttribute('data-url');
-      audio.play().catch(e => console.log("Auto-play blocked"));
+
+      btn.classList.add('active');
+      const trackUrl = btn.getAttribute('data-url');
+
+      // Asignación directa y play — NO usar load() entre click y play()
+      audio.src = trackUrl;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log("ZenRyu: ✅ Audio OK ->", trackUrl);
+        }).catch(err => {
+          console.error("ZenRyu: ❌ Audio blocked:", err);
+          showNotification("La Emisora Astral ha sido bloqueada. Toca otra parte de la pantalla primero e intenta de nuevo.", "Error de Audio");
+        });
+      }
     });
-  });
+  }
+
+  // ====== BAZAR DEL ORÁCULO ======
+  let currentStoreTab = 'aura';
+
+  window.openStoreModal = function () {
+    document.getElementById('store-coin-display').innerText = player.coins || 0;
+    // Reset to first tab
+    currentStoreTab = 'aura';
+    const firstTab = document.querySelector('.store-tab');
+    if (firstTab) switchStoreTab('aura', firstTab);
+    window.renderStore();
+    openModal('store-modal');
+  };
+
+  window.switchStoreTab = function (category, el) {
+    currentStoreTab = category;
+    document.querySelectorAll('.store-tab').forEach(t => {
+      t.classList.remove('active-tab');
+      t.style.color = '#888';
+      t.style.borderBottomColor = 'transparent';
+    });
+    el.classList.add('active-tab');
+    el.style.color = 'var(--accent-gold)';
+    el.style.borderBottomColor = 'var(--accent-gold)';
+    window.renderStore();
+  };
+
+  window.renderStore = function () {
+    let container = document.getElementById('store-items-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Filtrar por categoría actual
+    const filteredItems = STORE_ITEMS.filter(item => {
+      // Category handling
+      if (currentStoreTab === 'aura') return item.type === 'aura';
+      if (currentStoreTab === 'relic') return item.type === 'relic';
+      return item.type === currentStoreTab;
+    });
+
+    if (filteredItems.length === 0) {
+      container.innerHTML = '<p style="text-align:center; color:#555; font-style:italic; padding:40px;">No hay objetos disponibles en esta sección por ahora.</p>';
+      return;
+    }
+
+    filteredItems.forEach(item => {
+      let unl = window.player ? window.player.unlockedItems.includes(item.id) : player.unlockedItems.includes(item.id);
+      let isEquipped = window.player ? (window.player.activeAura === item.id) : (player.activeAura === item.id);
+      let actionBtn = '';
+
+      if (!unl) {
+        actionBtn = `<button class="btn-primary" onclick="buyStoreItem('${item.id}')" style="width:100%; font-size:0.8rem; background:#333; color:var(--accent-gold); border-color:var(--accent-gold);">🪙 COMPRAR (${item.price})</button>`;
+      } else {
+        if (item.type === 'aura') {
+          actionBtn = `<button class="btn-secondary" onclick="equipAura('${item.id}')" style="width:100%; font-size:0.8rem; background:${isEquipped ? 'var(--accent-gold)' : '#111'}; color:${isEquipped ? '#000' : 'var(--accent-gold)'};">${isEquipped ? 'EQUIPADA' : 'EQUIPAR'}</button>`;
+        } else if (item.type === 'lore') {
+          actionBtn = `<button class="btn-secondary" onclick="readLore('${item.id}')" style="width:100%; font-size:0.8rem; border-color:#00ffff; color:#00ffff;">LEER TOMO</button>`;
+        } else if (item.type === 'music') {
+          actionBtn = `<button class="btn-secondary" disabled style="width:100%; font-size:0.8rem; opacity:0.8; cursor:default; background:#000; border-color:#555; color:#888;">USAR EN EMISORA ASTRAL</button>`;
+        } else {
+          actionBtn = `<button class="btn-secondary" disabled style="width:100%; font-size:0.8rem; opacity:0.5; cursor:not-allowed;">OBTENIDO</button>`;
+        }
+      }
+
+      container.innerHTML += `
+      <div style="background:#151515; border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
+        <div style="font-size:2.5rem; filter:drop-shadow(0 0 10px rgba(255,215,0,0.2));">${item.icon}</div>
+        <div style="flex:1;">
+          <h4 style="color:#eee; margin-bottom:5px; font-family:'Cinzel', serif; font-size:1.1rem;">${item.name}</h4>
+          <p style="color:#888; font-size:0.8rem; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
+          ${actionBtn}
+        </div>
+      </div>
+    `;
+    });
+  };
+
+  window.buyStoreItem = function (id) {
+    let item = STORE_ITEMS.find(i => i.id === id);
+    if (!item) return;
+    if ((player.coins || 0) < item.price) {
+      if (window.UISoundEngine) window.UISoundEngine.playError();
+      alert("No tienes suficientes monedas del Dojo.");
+      return;
+    }
+    player.coins -= item.price;
+    player.unlockedItems.push(item.id);
+    savePlayer();
+    document.getElementById('store-coin-display').innerText = player.coins;
+    if (window.UISoundEngine) window.UISoundEngine.playSwoosh();
+
+    // Custom action triggers on buy
+    if (item.type === 'aura') equipAura(id);
+
+    applyInventory();
+    renderStore();
+
+    const rwCoins = document.getElementById('player-coins');
+    if (rwCoins) rwCoins.innerText = player.coins;
+  };
+
+  window.equipAura = function (id) {
+    if (player.activeAura === id) {
+      player.activeAura = null;
+    } else {
+      player.activeAura = id;
+    }
+    savePlayer();
+    applyInventory();
+    renderStore();
+  };
+
+  window.applyInventory = function () {
+    if (!player.unlockedItems) player.unlockedItems = [];
+
+    if (player.activeAura) {
+      let aura = STORE_ITEMS.find(i => i.id === player.activeAura);
+      if (aura && aura.meta) {
+        document.documentElement.style.setProperty('--accent-gold', aura.meta);
+        document.documentElement.style.setProperty('--accent-gold-glow', aura.meta + '66');
+      }
+    } else {
+      document.documentElement.style.setProperty('--accent-gold', '#ffd700');
+      document.documentElement.style.setProperty('--accent-gold-glow', 'rgba(255, 215, 0, 0.4)');
+    }
+
+    const taikoBtn = document.getElementById('audio-taiko');
+    if (taikoBtn) taikoBtn.style.display = player.unlockedItems.includes('mus_taiko') ? 'inline-block' : 'none';
+    const synthBtn = document.getElementById('audio-synth');
+    if (synthBtn) synthBtn.style.display = player.unlockedItems.includes('mus_synth') ? 'inline-block' : 'none';
+  };
+
+  window.readLore = function (id) {
+    let item = STORE_ITEMS.find(i => i.id === id);
+    if (item) {
+      document.getElementById('lore-title').innerText = item.name.toUpperCase();
+      document.getElementById('lore-body').innerHTML = '<p>' + item.meta.replace(/\n/g, '<br><br>') + '</p>';
+      openModal('lore-modal');
+    }
+  };
+
+  // ====== PERFIL Y BÓVEDA ======
+  window.openProfileModal = function () {
+    renderProfileVault();
+    openModal('profile-modal');
+  };
+
+  window.switchProfileTab = function (tabId, el) {
+    document.querySelectorAll('.profile-tab').forEach(t => {
+      t.classList.remove('active-tab');
+      t.style.color = '#888';
+      t.style.borderBottomColor = 'transparent';
+    });
+    el.classList.add('active-tab');
+    el.style.color = 'var(--accent-gold)';
+    el.style.borderBottomColor = 'var(--accent-gold)';
+
+    document.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+  };
+
+  window.renderProfileVault = function () {
+    const auraCont = document.getElementById('tab-auras');
+    const loreCont = document.getElementById('tab-lore');
+    const relicCont = document.getElementById('tab-relics');
+
+    auraCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">AUSENCIAS Y LUCES</h4>';
+    loreCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">CRÓNICAS DESBLOQUEADAS</h4>';
+    relicCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">RECUERDOS DE BATALLA</h4>';
+
+    let hasAuras = false, hasLore = false, hasRelics = false;
+
+    STORE_ITEMS.forEach(item => {
+      if (!player.unlockedItems.includes(item.id)) return;
+
+      let html = `
+      <div style="background:#151515; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:10px; display:flex; align-items:center; gap:12px;">
+        <div style="font-size:1.8rem;">${item.icon}</div>
+        <div style="flex:1;">
+          <div style="font-size:0.9rem; color:#eee; font-family:'Cinzel';">${item.name}</div>
+          <div style="font-size:0.7rem; color:#666;">${item.desc.substring(0, 40)}...</div>
+        </div>
+    `;
+
+      if (item.type === 'aura') {
+        hasAuras = true;
+        let isEq = player.activeAura === item.id;
+        html += `<button class="btn-secondary" onclick="equipAura('${item.id}'); renderProfileVault();" style="font-size:0.6rem; padding:5px 10px; background:${isEq ? 'var(--accent-gold)' : '#000'}; color:${isEq ? '#000' : 'var(--accent-gold)'};">${isEq ? 'ACTIVA' : 'USAR'}</button></div>`;
+        auraCont.innerHTML += html;
+      } else if (item.type === 'lore') {
+        hasLore = true;
+        html += `<button class="btn-secondary" onclick="readLore('${item.id}')" style="font-size:0.6rem; padding:5px 10px; border-color:#00ffff; color:#00ffff;">RELEER</button></div>`;
+        loreCont.innerHTML += html;
+      } else if (item.type === 'relic') {
+        hasRelics = true;
+        html += `</div>`;
+        relicCont.innerHTML += html;
+      }
+    });
+
+    if (!hasAuras) auraCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">No has adquirido esencias en el Bazar.</p>';
+    if (!hasLore) loreCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">No has recuperado fragmentos de historia.</p>';
+    if (!hasRelics) relicCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">Tu vitrina está vacía.</p>';
+  };
+
+  // ====== SISTEMA DE INSIGNIAS ======
+  let currentEditingBadgeSlot = 0;
+
+  window.openBadgeModal = function (slotIndex) {
+    currentEditingBadgeSlot = slotIndex;
+    renderBadgeSelection();
+    openModal('badge-modal');
+  };
+
+  window.renderBadgeSelection = function () {
+    const cont = document.getElementById('badge-selection-container');
+    cont.innerHTML = '';
+
+    if (player.unlockedBadges.length === 0) {
+      cont.innerHTML = '<p style="grid-column: 1/-1; color:#555; text-align:center; font-size:0.8rem; padding:20px;">No has ganado insignias aún guerrero. Sigue entrenando.</p>';
+      return;
+    }
+
+    BADGE_DB.forEach(badge => {
+      if (!player.unlockedBadges.includes(badge.id)) return;
+      let isEquipped = player.equippedBadges.includes(badge.id);
+      cont.innerHTML += `
+      <div onclick="equipBadge('${badge.id}')" style="background:#1a1a1a; border:1px solid ${isEquipped ? 'var(--accent-gold)' : '#333'}; border-radius:8px; padding:10px; text-align:center; cursor:pointer; opacity:${isEquipped ? '0.5' : '1'};">
+        <div style="font-size:1.5rem; margin-bottom:5px;">${badge.icon}</div>
+        <div style="font-size:0.5rem; color:#888; text-transform:uppercase;">${badge.name}</div>
+      </div>
+    `;
+    });
+  };
+
+  window.equipBadge = function (badgeId) {
+    // Ver si ya está en otro slot
+    let prevIndex = player.equippedBadges.indexOf(badgeId);
+    if (prevIndex !== -1) {
+      player.equippedBadges[prevIndex] = null;
+    }
+    player.equippedBadges[currentEditingBadgeSlot] = badgeId;
+    savePlayer();
+    updateBadgesUI();
+    closeModal('badge-modal');
+  };
+
+  window.unequipBadgeSlot = function () {
+    player.equippedBadges[currentEditingBadgeSlot] = null;
+    savePlayer();
+    updateBadgesUI();
+    closeModal('badge-modal');
+  };
+
+  window.updateBadgesUI = function () {
+    const slots = document.querySelectorAll('.badge-slot');
+    player.equippedBadges.forEach((id, idx) => {
+      if (slots[idx]) {
+        if (id) {
+          let b = BADGE_DB.find(x => x.id === id);
+          slots[idx].innerText = b ? b.icon : '';
+          slots[idx].style.borderColor = 'var(--accent-gold)';
+          slots[idx].style.boxShadow = '0 0 5px var(--accent-gold-glow)';
+        } else {
+          slots[idx].innerText = '';
+          slots[idx].style.borderColor = '#333';
+          slots[idx].style.boxShadow = 'none';
+        }
+      }
+    });
+  };
+
+  window.checkBadges = function () {
+    let newlyUnlocked = false;
+    BADGE_DB.forEach(badge => {
+      if (!player.unlockedBadges.includes(badge.id)) {
+        if (badge.goal(player)) {
+          player.unlockedBadges.push(badge.id);
+          newlyUnlocked = true;
+          showNotification(`¡Logro Desbloqueado: ${badge.name}!`, "Sistema");
+        }
+      }
+    });
+    if (newlyUnlocked) savePlayer();
+  };
+  // ====== FIN SISTEMA INSIGNIAS ======
+
+  // ====== END BAZAR DEL ORÁCULO ======
 
   // TIMER & AUDIO SYNTH
   let timerInterval;
@@ -1296,17 +1680,17 @@
     // C, E, G, High C (Arpeggio style)
     let notes = [523.25, 659.25, 783.99, 1046.50, 1046.50];
     notes.forEach((f, i) => {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(f, t + i*0.12);
-        gain.gain.setValueAtTime(0, t + i*0.12);
-        gain.gain.linearRampToValueAtTime(0.1, t + i*0.12 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.12 + 0.3);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(t + i*0.12);
-        osc.stop(t + i*0.12 + 0.3);
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(f, t + i * 0.12);
+      gain.gain.setValueAtTime(0, t + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.1, t + i * 0.12 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.12 + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t + i * 0.12);
+      osc.stop(t + i * 0.12 + 0.3);
     });
   }
 
@@ -1318,50 +1702,50 @@
     const COUNT = 60;
 
     for (let i = 0; i < COUNT; i++) {
-        let d = document.createElement('div');
-        d.style.cssText = [
-          'position:fixed',
-          'z-index:99999',
-          'width:8px',
-          'height:16px',
-          'will-change:transform',
-          'pointer-events:none',
-          `background-color:${colors[i % colors.length]}`,
-          'top:-20px',
-          `left:${Math.random() * 100}vw`,
-          `opacity:${Math.random() * 0.5 + 0.5}`,
-          `border-radius:${Math.random() > 0.5 ? '50%' : '2px'}`
-        ].join(';');
-        frag.appendChild(d);
-        pieces.push(d);
+      let d = document.createElement('div');
+      d.style.cssText = [
+        'position:fixed',
+        'z-index:99999',
+        'width:8px',
+        'height:16px',
+        'will-change:transform',
+        'pointer-events:none',
+        `background-color:${colors[i % colors.length]}`,
+        'top:-20px',
+        `left:${Math.random() * 100}vw`,
+        `opacity:${Math.random() * 0.5 + 0.5}`,
+        `border-radius:${Math.random() > 0.5 ? '50%' : '2px'}`
+      ].join(';');
+      frag.appendChild(d);
+      pieces.push(d);
     }
     // Un único reflow al insertar el Fragment completo
     document.body.appendChild(frag);
 
     // Animar DESPUÉS de insertar (browser ya tiene los nodos en el árbol)
     pieces.forEach(d => {
-        const tx = (Math.random() - 0.5) * 300;
-        const ty = window.innerHeight + 100;
-        const duration = 2000 + Math.random() * 2500;
-        const anim = d.animate([
-            { transform: 'translate3d(0,0,0) rotate(0deg)' },
-            { transform: `translate3d(${tx}px,${ty}px,0) rotate(${360 + Math.random()*360}deg)` }
-        ], {
-            duration,
-            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            fill: 'forwards'
-        });
-        anim.finished.then(() => d.remove()).catch(() => d.remove());
+      const tx = (Math.random() - 0.5) * 300;
+      const ty = window.innerHeight + 100;
+      const duration = 2000 + Math.random() * 2500;
+      const anim = d.animate([
+        { transform: 'translate3d(0,0,0) rotate(0deg)' },
+        { transform: `translate3d(${tx}px,${ty}px,0) rotate(${360 + Math.random() * 360}deg)` }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        fill: 'forwards'
+      });
+      anim.finished.then(() => d.remove()).catch(() => d.remove());
     });
   }
 
-  window.openTimer = function(seconds) {
+  window.openTimer = function (seconds) {
     timerSeconds = parseInt(seconds, 10) || 0;
     isCountdown = timerSeconds > 0;
     updateTimerDisplay();
     openModal('timer-modal');
   }
-  
+
   document.getElementById('timer-start').addEventListener('click', () => {
     initAudio();
     clearInterval(timerInterval);
@@ -1369,14 +1753,14 @@
       if (isCountdown) {
         timerSeconds--;
         if (timerSeconds <= 5 && timerSeconds > 0) {
-           playBeep();
+          playBeep();
         }
         if (timerSeconds <= 0) {
-           clearInterval(timerInterval);
-           timerSeconds = 0;
-           playGong();
-           if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
-           showNotification("¡EL TIEMPO SE HA AGOTADO! DESCANSAR.", "Cronos");
+          clearInterval(timerInterval);
+          timerSeconds = 0;
+          playGong();
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+          showNotification("¡EL TIEMPO SE HA AGOTADO! DESCANSAR.", "Cronos");
         }
       } else {
         timerSeconds++;
@@ -1384,7 +1768,7 @@
       updateTimerDisplay();
     }, 1000);
   });
-  
+
   document.getElementById('timer-stop').addEventListener('click', () => clearInterval(timerInterval));
   document.getElementById('timer-close').addEventListener('click', () => {
     clearInterval(timerInterval);
@@ -1398,7 +1782,7 @@
 
   let quoteIdx = Math.floor(Math.random() * zenQuotes.length);
   let quoteEl = document.getElementById('maestro-quote');
-  if(quoteEl) {
+  if (quoteEl) {
     quoteEl.innerText = '"' + zenQuotes[quoteIdx] + '"';
     // Rotate quote every 30 seconds
     setInterval(() => {
@@ -1416,17 +1800,17 @@
 
 window.UISoundEngine = {
   ctx: null,
-  init: function() {
-    if(!this.ctx) {
+  init: function () {
+    if (!this.ctx) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if(this.ctx.state === 'suspended') {
+    if (this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
   },
-  playClick: function() {
+  playClick: function () {
     this.init();
-    if(!this.ctx) return;
+    if (!this.ctx) return;
     let t = this.ctx.currentTime;
     let osc = this.ctx.createOscillator();
     let gain = this.ctx.createGain();
@@ -1441,9 +1825,9 @@ window.UISoundEngine = {
     osc.start(t);
     osc.stop(t + 0.06);
   },
-  playSwoosh: function() {
+  playSwoosh: function () {
     this.init();
-    if(!this.ctx) return;
+    if (!this.ctx) return;
     let t = this.ctx.currentTime;
     let osc = this.ctx.createOscillator();
     let gain = this.ctx.createGain();
@@ -1458,9 +1842,9 @@ window.UISoundEngine = {
     osc.start(t);
     osc.stop(t + 0.25);
   },
-  playError: function() {
+  playError: function () {
     this.init();
-    if(!this.ctx) return;
+    if (!this.ctx) return;
     let t = this.ctx.currentTime;
     let osc = this.ctx.createOscillator();
     let gain = this.ctx.createGain();
@@ -1478,15 +1862,15 @@ window.UISoundEngine = {
 };
 
 document.addEventListener('click', (e) => {
-  if(window.UISoundEngine) window.UISoundEngine.init();
+  if (window.UISoundEngine) window.UISoundEngine.init();
   let target = e.target.closest('button, .nav-item, .exercise-card, .btn-primary, .btn-secondary, .btn-complete-massive, .radio-btn, .zoomable-image, .mission-card');
   if (target) {
-     if(target.disabled) {
-         if(window.UISoundEngine) window.UISoundEngine.playError();
-         if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-     } else {
-         if(window.UISoundEngine) window.UISoundEngine.playClick();
-         if(navigator.vibrate) navigator.vibrate(15);
-     }
+    if (target.disabled) {
+      if (window.UISoundEngine) window.UISoundEngine.playError();
+      if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    } else {
+      if (window.UISoundEngine) window.UISoundEngine.playClick();
+      if (navigator.vibrate) navigator.vibrate(15);
+    }
   }
 });
