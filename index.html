@@ -27,7 +27,7 @@
     <div class="wizard-step active-step wizard-card" id="step-1">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        SISTEMA INICIADO: CALIBRACIÓN 1/5</div>
+        SISTEMA INICIADO: CALIBRACIÓN 1/6</div>
       <img src="./icon.png" id="dragon-welcome-img" class="holo-image"
         style="width:100px; height:100px; border-radius:50%; object-position:center; margin: 0 auto 15px auto;"
         onerror="this.style.display='none'; document.getElementById('dragon-emoji-fallback').style.display='block'">
@@ -46,13 +46,13 @@
     <div class="wizard-step hidden-step wizard-card" id="step-2">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: FIRMEZA 2/5</div>
+        CALIBRACIÓN: FIRMEZA 2/6</div>
       <h2 class="system-title">FUERZA DE LA MONTAÑA</h2>
       <img src="./img/techniques/str_2.png" class="holo-image"
         onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
       <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">La montaña no se
         mueve ante el viento.<br>Desciende y asciende hasta que tu voluntad se imponga al cuerpo. ¿Cuántas
-        <b>flexiones</b> resistes?
+        <b>flexiones estricas</b> resistes?
       </p>
       <input type="number" id="ob-str" class="wizard-input" placeholder="Repeticiones" min="0">
       <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR VOLUNTAD</button>
@@ -62,22 +62,47 @@
     <div class="wizard-step hidden-step wizard-card" id="step-3">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: EL RAYO 3/5</div>
+        CALIBRACIÓN: EL RAYO 3/6</div>
       <h2 class="system-title">VELOCIDAD DE LA SOMBRA</h2>
       <img src="./img/techniques/spd_3.png" class="holo-image"
         onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
       <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El rayo precede
-        al trueno. La explosividad es la clave.<br>Durante 60 latidos, descubre cuántos <b>Burpees</b> puede resistir el
-        motor de tu aliento.</p>
+        al trueno. La explosividad es la clave.<br>Durante 60 latidos, descubre cuántos <b>Burpees con salto</b> puedes ejecutar.</p>
       <input type="number" id="ob-spd" class="wizard-input" placeholder="Burpees Totales" min="0">
       <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR VELOCIDAD</button>
     </div>
 
-    <!-- FASE 4: Flexibilidad -->
+    <!-- FASE 4: Piernas -->
     <div class="wizard-step hidden-step wizard-card" id="step-4">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: EL BAMBÚ 4/5</div>
+        CALIBRACIÓN: RAÍCES 4/6</div>
+      <h2 class="system-title">RAÍCES DE HIERRO</h2>
+      <img src="./img/techniques/str_16.png" class="holo-image"
+        onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHYzeHh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpx927361Fvi/giphy.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">Sin raíces profundas, el roble cae.<br>Desciende rompiendo el paralelo en cada <b>sentadilla</b>. ¿Cuántas logras en un minuto?</p>
+      <input type="number" id="ob-legs" class="wizard-input" placeholder="Sentadillas Totales" min="0">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR RAÍZ</button>
+    </div>
+
+    <!-- FASE 5: Resistencia (Plancha) -->
+    <div class="wizard-step hidden-step wizard-card" id="step-5">
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        CALIBRACIÓN: EL TEMPLO 5/6</div>
+      <h2 class="system-title">FORTALEZA VIVA</h2>
+      <img src="./img/techniques/end_2.png" class="holo-image"
+        onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eHh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpx927361Fvi/giphy.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El centro es donde reside el poder inmóvil.<br>Mantén tu cuerpo como una vara de acero. ¿Cuántos <b>segundos</b> resistes en plancha?</p>
+      <input type="number" id="ob-end" class="wizard-input" placeholder="Segundos Totales" min="0">
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(5)">REGISTRAR TEMPLO</button>
+    </div>
+
+    <!-- FASE 6: Flexibilidad -->
+    <div class="wizard-step hidden-step wizard-card" id="step-6">
+      <div
+        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
+        CALIBRACIÓN: EL BAMBÚ 6/6</div>
       <h2 class="system-title">FLUIDEZ DEL ESPÍRITU</h2>
       <img src="./img/techniques/flex_1.png" class="holo-image"
         onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
@@ -85,27 +110,11 @@
         se dobla, se rompe.<br>Alcanza la tierra con tus manos descubriendo tu límite de elasticidad.</p>
       <select id="ob-flex" class="wizard-select">
         <option value="1">🌱 Inflexible (No llego a las rodillas)</option>
-        <option value="5">🌿 Rígido (Llego a las espinillas)</option>
-        <option value="10">🎋 Flexible (Toco mis pies)</option>
-        <option value="15">🐉 Maestro (Palmas al suelo)</option>
+        <option value="10">🌿 Rígido (Llego a las espinillas)</option>
+        <option value="20">🎋 Flexible (Toco mis pies)</option>
+        <option value="30">🐉 Maestro (Palmas al suelo)</option>
       </select>
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR FLUIDEZ</button>
-    </div>
-
-    <!-- FASE 5: Resistencia -->
-    <div class="wizard-step hidden-step wizard-card" id="step-5">
-      <div
-        style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: EL SENDERO 5/5</div>
-      <h2 class="system-title">RESISTENCIA DEL GUERRERO</h2>
-      <img src="./img/techniques/run_1.png" class="holo-image"
-        onerror="this.src='https://c.tenor.com/u7qFk9kX_V0AAAAC/running-run.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El camino largo
-        revela al verdadero maestro.<br>¿Cuántos minutos eres capaz de correr antes de que el fuego queme tu aliento?
-      </p>
-      <input type="number" id="ob-end" class="wizard-input" placeholder="Minutos (aprox)" min="0">
-      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:10px;">FORJAR EL
-        ACCESO</button>
+      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:10px;">FORJAR EL ACCESO</button>
     </div>
   </div>
 

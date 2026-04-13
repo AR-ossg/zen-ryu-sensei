@@ -439,7 +439,8 @@
       1: 'ob-name',
       2: 'ob-str',
       3: 'ob-spd',
-      4: 'ob-flex'
+      4: 'ob-legs',
+      5: 'ob-end'
     };
 
     let el = document.getElementById(inputsCheck[currentStep]);
@@ -469,13 +470,27 @@
     player.name = document.getElementById('ob-name').value;
     let vStr = parseInt(document.getElementById('ob-str').value) || 0;
     let vSpd = parseInt(document.getElementById('ob-spd').value) || 0;
+    let vLegs = parseInt(document.getElementById('ob-legs').value) || 0;
+    let vEnd = parseInt(document.getElementById('ob-end').value) || 0;
     let vFlex = parseInt(document.getElementById('ob-flex').value) || 1;
-    let vEnd = parseFloat(document.getElementById('ob-end').value) || 0;
 
-    let lvlStr = Math.max(1, Math.floor(vStr / 2) + 1);
-    let lvlSpd = Math.max(1, Math.floor(vSpd * 0.8) + 1);
-    let lvlFlex = Math.max(1, vFlex);
-    let lvlEnd = Math.max(1, Math.floor(vEnd * 3.5) + 1);
+    // --- ALGORITMO DE CALIBRACIÓN AL CÓDICE (1-100) ---
+    // Fuerza: 1 rep = 1 Lvl (Base 1). Experiencia Marcial: 40 reps = Lvl 40.
+    let lvlStrRaw = Math.max(1, Math.floor(vStr * 1.0) + 1);
+    // Velocidad: 1 burpee = 1.5 Lvl (Satura rápido por exigencia anaeróbica). 20 reps = Lvl 30.
+    let lvlSpdRaw = Math.max(1, Math.floor(vSpd * 1.5) + 1);
+    // Piernas: 2 reps = 1 Lvl. 50 sentadillas = Lvl 25.
+    let lvlLegsRaw = Math.max(1, Math.floor(vLegs * 0.5) + 1);
+    // Resistencia: 3 seg de plancha = 1 Lvl. 120 seg = Lvl 40.
+    let lvlEndRaw = Math.max(1, Math.floor(vEnd / 3) + 1);
+    // Flexibilidad: Mapeo directo del selector sensorial.
+    let lvlFlexRaw = Math.max(1, vFlex);
+
+    // Consolidación de Atributos
+    let lvlStr = Math.round((lvlStrRaw + lvlLegsRaw) / 2);
+    let lvlSpd = lvlSpdRaw;
+    let lvlEnd = lvlEndRaw;
+    let lvlFlex = lvlFlexRaw;
 
     let maxInitLvl = Math.max(lvlStr, lvlSpd, lvlFlex, lvlEnd);
     let startIdx = rankTitles.findIndex(r => maxInitLvl <= r.max);
