@@ -398,19 +398,11 @@
 
   // SOUNDS & NOTIFICATIONS
   window.playSysSound = function () {
-    const snd = document.getElementById('sys-sync-sound');
-    if (snd) {
-      snd.currentTime = 0;
-      snd.play().catch(() => { });
-    }
+    if (window.UISoundEngine) window.UISoundEngine.playClick();
   };
 
   window.playCompleteSound = function () {
-    const snd = document.getElementById('sys-complete-sound');
-    if (snd) {
-      snd.currentTime = 0;
-      snd.play().catch(() => { });
-    }
+    if (window.UISoundEngine) window.UISoundEngine.playSwoosh();
   };
 
   // ONBOARDING WIZARD
@@ -1556,11 +1548,51 @@
   window.applyInventory = function () {
     if (!player.unlockedItems) player.unlockedItems = [];
 
+    // Reset advanced themes
+    document.body.classList.remove('theme-boreal', 'theme-solar', 'theme-sombra', 'theme-sangre');
+    let weatherLayer = document.getElementById('weather-layer');
+    if (weatherLayer) weatherLayer.innerHTML = '';
+
     if (player.activeAura) {
       let aura = STORE_ITEMS.find(i => i.id === player.activeAura);
       if (aura && aura.meta) {
         document.documentElement.style.setProperty('--accent-gold', aura.meta);
         document.documentElement.style.setProperty('--accent-gold-glow', aura.meta + '66');
+
+        // Apply visual themes & particles
+        if (aura.id === 'aura_hielo') {
+          document.body.classList.add('theme-boreal');
+          if (weatherLayer) {
+            for(let i=0; i<30; i++) {
+              let w = Math.random() * 5 + 2;
+              weatherLayer.innerHTML += `<div class="snow-flake" style="width:${w}px; height:${w}px; left:${Math.random()*100}vw; animation-duration:${Math.random()*3 + 2}s; animation-delay:-${Math.random()*5}s"></div>`;
+            }
+          }
+        } else if (aura.id === 'aura_solar') {
+          document.body.classList.add('theme-solar');
+          if (weatherLayer) {
+            for(let i=0; i<25; i++) {
+              let w = Math.random() * 4 + 2;
+              weatherLayer.innerHTML += `<div class="ember" style="width:${w}px; height:${w}px; left:${Math.random()*100}vw; animation-duration:${Math.random()*4 + 3}s; animation-delay:-${Math.random()*5}s"></div>`;
+            }
+          }
+        } else if (aura.id === 'aura_sombra') {
+          document.body.classList.add('theme-sombra');
+          if (weatherLayer) {
+            for(let i=0; i<15; i++) {
+              let w = Math.random() * 80 + 30; // Larger shadowy blobs
+              weatherLayer.innerHTML += `<div class="shadow-blob" style="width:${w}px; height:${w}px; left:${Math.random()*100}vw; top:${Math.random()*100}vh; animation-duration:${Math.random()*5 + 4}s; animation-delay:-${Math.random()*5}s"></div>`;
+            }
+          }
+        } else if (aura.id === 'aura_sangre') {
+          document.body.classList.add('theme-sangre');
+          if (weatherLayer) {
+            for(let i=0; i<35; i++) {
+              let w = Math.random() * 5 + 2;
+              weatherLayer.innerHTML += `<div class="blood-particle" style="width:${w}px; height:${w}px; left:${Math.random()*100}vw; animation-duration:${Math.random()*3 + 2}s; animation-delay:-${Math.random()*5}s"></div>`;
+            }
+          }
+        }
       }
     } else {
       document.documentElement.style.setProperty('--accent-gold', '#ffd700');
@@ -1742,6 +1774,7 @@
   let timerInterval;
   let timerSeconds = 0;
   let isCountdown = false;
+  let originalTimerSeconds = 0;
   let audioCtx = null;
 
   function initAudio() {
@@ -1850,6 +1883,7 @@
 
   window.openTimer = function (seconds) {
     timerSeconds = parseInt(seconds, 10) || 0;
+    originalTimerSeconds = timerSeconds;
     isCountdown = timerSeconds > 0;
     updateTimerDisplay();
     openModal('timer-modal');
@@ -1878,7 +1912,12 @@
     }, 1000);
   });
 
-  document.getElementById('timer-stop').addEventListener('click', () => clearInterval(timerInterval));
+  document.getElementById('timer-stop').addEventListener('click', () => {
+    clearInterval(timerInterval);
+    timerSeconds = originalTimerSeconds;
+    isCountdown = originalTimerSeconds > 0;
+    updateTimerDisplay();
+  });
   document.getElementById('timer-close').addEventListener('click', () => {
     clearInterval(timerInterval);
     closeModal('timer-modal');
@@ -1903,6 +1942,61 @@
       }, 400);
     }, 30000);
   }
+
+  // ====== CÓDIGO SECRETO: MODO MAESTRO ======
+  let _secretTaps = 0;
+  let _secretTimer = null;
+  const heroTitle = document.querySelector('.hero-title');
+  if (heroTitle) {
+    heroTitle.addEventListener('click', () => {
+      _secretTaps++;
+      clearTimeout(_secretTimer);
+      _secretTimer = setTimeout(() => { _secretTaps = 0; }, 2000);
+      if (_secretTaps >= 7) {
+        _secretTaps = 0;
+        activateCheatMode();
+      }
+    });
+  }
+
+  function activateCheatMode() {
+    // Max coins
+    player.coins = 99999;
+    // Max stats
+    ['str', 'spd', 'flex', 'end'].forEach(s => {
+      player.stats[s].lvl = 99;
+      player.stats[s].xp = 0;
+    });
+    // Unlock all store items
+    STORE_ITEMS.forEach(item => {
+      if (!player.unlockedItems.includes(item.id)) {
+        player.unlockedItems.push(item.id);
+      }
+    });
+    // Unlock all badges
+    BADGE_DB.forEach(badge => {
+      if (!player.unlockedBadges.includes(badge.id)) {
+        player.unlockedBadges.push(badge.id);
+      }
+    });
+    // High streak & workout count
+    player.streak = 30;
+    player.workoutCount = 50;
+    player.rankIndex = rankTitles.length - 1;
+
+    savePlayer();
+    applyInventory();
+    updateBadgesUI();
+    updateUI();
+    if (window.updateCodexUI) updateCodexUI();
+
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]);
+    showNotification(
+      "⚡ MODO MAESTRO ACTIVADO ⚡\n\n🪙 99,999 Monedas Zen\n🗡️ Todos los Stats a Lvl 15\n🔓 Todo el Bazar desbloqueado\n🏅 Todas las insignias obtenidas\n🔥 Racha x30\n\nEl Oráculo te ha concedido el poder absoluto.",
+      "🐉 CÓDIGO SECRETO"
+    );
+  }
+  // ====== FIN CÓDIGO SECRETO ======
 
   loadPlayer();
 })();
