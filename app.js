@@ -21,12 +21,39 @@
   };
 
   const BADGE_DB = [
+    // --- Metas de Racha ---
     { id: 'b_streak_3', name: 'Llama Naciente', icon: '🔥', desc: 'Alcanza una racha de 3 días.', goal: (p) => p.streak >= 3 },
     { id: 'b_streak_7', name: 'Llama Eterna', icon: '🏮', desc: 'Alcanza una racha de 7 días.', goal: (p) => p.streak >= 7 },
-    { id: 'b_lvl_5', name: 'Iniciado ZEN', icon: '🥋', desc: 'Alcanza el nivel 5 de fuerza/res.', goal: (p) => p.stats.str.lvl >= 5 || p.stats.end.lvl >= 5 },
+    { id: 'b_streak_14', name: 'Corazón de Fénix', icon: '🦅', desc: 'Alcanza una racha inquebrantable de 14 días.', goal: (p) => p.streak >= 14 },
+    { id: 'b_streak_30', name: 'Espíritu de Montaña', icon: '🗻', desc: 'Alcanza una racha sagrada de 30 días seguidos.', goal: (p) => p.streak >= 30 },
+
+    // --- Metas de Nivel (Especialización) ---
+    { id: 'b_lvl_5', name: 'Iniciado ZEN', icon: '🥋', desc: 'Alcanza el nivel 5 de fuerza o resistencia.', goal: (p) => p.stats.str.lvl >= 5 || p.stats.end.lvl >= 5 },
     { id: 'b_lvl_10', name: 'Guerrero de Élite', icon: '🗡️', desc: 'Alcanza el nivel 10 en cualquier estadística.', goal: (p) => Object.values(p.stats).some(s => s.lvl >= 10) },
-    { id: 'b_rich', name: 'Bolsillos de Oro', icon: '💰', desc: 'Acumula 1000 Monedas Zen.', goal: (p) => p.coins >= 1000 },
-    { id: 'b_library', name: 'Científico del Dojo', icon: '🧠', desc: 'Realiza 10 entrenamientos totales.', goal: (p) => p.workoutCount >= 10 }
+    { id: 'b_lvl_30', name: 'Maestro Disciplinado', icon: '⚡', desc: 'Alcanza el nivel 30 en una disciplina singular.', goal: (p) => Object.values(p.stats).some(s => s.lvl >= 30) },
+    { id: 'b_lvl_50', name: 'Cinturón Negro', icon: '⛩️', desc: 'Domina un atributo físico hasta el Nivel 50.', goal: (p) => Object.values(p.stats).some(s => s.lvl >= 50) },
+    { id: 'b_lvl_100', name: 'Sensei Ascendido', icon: '🐉', desc: 'Corona el nivel 100 y conviértete en una Leyenda.', goal: (p) => Object.values(p.stats).some(s => s.lvl >= 100) },
+
+    // --- Metas de Equilibrio ---
+    { id: 'b_balance_15', name: 'El Camino del Loto', icon: '💠', desc: 'Lleva TODAS tus estadísticas base al Nivel 15.', goal: (p) => Object.values(p.stats).every(s => s.lvl >= 15) },
+
+    // --- Metas de Esfuerzo Físico ---
+    { id: 'b_first_blood', name: 'El Primer Paso', icon: '👣', desc: 'Completa tu primer entrenamiento.', goal: (p) => p.workoutCount >= 1 },
+    { id: 'b_library', name: 'Científico del Dojo', icon: '🧠', desc: 'Realiza 10 entrenamientos totales terminados.', goal: (p) => p.workoutCount >= 10 },
+    { id: 'b_library_50', name: 'Alma Curtída', icon: '🩸', desc: 'Rompe la barrera y registra 50 entrenamientos.', goal: (p) => p.workoutCount >= 50 },
+    { id: 'b_library_100', name: 'Demonio Marcial', icon: '🦾', desc: 'Sobrevive impecablemente a 100 batallas y sesiones.', goal: (p) => p.workoutCount >= 100 },
+
+    // --- Economía y Bazar ---
+    { id: 'b_rich', name: 'Bolsillos de Oro', icon: '💰', desc: 'Acumula las preciadas 1,000 Monedas Zen.', goal: (p) => p.coins >= 1000 },
+    { id: 'b_rich_5000', name: 'Templo de Abundancia', icon: '🪙', desc: 'Amasa fortuna letal poseyendo 5,000 Monedas Zen.', goal: (p) => p.coins >= 5000 },
+    { id: 'b_rich_10000', name: 'Dragón de Oro', icon: '💎', desc: 'Leyenda del comercio: 10,000 Monedas Zen.', goal: (p) => p.coins >= 10000 },
+    
+    // --- Coleccionista ---
+    { id: 'b_collector', name: 'Almacén del Dragón', icon: '🎒', desc: 'Desbloquea 5 objetos oscuros o reliquias de la tienda.', goal: (p) => (p.unlockedItems ? p.unlockedItems.length : 0) >= 5 },
+    { id: 'b_collector_max', name: 'Curador del Templo', icon: '🏺', desc: 'Consigue 10 artefactos sagrados.', goal: (p) => (p.unlockedItems ? p.unlockedItems.length : 0) >= 10 },
+    
+    // --- Devoción Suprema ---
+    { id: 'b_streak_100', name: 'Trascendencia', icon: '🌌', desc: 'Devoción irreal: Racha de 100 Días Seguidos.', goal: (p) => p.streak >= 100 }
   ];
 
   const STORE_ITEMS = [
@@ -899,43 +926,104 @@
     document.getElementById('loader').style.display = 'block';
 
     setTimeout(() => {
-      let selected = [];
-      const statsOrder = ['str', 'spd', 'end', 'flex'];
-
-      // El volumen es ahora estático por petición del guerrero:
-      // Cuerpo Completo = 8 ejercicios (2 de cada uno)
-      // Especializado = 6 ejercicios (del mismo stat)
-      let targetStats = focusStat ? [focusStat] : statsOrder;
-      let countPerStat = focusStat ? 6 : 2;
-
-      targetStats.forEach(stat => {
-        // 1. Filtrar base de datos según nivel individual y stat
-        let validForStat = EXERCISE_DB.filter(ex => {
-          let pLvl = player.stats[stat]?.lvl || 1;
-          let topLimit = window.isExamRoutine ? ex.lvl_max + 10 : ex.lvl_max;
-          return ex.s === stat && pLvl >= ex.lvl_min && pLvl <= topLimit;
+      // Helper function to safely fetch N unique exercises from a filter predicate
+      function fetchExercises(predicate, count, requiredStatLvl) {
+        let maxLvlCap = window.isExamRoutine ? 10 : 0;
+        
+        // 1. Strict Query (Matches exactly level limits)
+        let valid = EXERCISE_DB.filter(ex => {
+          let limit = ex.lvl_max + maxLvlCap;
+          return predicate(ex) && requiredStatLvl >= ex.lvl_min && requiredStatLvl <= limit;
         });
 
-        if (validForStat.length === 0) {
-          validForStat = EXERCISE_DB.filter(ex => ex.s === stat);
+        // 2. Fallback: If not enough unique exercises, drop the maximum cap (e.g. at lvl 99 allow returning to lvl 60 exercises, scaling will handle the toughness)
+        if (valid.length < count) {
+          valid = EXERCISE_DB.filter(ex => predicate(ex) && requiredStatLvl >= ex.lvl_min);
+        }
+        
+        // 3. Final Fallback: If still not enough (for some reason), ignore levels completely
+        if (valid.length < count) {
+          valid = EXERCISE_DB.filter(predicate);
         }
 
-        // 2. Barajar pool de este stat y seleccionar
-        let pool = [...validForStat].sort(() => 0.5 - Math.random());
-        let statSelection = [];
-        while (statSelection.length < countPerStat) {
-          statSelection.push(...pool);
+        // Shuffle pool
+        let pool = [...valid].sort(() => 0.5 - Math.random());
+        let results = [];
+        
+        // Add elements, repeating only if count > pool size
+        while (results.length < count) {
+          for (let i = 0; i < pool.length && results.length < count; i++) {
+            results.push(pool[i]);
+          }
+          // Shuffle again to randomize loops if repeating is mandatory
+          pool.sort(() => 0.5 - Math.random());
+          if (pool.length === 0) break; // Defensive
         }
-        selected.push(...statSelection.slice(0, countPerStat));
-      });
+        
+        return results;
+      }
+
+      let selected = [];
+
+      if (focusStat) {
+        // Specialized Training: Fixed 6 exercises of a single stat
+        let pLvl = player.stats[focusStat]?.lvl || 1;
+        selected = fetchExercises(ex => ex.s === focusStat, 6, pLvl);
+      } else {
+        // Smart Trainer: 3-Day Split Cycle based on user history
+        let daySplitIndex = (player.workoutCount || 0) % 3;
+        
+        let pLvlStr = player.stats.str?.lvl || 1;
+        let pLvlSpd = player.stats.spd?.lvl || 1;
+        let pLvlEnd = player.stats.end?.lvl || 1;
+        let pLvlFlex = player.stats.flex?.lvl || 1;
+
+        if (daySplitIndex === 0) {
+          // DIA A: TREN SUPERIOR Y TRONCO (Empuje, Tracción, Core Abdominal)
+          let getPush = ex => ex.s === 'str' && ex.f === 'push';
+          let getPull = ex => ex.s === 'str' && ex.f === 'pull';
+          let getCore = ex => ex.s === 'end' && ex.f === 'core'; 
+          let getStretchUpper = ex => ex.s === 'flex' && ex.f === 'upper'; 
+
+          selected.push(...fetchExercises(getPush, 3, pLvlStr));
+          selected.push(...fetchExercises(getPull, 2, pLvlStr));
+          selected.push(...fetchExercises(getCore, 2, pLvlEnd));
+          selected.push(...fetchExercises(getStretchUpper, 1, pLvlFlex));
+
+        } else if (daySplitIndex === 1) {
+          // DIA B: TREN INFERIOR Y EXPLOSIVIDAD (Piernas, Pliometría, Isometría Baja)
+          let getLegsStr = ex => ex.s === 'str' && ex.f === 'legs';
+          let getLegsIso = ex => ex.s === 'end' && ex.f === 'iso_legs'; // Ma bu, Wall sit
+          let getCardio = ex => ex.s === 'spd' && ex.f === 'cardio';
+          let getStretchLower = ex => ex.s === 'flex' && ex.f === 'lower';
+
+          selected.push(...fetchExercises(getLegsStr, 3, pLvlStr));
+          selected.push(...fetchExercises(getLegsIso, 1, pLvlEnd)); // Solo UNA isometría de piernas a la vez
+          selected.push(...fetchExercises(getCardio, 3, pLvlSpd));
+          selected.push(...fetchExercises(getStretchLower, 1, pLvlFlex));
+
+        } else {
+          // DIA C: ÁGILIDAD, MOVILIDAD Y ENDURANCE FULL BODY
+          let getSpd = ex => ex.s === 'spd';
+          let getEnd = ex => ex.s === 'end' && ex.f !== 'iso_legs'; // Evitar quemar piernas statics
+          let getFlex = ex => ex.s === 'flex';
+
+          selected.push(...fetchExercises(getSpd, 3, pLvlSpd));
+          selected.push(...fetchExercises(getEnd, 3, pLvlEnd));
+          selected.push(...fetchExercises(getFlex, 2, pLvlFlex));
+        }
+      }
 
       // 3. Escalar matemáticamente (sin barajar al final para mantener orden)
       let routine = selected.map(ex => {
         let isExam = window.isExamRoutine;
         let pLvl = player.stats[ex.s]?.lvl || 1;
         let virtualLevel = isExam ? ex.lvl_max : pLvl;
+        
+        // Evitar que el fallback asigne 100+ repeticiones a un ejercicio básico acotando su techo orgánico.
+        let capLevel = Math.min(virtualLevel, ex.lvl_max + 5);
 
-        let factor = (virtualLevel - ex.lvl_min) * ex.scale;
+        let factor = (capLevel - ex.lvl_min) * ex.scale;
         let finalVal = Math.floor(Math.max(ex.baseVal, ex.baseVal + factor));
         let numSets = type === 'mobility' ? 2 : (player.rankIndex >= 2 ? 4 : 3);
         if (isExam) numSets += 1;
@@ -1252,19 +1340,21 @@
 
       let timerBtn = '';
       if (isTime && numericVal > 0) {
-        timerBtn = `<div style="display:flex; gap:8px;">
-            <button class="btn-secondary" style="border-color:var(--accent-gold); color:var(--accent-gold); width:50%;" onclick="openTimer(${numericVal})">⏱️ ESFUERZO</button>
-            <button class="btn-secondary" style="border-color:#555; width:50%;" onclick="openTimer(60)">⏱️ RECUPERACIÓN</button>
+        timerBtn = `<div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 12px; width:100%;">
+            <button class="btn-secondary" style="border-color:var(--accent-gold); color:var(--accent-gold); width:100%; padding:18px 0; font-size:1.1rem; font-weight:800; border-width:2px; letter-spacing:1px;" onclick="openTimer(${numericVal})">⏱️ TEMPORIZADOR (${numericVal}s)</button>
+            <button class="btn-secondary" style="border-color:#555; width:100%; padding:16px 0; font-size:1rem; font-weight:700;" onclick="openTimer(60)">⏱️ RELOJ RECUPERACIÓN</button>
          </div>`;
       } else {
-        timerBtn = `<button class="btn-secondary" style="width:100%; border-color:#555;" onclick="openTimer(60)">⏱️ RECUPERACIÓN 60s</button>`;
+        timerBtn = `<div style="margin-bottom: 12px; width:100%;">
+          <button class="btn-secondary" style="width:100%; border-color:#555; padding:16px 0; font-size:1rem; font-weight:700;" onclick="openTimer(60)">⏱️ RELOJ RECUPERACIÓN (60s)</button>
+        </div>`;
       }
 
       const safeImg = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
       const safeDesc = (ex.desc || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
       const safeN = (ex.n || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
       const altBtn = (ex.alt && !window.isExamRoutine)
-        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; margin-top:8px; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ADAPTAR TÉCNICA</button>`
+        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; padding:14px 0; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ADAPTAR TÉCNICA</button>`
         : '';
 
       const baseLvl = ex.lvl_min || 1;
@@ -1281,11 +1371,14 @@
             ${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}
           </div>
           
-          <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:350px;">
-            <button class="btn-complete-massive focus-complete-btn" onclick="completeFocusTask(${index}, '${ex.s || 'str'}', ${xpReward})">✔️ FORJAR (+${xpReward} XP)</button>
+          <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:350px;">
             ${timerBtn}
-            <button class="btn-secondary" style="width:100%; border-color:#444;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ TÉCNICA E INSTRUCCIONES</button>
+            <button class="btn-secondary" style="width:100%; border-color:#444; padding:14px 0; font-weight:800;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ INSTRUCCIONES</button>
             ${altBtn}
+            
+            <div style="margin-top: 15px;">
+              <button class="btn-complete-massive focus-complete-btn" onclick="completeFocusTask(${index}, '${ex.s || 'str'}', ${xpReward})" style="width:100%; padding:20px 0; font-size:1.3rem;">✔️ FORJAR (+${xpReward} XP)</button>
+            </div>
           </div>
         </div>`;
     });
@@ -1964,7 +2057,7 @@
     player.coins = 99999;
     // Max stats
     ['str', 'spd', 'flex', 'end'].forEach(s => {
-      player.stats[s].lvl = 99;
+      player.stats[s].lvl = 100;
       player.stats[s].xp = 0;
     });
     // Unlock all store items
@@ -1980,8 +2073,8 @@
       }
     });
     // High streak & workout count
-    player.streak = 30;
-    player.workoutCount = 50;
+    player.streak = 100;
+    player.workoutCount = 100;
     player.rankIndex = rankTitles.length - 1;
 
     savePlayer();
@@ -1992,7 +2085,7 @@
 
     if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]);
     showNotification(
-      "⚡ MODO MAESTRO ACTIVADO ⚡\n\n🪙 99,999 Monedas Zen\n🗡️ Todos los Stats a Lvl 15\n🔓 Todo el Bazar desbloqueado\n🏅 Todas las insignias obtenidas\n🔥 Racha x30\n\nEl Oráculo te ha concedido el poder absoluto.",
+      "⚡ MODO MAESTRO ACTIVADO ⚡\n\n🪙 99,999 Monedas Zen\n🗡️ Todos los Stats a Lvl 100\n🔓 Todo el Bazar desbloqueado\n🏅 Todas las insignias obtenidas\n🔥 Racha x100\n\nEl Oráculo te ha concedido el poder absoluto.",
       "🐉 CÓDIGO SECRETO"
     );
   }
