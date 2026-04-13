@@ -101,6 +101,28 @@
     end: 'RESISTENCIA'
   };
 
+  let _ritualCount = 0;
+  let _ritualTimer = null;
+  window.handleAvatarRitual = function() {
+    clearTimeout(_ritualTimer);
+    _ritualCount++;
+    if (_ritualCount >= 7) {
+      window.cheatWealth();
+      _ritualCount = 0;
+    } else {
+      _ritualTimer = setTimeout(() => { _ritualCount = 0; }, 2000);
+    }
+  };
+
+  window.cheatWealth = function () {
+    player.coins += 10000;
+    savePlayer();
+    updateUI();
+    // Notificación sutil solo para el desarrollador
+    console.log("ZenRyu: Bendición del Maestro activada (+10,000)");
+    showNotification("Bendición de Prosperidad activada.", "Sincronización");
+  };
+
   window.debugSystem = function () {
     if (confirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?")) {
       if ('serviceWorker' in navigator) {
