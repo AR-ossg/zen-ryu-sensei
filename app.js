@@ -1001,53 +1001,105 @@
       }
 
       let selected = [];
+      window.currentAiMessage = "Forjando sesión con parámetros neutrales.";
 
-      if (focusStat) {
+      if (window.isExamRoutine) {
+        window.currentAiMessage = "El Oráculo te pone a prueba. Demuestra que eres digno de ascender realizando este Examen de Poder sin titubear.";
+      }
+
+      if (focusStat && !window.isExamRoutine) {
         // Specialized Training: Fixed 6 exercises of a single stat
         let pLvl = player.stats[focusStat]?.lvl || 1;
         selected = fetchExercises(ex => ex.s === focusStat, 6, pLvl);
+        window.currentAiMessage = `Has elegido enfocarte en tu ${STAT_LABELS[focusStat]}. El Maestro aprueba tu determinación. Hoy nos centraremos sólo en eso.`;
       } else {
-        // Smart Trainer: 3-Day Split Cycle based on user history
-        let daySplitIndex = (player.workoutCount || 0) % 3;
-        
+        // Smart Trainer Logic based on stats
         let pLvlStr = player.stats.str?.lvl || 1;
         let pLvlSpd = player.stats.spd?.lvl || 1;
         let pLvlEnd = player.stats.end?.lvl || 1;
         let pLvlFlex = player.stats.flex?.lvl || 1;
 
-        if (daySplitIndex === 0) {
-          // DIA A: TREN SUPERIOR Y TRONCO (Empuje, Tracción, Core Abdominal)
+        let statsArr = [
+          { s: 'str', lvl: pLvlStr },
+          { s: 'spd', lvl: pLvlSpd },
+          { s: 'end', lvl: pLvlEnd },
+          { s: 'flex', lvl: pLvlFlex }
+        ];
+
+        statsArr.sort((a,b) => a.lvl - b.lvl);
+        let weakest = statsArr[0].s;
+        let weakestLvl = statsArr[0].lvl;
+        let strongest = statsArr[statsArr.length - 1].s;
+        let strongestLvl = statsArr[statsArr.length - 1].lvl;
+        let maxDiff = strongestLvl - weakestLvl;
+        
+        let cycleIdx = (player.workoutCount || 0) % 5;
+        let finalSplit = 0; // 0: Upper, 1: Lower, 2: FullBody, 3: Weakness, 4: Combo
+
+        if (!window.isExamRoutine && maxDiff >= 3 && cycleIdx === 3) {
+           finalSplit = 3; // Corregir debilidad
+           window.currentAiMessage = `El Maestro observa que tu ${STAT_LABELS[weakest]} está rezagada (Lvl ${weakestLvl}). Un verdadero guerrero no tiene puntos ciegos. Hoy corregiremos esa debilidad.`;
+        } else if (!window.isExamRoutine && maxDiff >= 4 && cycleIdx === 4) {
+           finalSplit = 4; // Mezclar débil y fuerte
+           window.currentAiMessage = `Debes equilibrar tus fuerzas. Hoy fusionaremos tu supremacía en ${STAT_LABELS[strongest]} con tu debilidad en ${STAT_LABELS[weakest]}.`;
+        } else {
+           finalSplit = (player.workoutCount || 0) % 3;
+           if (!window.isExamRoutine) {
+               if (finalSplit === 0) window.currentAiMessage = "Hoy forjaremos el Tronco y la Fuerza Base. Empuje, tracción y un núcleo irrompible para cimentar tu postura.";
+               else if (finalSplit === 1) window.currentAiMessage = "Un árbol sin raíces cae ante la tormenta. Hoy toca sufrir para fortalecer tus Piernas y tu Explosividad.";
+               else window.currentAiMessage = "El templo exige fluidez. Hoy trabajaremos la Agilidad, Flexibilidad y Resistencia Total para moverte como el viento.";
+           }
+        }
+
+        let isLowRank = (player.rankIndex || 0) < 4; // Rango < 4 (Principiante - Nivel < 30)
+
+        if (finalSplit === 0) {
+          // DIA A: TREN SUPERIOR Y TRONCO
           let getPush = ex => ex.s === 'str' && ex.f === 'push';
           let getPull = ex => ex.s === 'str' && ex.f === 'pull';
           let getCore = ex => ex.s === 'end' && ex.f === 'core'; 
           let getStretchUpper = ex => ex.s === 'flex' && ex.f === 'upper'; 
 
-          selected.push(...fetchExercises(getPush, 3, pLvlStr));
+          selected.push(...fetchExercises(getPush, isLowRank ? 2 : 3, pLvlStr));
           selected.push(...fetchExercises(getPull, 2, pLvlStr));
-          selected.push(...fetchExercises(getCore, 2, pLvlEnd));
+          selected.push(...fetchExercises(getCore, isLowRank ? 1 : 2, pLvlEnd));
           selected.push(...fetchExercises(getStretchUpper, 1, pLvlFlex));
 
-        } else if (daySplitIndex === 1) {
-          // DIA B: TREN INFERIOR Y EXPLOSIVIDAD (Piernas, Pliometría, Isometría Baja)
+        } else if (finalSplit === 1) {
+          // DIA B: TREN INFERIOR Y EXPLOSIVIDAD
           let getLegsStr = ex => ex.s === 'str' && ex.f === 'legs';
-          let getLegsIso = ex => ex.s === 'end' && ex.f === 'iso_legs'; // Ma bu, Wall sit
+          let getLegsIso = ex => ex.s === 'end' && ex.f === 'iso_legs';
           let getCardio = ex => ex.s === 'spd' && ex.f === 'cardio';
           let getStretchLower = ex => ex.s === 'flex' && ex.f === 'lower';
 
-          selected.push(...fetchExercises(getLegsStr, 3, pLvlStr));
-          selected.push(...fetchExercises(getLegsIso, 1, pLvlEnd)); // Solo UNA isometría de piernas a la vez
-          selected.push(...fetchExercises(getCardio, 3, pLvlSpd));
+          selected.push(...fetchExercises(getLegsStr, isLowRank ? 2 : 3, pLvlStr));
+          selected.push(...fetchExercises(getLegsIso, 1, pLvlEnd));
+          selected.push(...fetchExercises(getCardio, isLowRank ? 2 : 3, pLvlSpd));
           selected.push(...fetchExercises(getStretchLower, 1, pLvlFlex));
 
-        } else {
+        } else if (finalSplit === 2) {
           // DIA C: ÁGILIDAD, MOVILIDAD Y ENDURANCE FULL BODY
           let getSpd = ex => ex.s === 'spd';
-          let getEnd = ex => ex.s === 'end' && ex.f !== 'iso_legs'; // Evitar quemar piernas statics
+          let getEnd = ex => ex.s === 'end' && ex.f !== 'iso_legs'; 
           let getFlex = ex => ex.s === 'flex';
 
-          selected.push(...fetchExercises(getSpd, 3, pLvlSpd));
-          selected.push(...fetchExercises(getEnd, 3, pLvlEnd));
+          selected.push(...fetchExercises(getSpd, isLowRank ? 2 : 3, pLvlSpd));
+          selected.push(...fetchExercises(getEnd, isLowRank ? 2 : 3, pLvlEnd));
           selected.push(...fetchExercises(getFlex, 2, pLvlFlex));
+
+        } else if (finalSplit === 3) {
+          // WEAKNESS CORRECTION
+          let targetLvl = player.stats[weakest]?.lvl || 1;
+          selected = fetchExercises(ex => ex.s === weakest, isLowRank ? 4 : 6, targetLvl);
+          selected.push(...fetchExercises(ex => ex.s === 'flex', 2, pLvlFlex));
+
+        } else if (finalSplit === 4) {
+          // COMBO MIX (Weakest + Strongest)
+          let tWeak = player.stats[weakest]?.lvl || 1;
+          let tStrong = player.stats[strongest]?.lvl || 1;
+          selected.push(...fetchExercises(ex => ex.s === weakest, isLowRank ? 3 : 4, tWeak));
+          selected.push(...fetchExercises(ex => ex.s === strongest, isLowRank ? 2 : 3, tStrong));
+          selected.push(...fetchExercises(ex => ex.s === 'flex', 1, pLvlFlex));
         }
       }
 
@@ -1062,7 +1114,12 @@
 
         let factor = (capLevel - ex.lvl_min) * ex.scale;
         let finalVal = Math.floor(Math.max(ex.baseVal, ex.baseVal + factor));
-        let numSets = type === 'mobility' ? 2 : (player.rankIndex >= 2 ? 4 : 3);
+        
+        let numSets = 2; // Default (Rank 0-1)
+        if ((player.rankIndex || 0) >= 6) numSets = 4; // Rank 6+
+        else if ((player.rankIndex || 0) >= 2) numSets = 3; // Rank 2-5
+
+        if (type === 'mobility') numSets = 2;
         if (isExam) numSets += 1;
 
         return {
@@ -1358,6 +1415,18 @@
     }
 
     document.getElementById('ov-focus').innerText = focusLabel;
+
+    // Display AI Insight
+    let insightPanel = document.getElementById('trainer-insight-panel');
+    let insightText = document.getElementById('trainer-insight-text');
+    if (insightPanel && insightText) {
+      if (window.currentAiMessage) {
+        insightText.innerText = `"${window.currentAiMessage}"`;
+        insightPanel.style.display = 'block';
+      } else {
+        insightPanel.style.display = 'none';
+      }
+    }
 
     ovList.innerHTML = html;
     document.getElementById('overview-content').style.display = 'block';
