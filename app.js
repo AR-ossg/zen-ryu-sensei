@@ -17,8 +17,21 @@
     unlockedItems: [],
     activeAura: null,
     unlockedBadges: [],
-    equippedBadges: [null, null, null]
+    equippedBadges: [null, null, null],
+    // 6.0 Extensions
+    voiceEnabled: true,
+    geminiKey: "",
+    equipment: "none",
+    injuries: [],
+    lastWorkoutFeedback: ''
   };
+
+  // 6.0 Core Global Hooks & Scopes
+  let activeSetIndex = 0;
+  let restInterval = null;
+  let restSecondsLeft = 0;
+  let wakeLock = null;
+  let breathPhaseTimer = null;
 
   const BADGE_DB = [
     // --- Metas de Racha ---
@@ -124,19 +137,23 @@
   };
 
   window.debugSystem = function () {
-    if (confirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?")) {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          for (let registration of registrations) { registration.unregister(); }
-        });
+    window.showConfirm(
+      "El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?",
+      "⛩️ Sincronizar Códice",
+      () => {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (let registration of registrations) { registration.unregister(); }
+          });
+        }
+        if (window.caches) {
+          caches.keys().then(names => {
+            for (let name of names) caches.delete(name);
+          });
+        }
+        location.replace(location.origin + location.pathname + '?v=' + Date.now());
       }
-      if (window.caches) {
-        caches.keys().then(names => {
-          for (let name of names) caches.delete(name);
-        });
-      }
-      location.replace(location.origin + location.pathname + '?v=' + Date.now());
-    }
+    );
   };
 
   window.sessionState = {
@@ -235,10 +252,15 @@
               await zendb.addHistory({ date: r.date, type: r.type || 'Entrenamiento' });
             }
           }
-          alert("Perfil restituido de forma segura. La academia se reiniciará para cargar tus habilidades.");
-          location.reload();
-        } else { alert("Archivo no válido para Zen Ryu Sensei."); }
-      } catch (err) { alert("Error leyendo el archivo."); }
+          showNotification("Perfil restituido de forma segura. La academia se reiniciará para cargar tus habilidades.", "⛩️ Importación de Perfil", () => {
+            location.reload();
+          });
+        } else {
+          showNotification("Archivo no válido para Zen Ryu Sensei.", "❌ Error de Códice");
+        }
+      } catch (err) {
+        showNotification("Error leyendo el archivo de perfil.", "❌ Error de Códice");
+      }
     };
     reader.readAsText(file);
     event.target.value = "";
@@ -363,6 +385,57 @@
       if (!player.activeAura) player.activeAura = null;
       if (!player.unlockedBadges) player.unlockedBadges = [];
       if (!player.equippedBadges) player.equippedBadges = [null, null, null];
+      
+      // 6.0 Defaults
+      if (typeof player.voiceEnabled === 'undefined') player.voiceEnabled = true;
+      if (typeof player.geminiKey === 'undefined') player.geminiKey = "";
+      if (typeof player.equipment === 'undefined') player.equipment = "none";
+      if (typeof player.injuries === 'undefined') player.injuries = [];
+      if (typeof player.lastWorkoutFeedback === 'undefined') player.lastWorkoutFeedback = '';
+      if (typeof player.savedVoiceURI === 'undefined') player.savedVoiceURI = "";
+      if (typeof player.voicePitch === 'undefined') player.voicePitch = 1.0;
+      if (typeof player.voiceRate === 'undefined') player.voiceRate = 0.95;
+
+      // Update PWA configs UI
+      const voiceToggle = document.getElementById('voice-toggle');
+      if (voiceToggle) voiceToggle.checked = player.voiceEnabled;
+      // Show/hide voice selector based on saved preference
+      const voiceSelectorEl = document.getElementById('voice-selector-container');
+      if (voiceSelectorEl) voiceSelectorEl.style.display = player.voiceEnabled ? 'block' : 'none';
+
+      // Update Sliders UI on load
+      const pitchSlider = document.getElementById('voice-pitch-slider');
+      const pitchVal = document.getElementById('voice-pitch-val');
+      if (pitchSlider) {
+        pitchSlider.value = player.voicePitch;
+        if (pitchVal) pitchVal.textContent = player.voicePitch.toFixed(2);
+      }
+
+      const rateSlider = document.getElementById('voice-rate-slider');
+      const rateVal = document.getElementById('voice-rate-val');
+      if (rateSlider) {
+        rateSlider.value = player.voiceRate;
+        if (rateVal) rateVal.textContent = player.voiceRate.toFixed(2);
+      }
+
+
+
+      // Populate voice dropdown — voices may load asynchronously (especially Chrome)
+      if (window.speechSynthesis) {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setTimeout(_populateVoiceSelector, 100);
+        } else {
+          // Chrome: voices not ready yet — use voiceschanged (already wired below)
+          // Fallback: try again in 1s as safety net
+          setTimeout(() => {
+            if (window.speechSynthesis.getVoices().length > 0) _populateVoiceSelector();
+          }, 1000);
+        }
+      }
+      const gKeyInput = document.getElementById('gemini-key');
+      if (gKeyInput) gKeyInput.value = player.geminiKey;
+      setTimeout(() => { window.updateGeminiStatusBadge && window.updateGeminiStatusBadge(); }, 200);
 
       document.getElementById('onboarding-wizard').classList.add('hide');
       applyInventory();
@@ -483,58 +556,90 @@
   }
 
   window.finishWizard = function () {
-    let endVal = document.getElementById('ob-end').value;
-    if (endVal.trim() === '') {
-      showNotification("No escapes del ejercicio final.", "Aviso");
+    let obName = document.getElementById('ob-name').value.trim();
+    if (obName === '') {
+      showNotification("Por honor, no dejes tu nombre en blanco.", "Aviso");
       return;
     }
 
-    player.name = document.getElementById('ob-name').value;
-    let vStr = parseInt(document.getElementById('ob-str').value) || 0;
-    let vSpd = parseInt(document.getElementById('ob-spd').value) || 0;
-    let vLegs = parseInt(document.getElementById('ob-legs').value) || 0;
-    let vEnd = parseInt(document.getElementById('ob-end').value) || 0;
-    let vFlex = parseInt(document.getElementById('ob-flex').value) || 1;
+    player.name = obName;
+    
+    // Obtener inputs del nuevo onboarding
+    let exp = document.getElementById('ob-exp').value;
+    let equip = document.getElementById('ob-equip').value;
+    let push = document.getElementById('ob-str-push').value;
+    let pull = document.getElementById('ob-str-pull').value;
+    let coreVal = parseInt(document.getElementById('ob-core').value) || 1;
+    let flexVal = parseInt(document.getElementById('ob-flex').value) || 1;
+    
+    let injuries = [];
+    document.querySelectorAll('.ob-injury:checked').forEach(cb => {
+      injuries.push(cb.value);
+    });
 
-    // --- ALGORITMO DE CALIBRACIÓN AL CÓDICE (1-100) ---
-    // Fuerza: 1 rep = 1 Lvl (Base 1). Experiencia Marcial: 40 reps = Lvl 40.
-    let lvlStrRaw = Math.max(1, Math.floor(vStr * 1.0) + 1);
-    // Velocidad: 1 burpee = 1.5 Lvl (Satura rápido por exigencia anaeróbica). 20 reps = Lvl 30.
-    let lvlSpdRaw = Math.max(1, Math.floor(vSpd * 1.5) + 1);
-    // Piernas: 2 reps = 1 Lvl. 50 sentadillas = Lvl 25.
-    let lvlLegsRaw = Math.max(1, Math.floor(vLegs * 0.5) + 1);
-    // Resistencia: 3 seg de plancha = 1 Lvl. 120 seg = Lvl 40.
-    let lvlEndRaw = Math.max(1, Math.floor(vEnd / 3) + 1);
-    // Flexibilidad: Mapeo directo del selector sensorial.
-    let lvlFlexRaw = Math.max(1, vFlex);
+    // Guardar equipamiento y lesiones en el player
+    player.equipment = equip;
+    player.injuries = injuries;
+    player.voiceEnabled = true;
+    player.geminiKey = "";
 
-    // Consolidación de Atributos
-    let lvlStr = Math.round((lvlStrRaw + lvlLegsRaw) / 2);
-    let lvlSpd = lvlSpdRaw;
-    let lvlEnd = lvlEndRaw;
-    let lvlFlex = lvlFlexRaw;
+    // Mapeo Biomecánico Realista
+    let pushLvl = 2;
+    if (push === 'guerrero') pushLvl = 12;
+    else if (push === 'campeon') pushLvl = 24;
+    else if (push === 'maestro') pushLvl = 45;
 
-    let maxInitLvl = Math.max(lvlStr, lvlSpd, lvlFlex, lvlEnd);
+    let pullLvl = 2;
+    if (pull === 'guerrero') pullLvl = 10;
+    else if (pull === 'campeon') pullLvl = 20;
+    else if (pull === 'maestro') pullLvl = 40;
+
+    let strLvl = Math.round((pushLvl + pullLvl) / 2);
+    let endLvl = Math.max(1, coreVal);
+    let flexLvl = Math.max(1, flexVal);
+
+    let spdLvl = 3;
+    if (exp === 'bambu') spdLvl = 12;
+    else if (exp === 'tigre') spdLvl = 25;
+
+    // Modular por experiencia
+    if (exp === 'semilla') {
+      strLvl = Math.min(strLvl, 8);
+      endLvl = Math.min(endLvl, 8);
+      flexLvl = Math.min(flexLvl, 10);
+    } else if (exp === 'bambu') {
+      strLvl = Math.min(Math.max(strLvl, 6), 25);
+      endLvl = Math.min(Math.max(endLvl, 6), 25);
+    } else if (exp === 'tigre') {
+      strLvl = Math.max(strLvl, 15);
+      endLvl = Math.max(endLvl, 15);
+      flexLvl = Math.max(flexLvl, 10);
+    }
+
+    let maxInitLvl = Math.max(strLvl, spdLvl, flexLvl, endLvl);
     let startIdx = rankTitles.findIndex(r => maxInitLvl <= r.max);
     player.rankIndex = startIdx === -1 ? rankTitles.length - 1 : startIdx;
 
     let allowedCap = rankTitles[player.rankIndex].max;
     player.stats = {
-      str: { lvl: Math.min(lvlStr, allowedCap), xp: 0 },
-      spd: { lvl: Math.min(lvlSpd, allowedCap), xp: 0 },
-      flex: { lvl: Math.min(lvlFlex, allowedCap), xp: 0 },
-      end: { lvl: Math.min(lvlEnd, allowedCap), xp: 0 }
+      str: { lvl: Math.min(strLvl, allowedCap), xp: 0 },
+      spd: { lvl: Math.min(spdLvl, allowedCap), xp: 0 },
+      flex: { lvl: Math.min(flexLvl, allowedCap), xp: 0 },
+      end: { lvl: Math.min(endLvl, allowedCap), xp: 0 }
     };
 
     player.workoutCount = 0;
+    player.coins = 100; // Monedas iniciales para alentar el bazar
 
     savePlayer();
     document.getElementById('onboarding-wizard').classList.add('hide');
     updateUI();
-    // Pequeña pausa para que el wizard desaparezca antes de mostrar la tarjeta
+    
+    // Hablar bienvenida
     setTimeout(() => {
+      speakSensei(`Bienvenido al Templo, ${player.name}. Tu sendero de disciplina marcial ha sido calibrado.`);
       showAscensionCard(getCurrentRank());
-    }, 350);
+    }, 450);
   }
 
   function checkExamPending() {
@@ -836,18 +941,43 @@
 
 
   window.openInfoModal = function (name, desc, imgUrl) {
+    if (!name) name = "Técnica Ancestral";
+    if (typeof desc !== 'string') desc = "No hay descripción detallada registrada para esta técnica.";
+
     document.getElementById('info-title').innerText = name;
 
-    let items = desc.split(/\d+\.\s*/).filter(i => i.trim() !== '');
+    // Separar la descripción técnica y el Consejo Zen del Sensei
+    let mainDesc = desc;
+    let zenTip = '';
+    const zenMatch = desc.match(/(?:Consejo Zen|Consejos Zen):\s*([\s\S]+)$/i);
+    if (zenMatch) {
+      zenTip = zenMatch[1].trim();
+      mainDesc = desc.replace(zenMatch[0], '').trim();
+    }
+
+    let items = mainDesc.split(/\d+\.\s*/).filter(i => i.trim() !== '');
     let listHtml = '';
     if (items.length > 1) {
-      listHtml = '<ol style="padding-left: 20px; font-family: \'Inter\', sans-serif;">';
+      listHtml = '<ol style="padding-left: 20px; font-family: \'Inter\', sans-serif; font-style: italic; border-left: 2px solid var(--accent-red); padding-left: 15px; margin: 0 0 20px 0;">';
       items.forEach(item => {
-        listHtml += `<li style="margin-bottom: 12px; color: #ccc;">${item.trim()}</li>`;
+        listHtml += `<li style="margin-bottom: 12px; color: #ccc; line-height: 1.5;">${item.trim()}</li>`;
       });
       listHtml += '</ol>';
     } else {
-      listHtml = `<p style="line-height:1.5; color:#ccc;">${desc}</p>`;
+      listHtml = `<p style="line-height: 1.5; color: #ccc; font-style: italic; border-left: 2px solid var(--accent-red); padding-left: 12px; margin: 0 0 20px 0;">${mainDesc}</p>`;
+    }
+
+    if (zenTip) {
+      listHtml += `
+        <div style="margin-top: 20px; padding: 14px 16px; background: rgba(255, 215, 0, 0.03); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 8px; box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.02); text-align: left;">
+          <div style="font-family: 'Cinzel', serif; font-size: 0.75rem; color: var(--accent-gold); letter-spacing: 2px; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            🐉 CONSEJO SENSEI
+          </div>
+          <p style="margin: 0; font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #ddd; line-height: 1.55; font-style: italic;">
+            "${zenTip}"
+          </p>
+        </div>
+      `;
     }
     document.getElementById('info-desc').innerHTML = listHtml;
 
@@ -963,6 +1093,7 @@
     document.getElementById('loader').style.display = 'block';
 
     setTimeout(() => {
+      try {
       // Helper function to safely fetch N unique exercises from a filter predicate
       function fetchExercises(predicate, count, requiredStatLvl) {
         let maxLvlCap = window.isExamRoutine ? 10 : 0;
@@ -970,17 +1101,66 @@
         // 1. Strict Query (Matches exactly level limits)
         let valid = EXERCISE_DB.filter(ex => {
           let limit = ex.lvl_max + maxLvlCap;
-          return predicate(ex) && requiredStatLvl >= ex.lvl_min && requiredStatLvl <= limit;
+          
+          // Equipment check
+          let matchesEquip = true;
+          let userEquip = player.equipment || 'none';
+          if (userEquip === 'none') {
+            matchesEquip = (ex.equip === 'none');
+          } else if (userEquip === 'bar') {
+            matchesEquip = (ex.equip === 'none' || ex.equip === 'bar');
+          }
+          
+          // Injury check
+          let avoidsInjuries = true;
+          let userInjuries = player.injuries || [];
+          if (ex.avoidInjuries && userInjuries.length > 0) {
+            avoidsInjuries = !ex.avoidInjuries.some(i => userInjuries.includes(i));
+          }
+
+          return predicate(ex) && requiredStatLvl >= ex.lvl_min && requiredStatLvl <= limit && matchesEquip && avoidsInjuries;
         });
 
         // 2. Fallback: If not enough unique exercises, drop the maximum cap (e.g. at lvl 99 allow returning to lvl 60 exercises, scaling will handle the toughness)
         if (valid.length < count) {
-          valid = EXERCISE_DB.filter(ex => predicate(ex) && requiredStatLvl >= ex.lvl_min);
+          valid = EXERCISE_DB.filter(ex => {
+            let matchesEquip = true;
+            let userEquip = player.equipment || 'none';
+            if (userEquip === 'none') matchesEquip = (ex.equip === 'none');
+            else if (userEquip === 'bar') matchesEquip = (ex.equip === 'none' || ex.equip === 'bar');
+            
+            let avoidsInjuries = true;
+            let userInjuries = player.injuries || [];
+            if (ex.avoidInjuries && userInjuries.length > 0) avoidsInjuries = !ex.avoidInjuries.some(i => userInjuries.includes(i));
+
+            return predicate(ex) && requiredStatLvl >= ex.lvl_min && matchesEquip && avoidsInjuries;
+          });
         }
         
-        // 3. Final Fallback: If still not enough (for some reason), ignore levels completely
+        // 3. Final Fallback: If still not enough, still respect lvl_min (user MUST be able to do it)
+        // but drop the lvl_max cap to allow higher-level exercises at their base values
         if (valid.length < count) {
-          valid = EXERCISE_DB.filter(predicate);
+          valid = EXERCISE_DB.filter(ex => {
+            let matchesEquip = true;
+            let userEquip = player.equipment || 'none';
+            if (userEquip === 'none') matchesEquip = (ex.equip === 'none');
+            else if (userEquip === 'bar') matchesEquip = (ex.equip === 'none' || ex.equip === 'bar');
+            let avoidsInjuries = true;
+            let userInjuries = player.injuries || [];
+            if (ex.avoidInjuries && userInjuries.length > 0) {
+              avoidsInjuries = !ex.avoidInjuries.some(i => userInjuries.includes(i));
+            }
+            // CRITICAL: lvl_min MUST be respected — user must be capable of doing the exercise
+            return predicate(ex) && requiredStatLvl >= ex.lvl_min && matchesEquip && avoidsInjuries;
+          });
+        }
+
+        // 4. Absolute last resort: same stat, any level — only if pool is completely empty
+        if (valid.length === 0) {
+          valid = EXERCISE_DB.filter(ex => {
+            const s = ex.s;
+            return predicate(ex);
+          }).slice(0, count);
         }
 
         // Shuffle pool
@@ -1033,7 +1213,9 @@
         let strongestLvl = statsArr[statsArr.length - 1].lvl;
         let maxDiff = strongestLvl - weakestLvl;
         
-        let cycleIdx = (player.workoutCount || 0) % 5;
+        // Use dynamic date offsets combined with reforge offset to ensure split variety during testing or daily generations
+        const dynamicOffset = new Date().getDay() + new Date().getDate() + (window.reforgeOffset || 0);
+        let cycleIdx = (player.workoutCount + dynamicOffset) % 5;
         let finalSplit = 0; // 0: Upper, 1: Lower, 2: FullBody, 3: Weakness, 4: Combo
 
         if (!window.isExamRoutine && maxDiff >= 3 && cycleIdx === 3) {
@@ -1043,11 +1225,11 @@
            finalSplit = 4; // Mezclar débil y fuerte
            window.currentAiMessage = `Debes equilibrar tus fuerzas. Hoy fusionaremos tu supremacía en ${STAT_LABELS[strongest]} con tu debilidad en ${STAT_LABELS[weakest]}.`;
         } else {
-           finalSplit = (player.workoutCount || 0) % 3;
+           finalSplit = (player.workoutCount + dynamicOffset) % 3;
            if (!window.isExamRoutine) {
-               if (finalSplit === 0) window.currentAiMessage = "Hoy forjaremos el Tronco y la Fuerza Base. Empuje, tracción y un núcleo irrompible para cimentar tu postura.";
-               else if (finalSplit === 1) window.currentAiMessage = "Un árbol sin raíces cae ante la tormenta. Hoy toca sufrir para fortalecer tus Piernas y tu Explosividad.";
-               else window.currentAiMessage = "El templo exige fluidez. Hoy trabajaremos la Agilidad, Flexibilidad y Resistencia Total para moverte como el viento.";
+                if (finalSplit === 0) window.currentAiMessage = "Hoy forjaremos el Tronco y la Fuerza Base. Empuje, tracción y un núcleo irrompible para cimentar tu postura.";
+                else if (finalSplit === 1) window.currentAiMessage = "Un árbol sin raíces cae ante la tormenta. Hoy toca sufrir para fortalecer tus Piernas y tu Explosividad.";
+                else window.currentAiMessage = "El templo exige fluidez. Hoy trabajaremos la Agilidad, Flexibilidad y Resistencia Total para moverte como el viento.";
            }
         }
 
@@ -1141,15 +1323,25 @@
       document.getElementById('loader').style.display = 'none';
       renderOverview(routine);
 
+      } catch (err) {
+        console.error("ZenRyu: Error in offline generator", err);
+        document.getElementById('loader').style.display = 'none';
+        showNotification("El Templo ha experimentado una perturbación al forjar tu rutina. Por favor, verifica tu nivel de atributos y vuelve a intentarlo.", "Fallo del Templo");
+      }
     }, 150);
   }
+
+  let activeCheckinType = 'conditioning';
+  let activeCheckinFocus = null;
 
   const startRoutineHandler = (type = 'conditioning', focusStat = null) => {
     let examPending = checkExamPending();
     if (examPending && type === 'conditioning') {
       showNotification("El Oráculo observa tu espíritu. Estás a punto de iniciar una Prueba de Ascenso. Sé absolutamente sincero: marca como terminada una serie SÓLO si realmente lograste el esfuerzo estricto y la técnica correcta. Engañar al sistema hoy significa lesionarte mañana en niveles superiores. El honor no admite auto-trampas.", "Examen Marcial de Honor", () => {
         window.isExamRoutine = true;
-        initRoutineGeneration(type, focusStat);
+        activeCheckinType = type;
+        activeCheckinFocus = focusStat;
+        openModal('checkin-modal');
       });
       return;
     } else if (examPending && type === 'mobility') {
@@ -1159,13 +1351,45 @@
 
     window.isExamRoutine = false;
     window.currentFocusStat = focusStat; // Guardar el foco para la sesión actual
-    initRoutineGeneration(type, focusStat);
+    
+    // Open check-in modal
+    activeCheckinType = type;
+    activeCheckinFocus = focusStat;
+    openModal('checkin-modal');
+  };
+
+  window.submitCheckin = function() {
+    let energy = parseInt(document.getElementById('ci-energy').value) || 3;
+    let soreness = document.getElementById('ci-soreness').value;
+    let notes = document.getElementById('ci-notes').value.trim();
+    
+    window.dailyCheckin = {
+      energy: energy,
+      soreness: soreness,
+      notes: notes
+    };
+    
+    closeModal('checkin-modal');
+    initRoutineGeneration(activeCheckinType, activeCheckinFocus);
   };
 
   function initRoutineGeneration(type, focusStat = null) {
-    switchView('routine-overview-view', 'home-view');
-    document.getElementById('overview-content').style.display = 'none';
-    generateOfflineRoutine(type, focusStat);
+    // Wrap view transitions in document.startViewTransition if available
+    const transitionView = () => {
+      switchView('routine-overview-view', 'home-view');
+      document.getElementById('overview-content').style.display = 'none';
+    };
+    if (document.startViewTransition) {
+      document.startViewTransition(transitionView);
+    } else {
+      transitionView();
+    }
+
+    if (player.geminiKey && player.geminiKey.trim() !== '') {
+      generateGeminiRoutine(type, focusStat);
+    } else {
+      generateOfflineRoutine(type, focusStat);
+    }
   }
 
   if (document.getElementById('btn-start-conditioning')) document.getElementById('btn-start-conditioning').addEventListener('click', () => startRoutineHandler('conditioning'));
@@ -1212,7 +1436,12 @@
     let currentType = currentRoutine[0]?.domain || 'conditioning';
     let currentFocus = window.currentFocusStat || null; // Recuperar el foco si existe
     document.getElementById('overview-content').style.display = 'none';
-    generateOfflineRoutine(currentType, currentFocus);
+    window.reforgeOffset = (window.reforgeOffset || 0) + 1;
+    if (player.geminiKey && player.geminiKey.trim() !== '') {
+      generateGeminiRoutine(currentType, currentFocus);
+    } else {
+      generateOfflineRoutine(currentType, currentFocus);
+    }
   });
 
   document.getElementById('btn-start-focus').addEventListener('click', () => {
@@ -1381,8 +1610,8 @@
       totalSecs += (sets - 1) * 60;
 
       // Sanitización para el modal
-      const safeN = (ex.n || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const safeN = (ex.n || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '');
+      const safeDesc = (ex.desc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '');
       const safeImg = (ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./'))) ? ex.m : '';
 
       html += `
@@ -1438,6 +1667,7 @@
     const container = document.getElementById('focus-exercises-container');
     document.getElementById('focus-finish-container').style.display = 'none';
     currentFocusIndex = 0;
+    activeSetIndex = 0;
 
     let fullHtml = '';
     exercises.forEach((ex, index) => {
@@ -1446,44 +1676,50 @@
 
       let timerBtn = '';
       if (isTime && numericVal > 0) {
-        timerBtn = `<div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 12px; width:100%;">
-            <button class="btn-secondary" style="border-color:var(--accent-gold); color:var(--accent-gold); width:100%; padding:18px 0; font-size:1.1rem; font-weight:800; border-width:2px; letter-spacing:1px;" onclick="openTimer(${numericVal})">⏱️ TEMPORIZADOR (${numericVal}s)</button>
-            <button class="btn-secondary" style="border-color:#555; width:100%; padding:16px 0; font-size:1rem; font-weight:700;" onclick="openTimer(60)">⏱️ RELOJ RECUPERACIÓN</button>
+        timerBtn = `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 12px; width:100%;">
+            <button class="btn-secondary" style="border-color:var(--accent-gold); color:var(--accent-gold); width:100%; padding:14px 0; font-size:0.95rem; font-weight:800; border-width:2px; letter-spacing:1px; margin-top:0;" onclick="openTimer(${numericVal})">⏱️ TEMPORIZADOR (${numericVal}s)</button>
          </div>`;
-      } else {
-        timerBtn = `<div style="margin-bottom: 12px; width:100%;">
-          <button class="btn-secondary" style="width:100%; border-color:#555; padding:16px 0; font-size:1rem; font-weight:700;" onclick="openTimer(60)">⏱️ RELOJ RECUPERACIÓN (60s)</button>
-        </div>`;
       }
 
       const safeImg = ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./')) ? ex.m : '';
-      const safeDesc = (ex.desc || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
-      const safeN = (ex.n || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;');
+      const safeDesc = (ex.desc || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '');
+      const safeN = (ex.n || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '');
       const altBtn = (ex.alt && !window.isExamRoutine)
-        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; padding:14px 0; font-weight:700;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ADAPTAR TÉCNICA</button>`
+        ? `<button class="btn-secondary" style="border-color:var(--accent-red); color:#ff5555; width:100%; padding:12px 0; font-weight:700; margin-top:0;" onclick="mutateExercise(${index}, '${ex.id}')">🔄 ADAPTAR TÉCNICA</button>`
         : '';
 
       const baseLvl = ex.lvl_min || 1;
       const baseXP = Math.round(Math.max(20, baseLvl * 1.5 + ex.sets * 2));
       const xpReward = window.isExamRoutine ? Math.round(baseXP * 1.5) : baseXP;
 
+      // Generar indicadores de series
+      let dotsHtml = '';
+      for (let s = 0; s < ex.sets; s++) {
+        dotsHtml += `<div class="set-dot ${s === 0 ? 'active' : ''}" id="ex-${index}-set-${s}"></div>`;
+      }
+
       fullHtml += `
         <div class="exercise-card focus-card" id="ex-${index}" style="position:absolute; width:100%; height:100%; left:0; top:0; background:none; border:none; box-shadow:none; padding:10px; opacity: ${index === 0 ? 1 : 0}; pointer-events: ${index === 0 ? 'all' : 'none'}; transform: ${index === 0 ? 'translateX(0)' : 'translateX(50px)'}; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease; display:flex; flex-direction:column; align-items:center; text-align:center; box-sizing:border-box; justify-content:center;">
 
-          <div style="font-size:1.5rem; color:var(--accent-gold); font-family:'Cinzel'; margin-bottom:5px; text-shadow:0 0 10px rgba(255,215,0,0.3);">${ex.n}</div>
-          <div style="background:#111; color:var(--accent-gold); padding:4px 10px; border-radius:4px; font-size:0.75rem; font-family:'Inter'; letter-spacing:1px; margin-bottom:15px; border:1px solid #333;">${STAT_LABELS[ex.s || 'str']}</div>
+          <div style="font-size:1.4rem; color:var(--accent-gold); font-family:'Cinzel'; margin-bottom:5px; text-shadow:0 0 10px rgba(255,215,0,0.3); font-weight:bold; line-height:1.2;">${ex.n}</div>
+          <div style="background:#111; color:var(--accent-gold); padding:4px 10px; border-radius:4px; font-size:0.7rem; font-family:'Inter'; letter-spacing:1px; margin-bottom:12px; border:1px solid #333; font-weight:bold;">${STAT_LABELS[ex.s || 'str']}</div>
           
-          <div style="font-size:1.3rem; margin-bottom:20px; color:#fff; font-weight:900; letter-spacing:1px; background:#1a1a1a; padding:10px 20px; border-radius:8px; border:1px dashed #444; width:100%;">
+          <div style="font-size:1.15rem; margin-bottom:12px; color:#fff; font-weight:900; letter-spacing:1px; background:#161616; padding:10px 20px; border-radius:8px; border:1px dashed #333; width:100%;">
             ${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}
+          </div>
+
+          <!-- Puntos de progreso de series -->
+          <div class="set-dots-container">
+            ${dotsHtml}
           </div>
           
           <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:350px;">
             ${timerBtn}
-            <button class="btn-secondary" style="width:100%; border-color:#444; padding:14px 0; font-weight:800;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ INSTRUCCIONES</button>
+            <button class="btn-secondary" style="width:100%; border-color:#333; padding:12px 0; font-weight:800; margin-top:0;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ INSTRUCCIONES</button>
             ${altBtn}
             
-            <div style="margin-top: 15px;">
-              <button class="btn-complete-massive focus-complete-btn" onclick="completeFocusTask(${index}, '${ex.s || 'str'}', ${xpReward})" style="width:100%; padding:20px 0; font-size:1.3rem;">✔️ FORJAR (+${xpReward} XP)</button>
+            <div style="margin-top: 10px;">
+              <button id="ex-${index}-action-btn" class="btn-complete-massive focus-complete-btn" onclick="logActiveSet(${index}, '${ex.s || 'str'}', ${xpReward})" style="width:100%; padding:18px 0; font-size:1.2rem;">✔️ COMPLETAR SERIE 1</button>
             </div>
           </div>
         </div>`;
@@ -1491,12 +1727,70 @@
 
     container.innerHTML = fullHtml;
     updateFocusProgress();
+    requestWakeLock(); // Screen on when starting routine focus!
+    
+    // Sensei speaks introductory line
+    setTimeout(() => {
+      speakSensei(`Comenzamos la forja física de hoy, ${player.name}. Tu voluntad guiará tu cuerpo. Primer ejercicio: ${exercises[0].n}. Prepárate.`);
+    }, 600);
   }
 
   function updateFocusProgress() {
     let el = document.getElementById('focus-progress-text');
     if (el) el.innerText = `EJERCICIO ${currentFocusIndex + 1} DE ${currentRoutine.length}`;
   }
+
+  window.logActiveSet = function(exIndex, statAlias, xpReward) {
+    if (navigator.vibrate) navigator.vibrate(50);
+    const ex = currentRoutine[exIndex];
+    const totalSets = ex.sets;
+    
+    // Complete active set dot
+    const dot = document.getElementById(`ex-${exIndex}-set-${activeSetIndex}`);
+    if (dot) {
+      dot.classList.remove('active');
+      dot.classList.add('completed');
+    }
+    
+    // Sound
+    playBeep();
+    
+    activeSetIndex++;
+    
+    if (activeSetIndex < totalSets) {
+      // Highlight next set
+      const nextDot = document.getElementById(`ex-${exIndex}-set-${activeSetIndex}`);
+      if (nextDot) nextDot.classList.add('active');
+      
+      // Update action button text
+      const btn = document.getElementById(`ex-${exIndex}-action-btn`);
+      if (btn) btn.innerHTML = `✔️ COMPLETAR SERIE ${activeSetIndex + 1}`;
+      
+      // Trigger rest timer HUD — adaptive rest based on player rank
+      const _rankIdx = player.rankIndex || 0;
+      const _restSecs = _rankIdx >= 7 ? 45 : _rankIdx >= 4 ? 60 : 90;
+      triggerRestTimer(_restSecs);
+    } else {
+      // Completed all sets! Show transitional button
+      const btn = document.getElementById(`ex-${exIndex}-action-btn`);
+      if (btn) {
+        btn.innerHTML = `🥊 TRANSICIÓN AL EJERCICIO (+${xpReward} XP)`;
+        btn.style.background = 'linear-gradient(135deg, var(--accent-gold), #b8860b)';
+        btn.style.color = '#000';
+        btn.style.borderColor = 'var(--accent-gold)';
+        btn.style.textShadow = 'none';
+        btn.onclick = () => {
+          activeSetIndex = 0;
+          completeFocusTask(exIndex, statAlias, xpReward);
+        };
+      }
+      
+      // Whoosh: all sets of this exercise are done
+      playWhoosh();
+      // Sensei speaks technique complete
+      speakSensei(`Técnica concluida con honor. Prepárate para el siguiente reto.`);
+    }
+  };
 
   window.completeFocusTask = function (index, statAlias, xpReward) {
     if (navigator.vibrate) navigator.vibrate(50);
@@ -1521,7 +1815,64 @@
 
     currentFocusIndex++;
 
-    if (currentFocusIndex < currentRoutine.length) {
+    if (currentFocusIndex >= currentRoutine.length) {
+      // All exercises complete — show finish overlay
+      let finContainer = document.getElementById('focus-finish-container');
+      if (finContainer) {
+        finContainer.style.display = 'flex';
+        finContainer.classList.add('pulse-glow');
+      }
+      let rwContainer = document.getElementById('victory-rewards');
+      if (rwContainer) rwContainer.style.display = 'flex';
+
+      // ─── CALCULAR Y ACTUALIZAR RACHA ─────────────────────────────────────
+      const todayStr = new Date().toLocaleDateString();
+      const yesterdayStr = new Date(Date.now() - 86400000).toLocaleDateString();
+      let lastWorkoutDateStr = "";
+      if (workoutHistory && workoutHistory.length > 0) {
+        let firstEntry = workoutHistory[0];
+        if (firstEntry && firstEntry.date) {
+          lastWorkoutDateStr = firstEntry.date.split(' ')[0];
+        }
+      }
+
+      if (lastWorkoutDateStr === todayStr) {
+        // Ya entrenó hoy, la racha no cambia
+      } else if (lastWorkoutDateStr === yesterdayStr || lastWorkoutDateStr === "") {
+        // Entrenó ayer o es su primer entrenamiento, incrementa la racha
+        player.streak = (player.streak || 0) + 1;
+      } else {
+        // Rompió la racha (más de 1 día sin entrenar), reinicia a 1
+        player.streak = 1;
+      }
+
+      // ─── CALCULAR Y ENSEÑAR MONEDAS GANADAS ──────────────────────────────
+      const baseCoins = 50 + (currentRoutine.length * 15);
+      const streakBonus = Math.min(50, (player.streak || 0) * 10);
+      const coinsEarned = baseCoins + streakBonus;
+
+      player.coins = (player.coins || 0) + coinsEarned;
+
+      // Actualizar visuales del modal de victoria
+      const rewardCoinsEl = document.getElementById('reward-coins');
+      if (rewardCoinsEl) rewardCoinsEl.textContent = `+${coinsEarned}`;
+      
+      const rewardStreakEl = document.getElementById('reward-streak');
+      if (rewardStreakEl) rewardStreakEl.textContent = `Racha x${player.streak || 1}`;
+
+      savePlayer(); // Persistir monedas y racha de inmediato
+
+      // Release Wake Lock & celebrate
+      releaseWakeLock();
+      initAudio();
+      playFanfare();
+      throwConfetti();
+      speakSensei(`Sesión completada con honor, ${player.name}. El Templo reconoce tu disciplina. Descansa y vuelve más fuerte.`);
+    } else {
+      // Trigger a 90-second recovery timer between exercises!
+      triggerRestTimer(90, true);
+
+      // Reveal the next exercise card
       let nextCard = document.getElementById(`ex-${currentFocusIndex}`);
       if (nextCard) {
         nextCard.style.opacity = '1';
@@ -1529,46 +1880,13 @@
         nextCard.style.pointerEvents = 'all';
       }
       updateFocusProgress();
-    } else {
-      document.getElementById('focus-progress-text').innerText = "RUTINA COMPLETADA";
-      document.getElementById('btn-cancel-focus').style.display = 'none';
-
-      // Recompensas
-      const today = new Date();
-      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      let earnedCoins = 50;
-
-      if (player.lastWorkoutDate) {
-        const lastDate = new Date(player.lastWorkoutDate);
-        const lastWorkout = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
-        const diffTime = todayDate - lastWorkout;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 1) { player.streak = (player.streak || 0) + 1; }
-        else if (diffDays > 1) { player.streak = 1; }
-      } else {
-        player.streak = 1;
+      const nextEx = currentRoutine[currentFocusIndex];
+      if (nextEx) {
+        // Announce next exercise details after a brief delay so it doesn't collide with the transition beep
+        setTimeout(() => {
+          speakSensei(`Prepárate para el siguiente reto: ${nextEx.n}. Serán ${nextEx.sets} series de ${nextEx.r}.`);
+        }, 4000);
       }
-      player.lastWorkoutDate = today.toISOString();
-      player.coins = (player.coins || 0) + earnedCoins;
-      savePlayer();
-
-      const rwCoins = document.getElementById('reward-coins');
-      const rwStreak = document.getElementById('reward-streak');
-      const rwStreakIcon = document.getElementById('reward-streak-icon');
-      if (rwCoins) rwCoins.innerText = '+' + earnedCoins;
-      if (rwStreak) rwStreak.innerText = 'Racha x' + player.streak;
-      if (rwStreakIcon) rwStreakIcon.style.filter = "none";
-
-      updateUI();
-      if (window.checkBadges) window.checkBadges();
-
-      let finContainer = document.getElementById('focus-finish-container');
-      finContainer.style.display = 'flex';
-      finContainer.classList.add('pulse-glow');
-
-      let rwContainer = document.getElementById('victory-rewards');
-      if (rwContainer) rwContainer.style.display = 'flex';
     }
   }
 
@@ -1713,8 +2031,7 @@
     let item = STORE_ITEMS.find(i => i.id === id);
     if (!item) return;
     if ((player.coins || 0) < item.price) {
-      if (window.UISoundEngine) window.UISoundEngine.playError();
-      alert("No tienes suficientes monedas del Dojo.");
+      showNotification("No tienes suficientes Monedas Zen. Sigue forjando tu espíritu en el dojo para amasar fortuna.", "🪙 Monedas Insuficientes");
       return;
     }
     player.coins -= item.price;
@@ -1798,6 +2115,23 @@
       document.documentElement.style.setProperty('--accent-gold-glow', 'rgba(255, 215, 0, 0.4)');
     }
 
+    // Aura Pulse: add pulsing glow to avatar when an aura is equipped
+    const avatarEl = document.getElementById('avatar');
+    if (avatarEl) {
+      if (player.activeAura) {
+        const auraMeta = STORE_ITEMS.find(i => i.id === player.activeAura);
+        if (auraMeta && auraMeta.meta) {
+          document.documentElement.style.setProperty('--avatar-aura-color', auraMeta.meta + 'bb');
+          avatarEl.classList.add('avatar-aura-active');
+        } else {
+          avatarEl.classList.remove('avatar-aura-active');
+        }
+      } else {
+        document.documentElement.style.setProperty('--avatar-aura-color', 'rgba(255,215,0,0.4)');
+        avatarEl.classList.remove('avatar-aura-active');
+      }
+    }
+
     const taikoBtn = document.getElementById('audio-taiko');
     if (taikoBtn) taikoBtn.style.display = player.unlockedItems.includes('mus_taiko') ? 'inline-block' : 'none';
     const synthBtn = document.getElementById('audio-synth');
@@ -1839,6 +2173,9 @@
 
     document.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
     document.getElementById(tabId).style.display = 'block';
+
+    // Render heatmap lazily when the Diary tab opens
+    if (tabId === 'tab-lore' && window.renderHeatmap) window.renderHeatmap();
   };
 
   window.renderProfileVault = function () {
@@ -1977,41 +2314,81 @@
   let audioCtx = null;
 
   function initAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Función auto-eliminable para desbloquear el AudioContext en Safari/iOS
+        const unlock = () => {
+          if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().then(() => {
+              console.log("ZenRyu: audioCtx desbloqueado. Estado:", audioCtx.state);
+            }).catch(e => console.warn("ZenRyu: resume falló", e));
+          }
+          if (audioCtx && audioCtx.state === 'running') {
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('touchstart', unlock);
+            window.removeEventListener('touchend', unlock);
+            window.removeEventListener('keydown', unlock);
+          }
+        };
+        
+        window.addEventListener('click', unlock);
+        window.addEventListener('touchstart', unlock);
+        window.addEventListener('touchend', unlock);
+        window.addEventListener('keydown', unlock);
+      }
+      
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+    } catch (e) {
+      console.warn("ZenRyu: AudioContext initiation blocked or unsupported", e);
+    }
   }
+  window.initAudio = initAudio;
 
   function playBeep() {
+    initAudio();
     if (!audioCtx) return;
-    let osc = audioCtx.createOscillator();
-    let gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.1);
+    try {
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {
+      console.warn("ZenRyu: playBeep failed", e);
+    }
   }
 
   function playGong() {
+    initAudio();
     if (!audioCtx) return;
-    let gain = audioCtx.createGain();
-    gain.connect(audioCtx.destination);
-    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3);
+    try {
+      let gain = audioCtx.createGain();
+      gain.connect(audioCtx.destination);
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3);
 
-    let freqs = [200, 300, 350, 450, 520, 600];
-    freqs.forEach(f => {
-      let osc = audioCtx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-      osc.detune.setValueAtTime(Math.random() * 20 - 10, audioCtx.currentTime);
-      osc.connect(gain);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 3);
-    });
+      let freqs = [200, 300, 350, 450, 520, 600];
+      freqs.forEach(f => {
+        let osc = audioCtx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+        osc.detune.setValueAtTime(Math.random() * 20 - 10, audioCtx.currentTime);
+        osc.connect(gain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 3);
+      });
+    } catch (e) {
+      console.warn("ZenRyu: playGong failed", e);
+    }
   }
 
   function playFanfare() {
@@ -2033,6 +2410,26 @@
       osc.start(t + i * 0.12);
       osc.stop(t + i * 0.12 + 0.3);
     });
+  }
+
+  function playWhoosh() {
+    initAudio();
+    if (!audioCtx) return;
+    try {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {
+      console.warn('ZenRyu: playWhoosh failed', e);
+    }
   }
 
   function throwConfetti() {
@@ -2197,8 +2594,726 @@
   }
   // ====== FIN CÓDIGO SECRETO ======
 
+  // ======================================================================
+  //  ZEN RYU SENSEI 6.0 — INTELLIGENT FEATURES
+  // ======================================================================
+
+  // --- SETTINGS UI BINDINGS ---
+
+
+  window.updateGeminiStatusBadge = function (customStatus = null) {
+    const badge = document.getElementById('gemini-status-badge');
+    if (!badge) return;
+    const key = (player.geminiKey || '').trim();
+
+    if (!badge.dataset.wiredClick) {
+      badge.dataset.wiredClick = "true";
+      badge.style.cursor = "pointer";
+      badge.addEventListener('click', () => {
+        if (window.lastGeminiError) {
+          showNotification(`El oráculo está temporalmente en modo offline por el siguiente motivo:\n\n"${window.lastGeminiError}"\n\nNo te preocupes, el dojo ha activado automáticamente el motor procedimental local sin interrumpir tu forja física.`, "🔮 DIÁLOGO CON EL ORÁCULO");
+        } else if (player.geminiKey && player.geminiKey.trim().length > 10) {
+          showNotification("El Oráculo AI de Gemini está activo, validado y listo para forjar tus rutinas.", "🔮 DIÁLOGO CON EL ORÁCULO");
+        } else {
+          showNotification("El Oráculo AI está offline. Introduce tu clave de API en Ajustes para activar entrenamientos dinámicos.", "🔮 DIÁLOGO CON EL ORÁCULO");
+        }
+      });
+    }
+    
+    if (customStatus) {
+      if (customStatus === 'green') {
+        badge.textContent = '🟢';
+        badge.title = 'Oráculo AI Activo (Haz clic para detalles)';
+      } else if (customStatus === 'yellow') {
+        badge.textContent = '🟡';
+        badge.title = window.lastGeminiError ? `Error: ${window.lastGeminiError} (Haz clic para detalles)` : 'Oráculo AI con problemas de conexión. (Haz clic para detalles)';
+      } else if (customStatus === 'loading') {
+        badge.textContent = '⏳';
+        badge.title = 'Validando clave de API en los servidores del Templo...';
+      } else {
+        badge.textContent = '🔴';
+        badge.title = 'Oráculo Offline (Haz clic para detalles)';
+      }
+      return;
+    }
+
+    if (key && key.length > 10) {
+      if (window.lastGeminiError) {
+        const errMsg = window.lastGeminiError.toLowerCase();
+        if (errMsg.includes('400') || errMsg.includes('403') || errMsg.includes('key') || errMsg.includes('inválid') || errMsg.includes('invalid')) {
+          badge.textContent = '🔴';
+          badge.title = `Error de Clave: ${window.lastGeminiError} (Haz clic para detalles)`;
+        } else {
+          badge.textContent = '🟡';
+          badge.title = `Error del Oráculo: ${window.lastGeminiError} (Haz clic para detalles)`;
+        }
+      } else {
+        badge.textContent = '🟢';
+        badge.title = 'Oráculo AI Activo (Haz clic para detalles)';
+      }
+    } else {
+      badge.textContent = '🔴';
+      badge.title = 'Oráculo Offline (Haz clic para detalles)';
+    }
+  };
+
+  window.saveGeminiKey = async function () {
+    const input = document.getElementById('gemini-key');
+    if (!input) return;
+    const key = input.value.trim();
+    
+    if (!key) {
+      player.geminiKey = '';
+      savePlayer();
+      window.updateGeminiStatusBadge('red');
+      showNotification('Clave eliminada. Operando en modo offline con el motor procedimental.', '🔮 Oráculo AI');
+      return;
+    }
+    
+    window.updateGeminiStatusBadge('loading');
+    
+    try {
+      const _vc = new AbortController();
+      const _vt = setTimeout(() => _vc.abort(), 10000);
+      let resp;
+      try {
+        resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`, { signal: _vc.signal });
+      } finally {
+        clearTimeout(_vt);
+      }
+      if (resp.ok) {
+        player.geminiKey = key;
+        window.lastGeminiError = '';
+        savePlayer();
+        window.updateGeminiStatusBadge('green');
+        showNotification('Oráculo AI validado y activo. El Maestro Digital guiará tus rutinas desde ahora.', '🔮 Oráculo AI');
+      } else {
+        let errMessage = `Error HTTP ${resp.status}`;
+        try {
+          const errData = await resp.json();
+          if (errData && errData.error && errData.error.message) {
+            errMessage = errData.error.message;
+          }
+        } catch (_) {}
+
+        window.lastGeminiError = errMessage;
+        savePlayer();
+
+        if (resp.status === 400 || resp.status === 403) {
+          window.updateGeminiStatusBadge('red');
+          showNotification(`Clave de API inválida o inactiva: ${errMessage} (Error ${resp.status}). Por favor, verifícala en Google AI Studio.`, '❌ Error del Oráculo');
+        } else {
+          player.geminiKey = key;
+          window.updateGeminiStatusBadge('yellow');
+          showNotification(`Error al verificar la clave: ${errMessage} (Error ${resp.status}). Se guardó de todas formas, pero podría no funcionar.`, '⚠️ Advertencia');
+        }
+      }
+    } catch (err) {
+      console.error('Validation error:', err);
+      player.geminiKey = key;
+      window.lastGeminiError = err.message;
+      savePlayer();
+      window.updateGeminiStatusBadge('yellow');
+      if (err.name === 'AbortError') {
+        showNotification('La validación tardó demasiado. La clave se guardó pero no se pudo verificar. Comprueba tu conexión.', '⏱️ Tiempo de Espera Agotado');
+      } else {
+        showNotification(`No se pudo comprobar la clave con los servidores: ${err.message}. Se guardó de todas formas.`, '📡 Error de Conexión');
+      }
+    }
+  };
+
+  // Wire up gemini key input (save on blur / Enter)
+  const _geminiKeyEl = document.getElementById('gemini-key');
+  if (_geminiKeyEl) {
+    _geminiKeyEl.addEventListener('blur', window.saveGeminiKey);
+    _geminiKeyEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); window.saveGeminiKey(); this.blur(); }
+    });
+  }
+
+  // --- SENSEI VOICE ENGINE (Web Speech & Local Neural TTS) ---
+
+  let _senseiVoice = null;
+
+  function _populateVoiceSelector () {
+    if (!window.speechSynthesis) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    const sel = document.getElementById('voice-select');
+    if (!sel) return;
+
+    sel.innerHTML = '';
+
+    // Rank voices: Spanish male first, then any Spanish, then all others
+    const esMale   = voices.filter(v => 
+      v.lang.startsWith('es') && 
+      (/jorge|pablo|diego|miguel|antonio|carlos|alvaro|juan|enrique|dario|julio|masculino|male|hombre/i.test(v.name) || 
+       /jorge|pablo|diego|miguel|antonio|carlos|alvaro|juan|enrique|dario|julio|masculino|male|hombre/i.test(v.voiceURI))
+    );
+    const esOther  = voices.filter(v => v.lang.startsWith('es') && !esMale.includes(v));
+    const rest     = voices.filter(v => !v.lang.startsWith('es'));
+    const ordered  = [...esMale, ...esOther, ...rest];
+
+    ordered.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.voiceURI;
+      opt.textContent = `${v.name} (${v.lang})`;
+      sel.appendChild(opt);
+    });
+
+    // Restore saved choice or auto-select best male Spanish voice
+    if (player.savedVoiceURI) {
+      sel.value = player.savedVoiceURI;
+    } else if (esMale.length > 0) {
+      sel.value = esMale[0].voiceURI;
+    } else if (esOther.length > 0) {
+      sel.value = esOther[0].voiceURI;
+    }
+
+    // Sync _senseiVoice to current selection
+    _senseiVoice = voices.find(v => v.voiceURI === sel.value) || voices[0] || null;
+  }
+
+  function _loadSenseiVoice () {
+    if (!window.speechSynthesis) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+
+    _populateVoiceSelector();
+
+    // If no manual choice made yet, auto-select best Spanish male voice
+    if (!player.savedVoiceURI) {
+      const preferredNames = ['jorge', 'pablo', 'diego', 'miguel', 'antonio', 'carlos', 'alvaro', 'juan', 'enrique', 'dario', 'julio', 'male'];
+      _senseiVoice = voices.find(v =>
+        v.lang.startsWith('es') && preferredNames.some(n => v.name.toLowerCase().includes(n))
+      ) || voices.find(v => v.lang.startsWith('es')) || voices[0] || null;
+    }
+  }
+
+  if (window.speechSynthesis) {
+    _loadSenseiVoice();
+    window.speechSynthesis.addEventListener('voiceschanged', _loadSenseiVoice);
+  }
+
+  // Wire up voice toggle switch (show/hide selector + persist)
+  const _voiceToggleEl = document.getElementById('voice-toggle');
+  const _voiceSelectorContainer = document.getElementById('voice-selector-container');
+
+  if (_voiceToggleEl) {
+    _voiceToggleEl.addEventListener('change', function () {
+      player.voiceEnabled = this.checked;
+      savePlayer();
+      if (_voiceSelectorContainer) {
+        _voiceSelectorContainer.style.display = this.checked ? 'block' : 'none';
+      }
+      if (player.voiceEnabled) {
+        _populateVoiceSelector();
+        setTimeout(() => speakSensei('El Sensei Dragón Zen te saluda, guerrero. Tu camino comienza hoy.'), 300);
+      } else {
+        window.speechSynthesis && window.speechSynthesis.cancel();
+      }
+    });
+    // Restore state on page load
+    if (player.voiceEnabled && _voiceSelectorContainer) {
+      _voiceSelectorContainer.style.display = 'block';
+    }
+  }
+
+  // Wire voice selector dropdown change
+  const _voiceSelectEl = document.getElementById('voice-select');
+  if (_voiceSelectEl) {
+    _voiceSelectEl.addEventListener('change', function () {
+      const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      _senseiVoice = voices.find(v => v.voiceURI === this.value) || _senseiVoice;
+      player.savedVoiceURI = this.value;
+      savePlayer();
+    });
+  }
+
+  // Wire voice pitch and rate sliders
+  const _pitchSliderEl = document.getElementById('voice-pitch-slider');
+  const _pitchValEl = document.getElementById('voice-pitch-val');
+  if (_pitchSliderEl) {
+    _pitchSliderEl.addEventListener('input', function () {
+      player.voicePitch = parseFloat(this.value);
+      if (_pitchValEl) _pitchValEl.textContent = player.voicePitch.toFixed(2);
+      savePlayer();
+    });
+  }
+
+  const _rateSliderEl = document.getElementById('voice-rate-slider');
+  const _rateValEl = document.getElementById('voice-rate-val');
+  if (_rateSliderEl) {
+    _rateSliderEl.addEventListener('input', function () {
+      player.voiceRate = parseFloat(this.value);
+      if (_rateValEl) _rateValEl.textContent = player.voiceRate.toFixed(2);
+      savePlayer();
+    });
+  }
+
+  // Wire test-voice button
+  const _testVoiceBtn = document.getElementById('btn-test-voice');
+  if (_testVoiceBtn) {
+    _testVoiceBtn.addEventListener('click', function () {
+      const wasEnabled = player.voiceEnabled;
+      player.voiceEnabled = true; // Force speak for test
+      speakSensei('La disciplina forja al guerrero. El dolor es pasajero, la gloria es eterna.');
+      player.voiceEnabled = wasEnabled;
+    });
+  }
+
+
+
+  function speakSenseiNative (text) {
+    if (!window.speechSynthesis) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      if (_senseiVoice) utt.voice = _senseiVoice;
+      utt.lang    = _senseiVoice ? _senseiVoice.lang : 'es-ES';
+      utt.rate    = player.voiceRate || 0.95;
+      utt.pitch   = player.voicePitch || 1.0;
+      utt.volume  = 1.0;
+      window.speechSynthesis.speak(utt);
+    } catch (e) {
+      console.warn('ZenRyu: Native TTS error', e);
+    }
+  }
+
+  function speakSensei (text) {
+    if (!player.voiceEnabled) return;
+    speakSenseiNative(text);
+  }
+
+  // --- WAKE LOCK API ---
+
+  async function requestWakeLock () {
+    if (!('wakeLock' in navigator)) return;
+    if (wakeLock) return; // already held
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+      console.log('ZenRyu: Wake Lock acquired ✅');
+    } catch (e) {
+      console.warn('ZenRyu: Wake Lock request failed', e.message);
+    }
+  }
+
+  async function releaseWakeLock () {
+    if (!wakeLock) return;
+    try { await wakeLock.release(); } catch (e) { /* ignore */ }
+    wakeLock = null;
+    console.log('ZenRyu: Wake Lock released');
+  }
+
+  // Re-acquire on tab visibility restore when a session is active
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && window.sessionState && window.sessionState.active) {
+      await requestWakeLock();
+    }
+  });
+
+  // --- FLOATING REST TIMER HUD ---
+
+  function startBreathing() {
+    const label = document.getElementById('breath-label');
+    if (!label) return;
+    const phases = [
+      { text: '↑  INHALA', duration: 4000 },
+      { text: '◉  RETÉN',  duration: 2000 },
+      { text: '↓  EXHALA', duration: 4000 },
+      { text: '· · ·',     duration: 2000 }
+    ];
+    let i = 0;
+    function tick() {
+      label.textContent = phases[i].text;
+      const dur = phases[i].duration;
+      i = (i + 1) % phases.length;
+      breathPhaseTimer = setTimeout(tick, dur);
+    }
+    clearTimeout(breathPhaseTimer);
+    tick();
+  }
+
+  function stopBreathing() {
+    clearTimeout(breathPhaseTimer);
+    breathPhaseTimer = null;
+    const label = document.getElementById('breath-label');
+    if (label) label.textContent = '';
+  }
+
+  function triggerRestTimer (seconds, isTransition = false) {
+    if (!seconds || seconds <= 0) return;
+    initAudio();
+
+    const hud     = document.getElementById('rest-timer-hud');
+    const display = document.getElementById('rest-timer-seconds');
+    const label   = document.getElementById('rest-timer-label');
+    if (!hud) return;
+
+    clearInterval(restInterval);
+    restSecondsLeft = seconds;
+    if (display) display.textContent = restSecondsLeft;
+    
+    if (label) {
+      label.textContent = isTransition ? '⛩️ TRANSICIÓN DE EJERCICIO' : '⏸️ TIEMPO DE RECUPERACIÓN';
+    }
+    
+    // Rellenar dinámicamente la previsualización del siguiente paso
+    let nextName = '';
+    let nextDetails = '';
+
+    if (currentRoutine && currentRoutine[currentFocusIndex]) {
+      const ex = currentRoutine[currentFocusIndex];
+      if (isTransition) {
+        nextName = ex.n;
+        nextDetails = `${ex.sets} SERIES ✕ ${ex.r.toUpperCase()}`;
+      } else {
+        nextName = ex.n;
+        nextDetails = `SERIE ${activeSetIndex + 1} DE ${ex.sets} (✕ ${ex.r.toUpperCase()})`;
+      }
+    }
+
+    const nextNameEl = document.getElementById('rest-next-name');
+    const nextDetailsEl = document.getElementById('rest-next-details');
+    const previewContainer = document.getElementById('rest-next-preview');
+
+    if (nextNameEl && nextDetailsEl) {
+      nextNameEl.textContent = nextName;
+      nextDetailsEl.textContent = nextDetails;
+      if (previewContainer) previewContainer.style.display = 'block';
+    } else if (previewContainer) {
+      previewContainer.style.display = 'none';
+    }
+
+    // Seleccionar una cita Zen al azar para inspirar durante el descanso
+    const quoteEl = document.getElementById('rest-zen-quote');
+    if (quoteEl && typeof zenQuotes !== 'undefined' && zenQuotes.length > 0) {
+      const randomQuote = zenQuotes[Math.floor(Math.random() * zenQuotes.length)];
+      quoteEl.textContent = `"${randomQuote}"`;
+    }
+    
+    // Mostrar como flex (pantalla completa)
+    hud.style.display = 'flex';
+    startBreathing();
+
+    if (isTransition) {
+      speakSensei(`Técnica forjada. Transición al siguiente ejercicio. Descansa ${seconds} segundos.`);
+    } else {
+      speakSensei(`Descansa ${seconds} segundos. Respira y recarga.`);
+    }
+
+    restInterval = setInterval(() => {
+      restSecondsLeft--;
+      if (display) display.textContent = restSecondsLeft;
+
+      if (restSecondsLeft > 0 && restSecondsLeft <= 3) playBeep();
+
+      if (restSecondsLeft <= 0) {
+        clearInterval(restInterval);
+        restInterval = null;
+        stopBreathing();
+        hud.style.display = 'none';
+        playGong();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        speakSensei('¡Tiempo! Vuelve a la posición. Activa el cuerpo.');
+      }
+    }, 1000);
+  }
+
+  window.adjustRestTimer = function (amount) {
+    if (restInterval === null) return; // timer not running
+    restSecondsLeft = Math.max(0, restSecondsLeft + amount);
+    const display = document.getElementById('rest-timer-seconds');
+    if (display) display.textContent = restSecondsLeft;
+    if (restSecondsLeft <= 0) window.skipRestTimer();
+  };
+
+  window.skipRestTimer = function () {
+    clearInterval(restInterval);
+    restInterval = null;
+    restSecondsLeft = 0;
+    stopBreathing();
+    const hud = document.getElementById('rest-timer-hud');
+    if (hud) hud.style.display = 'none';
+    playBeep();
+    speakSensei('Omitiendo descanso. Mantén la técnica.');
+  };
+
+  window.saveWorkoutFeedback = function () {
+    const input = document.getElementById('feedback-input');
+    if (!input) return;
+    const val = input.value.trim();
+    if (!val) return;
+    player.lastWorkoutFeedback = val;
+    savePlayer();
+    const btn = input.nextElementSibling;
+    if (btn) {
+      btn.textContent = '✅ GUARDADO — IA ADAPTARÁ TU PRÓXIMA RUTINA';
+      btn.style.color = 'var(--accent-green)';
+      btn.style.borderColor = 'rgba(40,167,69,0.4)';
+    }
+    input.style.borderColor = 'rgba(40,167,69,0.4)';
+  };
+
+  // --- HEATMAP RENDERER (Year-Long Consistency Calendar) ---
+
+  window.renderHeatmap = async function () {
+    const grid = document.getElementById('heatmap-grid');
+    if (!grid) return;
+
+    // Load IndexedDB history
+    let history = [];
+    try { history = await zendb.getAllHistory(); } catch (e) { /* offline */ }
+
+    // Build date → count map
+    const dateMap = {};
+    history.forEach(entry => {
+      if (!entry || !entry.date) return;
+      try {
+        const d = new Date(entry.date);
+        if (isNaN(d.getTime())) return;
+        const key = d.toISOString().split('T')[0];
+        dateMap[key] = (dateMap[key] || 0) + 1;
+      } catch (e) { /* skip bad entries */ }
+    });
+
+    // Build 365-day array (oldest first → grid flows left to right)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let html = '';
+
+    for (let i = 364; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      const count = dateMap[key] || 0;
+      const level = count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : count === 3 ? 3 : 4;
+      const label = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+      const title = count === 0
+        ? `${label}: Sin entrenamiento`
+        : `${label}: ${count} sesión${count !== 1 ? 'es' : ''}`;
+      html += `<div class="heatmap-cell level-${level}" title="${title}"></div>`;
+    }
+
+    grid.innerHTML = html;
+
+    // Update stats label if present
+    const totalDays   = Object.keys(dateMap).length;
+    const totalSess   = Object.values(dateMap).reduce((a, b) => a + b, 0);
+    const statsLabel  = document.getElementById('heatmap-stats');
+    if (statsLabel) {
+      statsLabel.textContent = `${totalDays} días activos · ${totalSess} sesiones totales en el último año`;
+    }
+  };
+
+  // --- GEMINI AI ROUTINE GENERATOR ---
+
+  async function generateGeminiRoutine (type, focusStat = null) {
+    document.getElementById('loader').style.display = 'block';
+    window.currentAiMessage = null;
+
+    try {
+      const key = (player.geminiKey || '').trim();
+      if (!key) throw new Error('No API key');
+
+      // Filter exercises by user equipment, injuries, and strict player level checks
+      const userEquip    = player.equipment || 'none';
+      const userInjuries = player.injuries  || [];
+
+      const availEx = EXERCISE_DB.filter(ex => {
+        const equipOk = userEquip === 'none' ? ex.equip === 'none'
+          : userEquip === 'bar' ? (ex.equip === 'none' || ex.equip === 'bar')
+          : true;
+        const injuryOk = userInjuries.length === 0
+          ? true
+          : !ex.avoidInjuries.some(i => userInjuries.includes(i));
+        const domainOk = type === 'mobility' ? ex.domain === 'mobility' : ex.domain === 'conditioning';
+        
+        // Strict level matching: User must have unlocked the exercise's minimum level
+        const userLvl = player.stats[ex.s]?.lvl || 1;
+        const lvlOk   = userLvl >= ex.lvl_min;
+
+        return equipOk && injuryOk && domainOk && lvlOk;
+      });
+
+      // Compact exercise list for prompt (reduces token count)
+      const exList = availEx.map(ex =>
+        `${ex.id}|${ex.real}|${ex.s}|Lv${ex.lvl_min}-${ex.lvl_max}`
+      ).join('\n');
+
+      const checkin     = window.dailyCheckin || { energy: 3, soreness: 'no', notes: '' };
+      const rankTitle   = getCurrentRank().title;
+      const isMobility  = type === 'mobility';
+      const targetCount = isMobility ? 6 : (player.rankIndex < 4 ? 6 : 8);
+      const minCount    = Math.max(4, targetCount - 2);
+
+      const prompt = `Eres el Sensei Dragón Zen, maestro supremo de la calistenia marcial. Diseña una rutina personalizada AHORA.
+
+PERFIL DEL GUERRERO:
+- Nombre: ${player.name} | Rango: ${rankTitle}
+- Fuerza Lvl ${player.stats.str.lvl} | Velocidad Lvl ${player.stats.spd.lvl} | Flex Lvl ${player.stats.flex.lvl} | Resistencia Lvl ${player.stats.end.lvl}
+- Equipamiento: ${userEquip === 'none' ? 'Solo suelo' : userEquip === 'bar' ? 'Suelo + Barra' : 'Dojo Completo'}
+- Lesiones activas: ${userInjuries.length > 0 ? userInjuries.join(', ') : 'Ninguna'}
+
+ESTADO FÍSICO HOY:
+- Energía: ${checkin.energy}/5 | Agujetas: ${checkin.soreness === 'si' ? 'SÍ' : 'NO'}
+- Notas: "${checkin.notes || 'Sin notas'}"
+- Feedback anterior: "${player.lastWorkoutFeedback || 'Sin registro previo'}"  
+- Sesión: ${isMobility ? 'MOVILIDAD' : focusStat ? `ESPECIALIZACIÓN ${focusStat.toUpperCase()}` : 'ACONDICIONAMIENTO'}
+
+EJERCICIOS DISPONIBLES (id|nombre|stat|nivel):
+${exList}
+
+REGLAS:
+- Usa solo IDs de la lista de arriba.
+- Elige entre ${minCount} y ${targetCount} ejercicios apropiados para el nivel del guerrero.
+- Si energía ≤ 2, reduce a ${minCount} ejercicios de menor intensidad.
+- Si hay agujetas, evita grupos musculares fatigados.
+- Para cada ejercicio indica: id (de la lista), sets (2-4), customVal (reps/segs reales según su nivel).
+- El campo "insight" es un mantra filosófico inspirador de máximo 2 frases.
+
+RESPONDE ÚNICAMENTE con este JSON válido (sin texto adicional):
+{
+  "insight": "Frase filosófica del Sensei.",
+  "routine": [
+    { "id": "str_2", "sets": 3, "customVal": 12 }
+  ]
+}`;
+
+      // 30-second timeout to prevent infinite loader spin
+      const _ctrl = new AbortController();
+      const _timeoutId = setTimeout(() => _ctrl.abort(), 30000);
+
+      let apiResp;
+      try {
+        apiResp = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${key}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: _ctrl.signal,
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.75,
+                maxOutputTokens: 1024
+              }
+            })
+          }
+        );
+      } finally {
+        clearTimeout(_timeoutId);
+      }
+
+      if (!apiResp.ok) {
+        let errDetails = `API HTTP ${apiResp.status}`;
+        try {
+          const errData = await apiResp.json();
+          if (errData && errData.error && errData.error.message) {
+            errDetails = `${errData.error.message} (HTTP ${apiResp.status})`;
+          }
+        } catch (_) {}
+        throw new Error(errDetails);
+      }
+
+      const apiData  = await apiResp.json();
+      const rawText  = apiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      // Parse response — strip markdown fences if present (gemini-2.0-flash-lite may wrap JSON)
+      let parsed;
+      try {
+        parsed = JSON.parse(rawText);
+      } catch (_) {
+        // Strip ```json ... ``` or ``` ... ``` wrappers
+        const stripped = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+        try {
+          parsed = JSON.parse(stripped);
+        } catch (_2) {
+          const match = stripped.match(/\{[\s\S]*\}/);
+          if (match) parsed = JSON.parse(match[0]);
+          else throw new Error('No JSON encontrado en respuesta de Gemini');
+        }
+      }
+
+      window.currentAiMessage = parsed.insight || '';
+
+      // Map Gemini IDs back to full exercise objects with proper scaling
+      const routine = [];
+      for (const item of (parsed.routine || [])) {
+        const exBase = EXERCISE_DB.find(x => x.id === item.id);
+        if (!exBase) continue;
+
+        const pLvl     = player.stats[exBase.s]?.lvl || 1;
+        const capLevel = Math.min(pLvl, exBase.lvl_max + 5);
+        const factor   = (capLevel - exBase.lvl_min) * exBase.scale;
+        const autoVal  = Math.floor(Math.max(exBase.baseVal, exBase.baseVal + factor));
+        const finalVal = (item.customVal && item.customVal > 0) ? item.customVal : autoVal;
+        const numSets  = Math.min(Math.max(item.sets || 3, 2), 5);
+
+        routine.push({
+          id:      exBase.id,
+          n:       `${exBase.n} (${exBase.real})`,
+          r:       `${finalVal} ${exBase.t === 'time' ? 'segs' : 'reps'}`,
+          t:       exBase.t,
+          val:     finalVal,
+          s:       exBase.s,
+          domain:  exBase.domain,
+          sets:    numSets,
+          desc:    exBase.desc,
+          m:       exBase.m,
+          alt:     exBase.alt,
+          lvl_min: exBase.lvl_min
+        });
+      }
+
+      if (routine.length === 0) throw new Error('Rutina vacía de Gemini');
+
+      currentRoutine = routine;
+      document.getElementById('loader').style.display = 'none';
+      renderOverview(routine);
+
+      // Sensei speaks the AI insight
+      setTimeout(() => {
+        speakSensei(parsed.insight || 'El Oráculo ha forjado tu camino de hoy, guerrero.');
+      }, 600);
+
+      // Mark badge as active
+      window.lastGeminiError = '';
+      window.updateGeminiStatusBadge('green');
+
+    } catch (err) {
+      console.error('ZenRyu: Gemini error → fallback offline', err.name, err.message);
+      window.currentAiMessage = null;
+      window.lastGeminiError = err.name === 'AbortError'
+        ? 'Tiempo de espera agotado (30s). El Oráculo tardó demasiado.'
+        : (err.message || 'Error desconocido');
+      window.updateGeminiStatusBadge('yellow');
+
+      generateOfflineRoutine(type, focusStat);
+    }
+  }
+
+  // ====== END 6.0 INTELLIGENT FEATURES ======
+
+  // Hook openModal to refresh Gemini status badge and voice dropdown dynamically when Settings is opened
+  window.addEventListener('load', () => {
+    const originalOpenModal = window.openModal;
+    window.openModal = function (id) {
+      if (id === 'settings-modal') {
+        _populateVoiceSelector();
+        if (window.updateGeminiStatusBadge) window.updateGeminiStatusBadge();
+      }
+      if (originalOpenModal) {
+        originalOpenModal(id);
+      }
+    };
+  });
+
   loadPlayer();
 })();
+
 
 window.UISoundEngine = {
   ctx: null,
@@ -2265,6 +3380,7 @@ window.UISoundEngine = {
 
 document.addEventListener('click', (e) => {
   if (window.UISoundEngine) window.UISoundEngine.init();
+  if (window.initAudio) window.initAudio();
   let target = e.target.closest('button, .nav-item, .exercise-card, .btn-primary, .btn-secondary, .btn-complete-massive, .radio-btn, .zoomable-image, .mission-card');
   if (target) {
     if (target.disabled) {

@@ -1006,9 +1006,9 @@ body {
   align-items: center;
 }
 
-.wizard-card p,
-.wizard-card h2,
-.wizard-card div {
+.wizard-card > p,
+.wizard-card > h2,
+.wizard-card > div {
   text-align: center !important;
   width: 100% !important;
   justify-content: center !important;
@@ -1535,4 +1535,231 @@ body.theme-sangre {
 body.theme-sangre .glass-panel {
   border-color: rgba(204, 0, 51, 0.3) !important;
   box-shadow: inset 0 0 20px rgba(204, 0, 51, 0.05);
+}
+
+/* ===================== ZEN RYU 6.0 PREMIUM EXTENSIONS ===================== */
+
+/* GPU Optimization */
+.snow-flake, .ember, .shadow-blob, .blood-particle {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Liquid Glass Theme */
+.Liquid-Glass {
+  background: rgba(18, 18, 18, 0.8) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 215, 0, 0.2) !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255, 215, 0, 0.05) !important;
+}
+
+/* Onboarding premium select styling */
+.wizard-select {
+  width: 100%;
+  padding: 14px;
+  background: #0d0e0d;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align-last: center;
+}
+.wizard-select:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+.wizard-select option {
+  background: #111;
+  color: #ccc;
+  padding: 10px;
+}
+
+/* Switch & Slider (TTS Toggles) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #222;
+  transition: .3s;
+  border-radius: 24px;
+  border: 1px solid #444;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #888;
+  transition: .3s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider {
+  background-color: rgba(255, 215, 0, 0.1);
+  border-color: var(--accent-gold);
+}
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+  background-color: var(--accent-gold);
+  box-shadow: 0 0 5px var(--accent-gold-glow);
+}
+
+/* Mapa de Calor */
+.heatmap-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 10px);
+  grid-auto-flow: column;
+  grid-auto-columns: 10px;
+  gap: 3px;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 10px 0;
+  scrollbar-width: none;
+}
+.heatmap-grid::-webkit-scrollbar {
+  display: none;
+}
+.heatmap-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background-color: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+.heatmap-cell:hover {
+  transform: scale(1.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.heatmap-cell.level-0 { background-color: #161616; }
+.heatmap-cell.level-1 { background-color: #4a1010; }
+.heatmap-cell.level-2 { background-color: #8a1515; }
+.heatmap-cell.level-3 { background-color: #cc1a1a; }
+.heatmap-cell.level-4 { background-color: var(--accent-gold); box-shadow: 0 0 5px var(--accent-gold-glow); }
+
+/* Set progressive dots */
+.set-dots-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 15px 0 20px 0;
+}
+.set-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  background: #0f0f0f;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  position: relative;
+}
+.set-dot:active {
+  transform: scale(0.85);
+}
+.set-dot.completed {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+  transform: scale(1.1);
+}
+.set-dot.active {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 10px var(--accent-gold-glow);
+  transform: scale(1.3);
+  animation: setPulse 1.5s infinite alternate ease-in-out;
+}
+@keyframes setPulse {
+  0% { box-shadow: 0 0 4px var(--accent-gold-glow); }
+  100% { box-shadow: 0 0 12px var(--accent-gold); }
+}
+
+/* View Transitions Support */
+::view-transition-old(root) {
+  animation: fade-out 0.2s ease forwards;
+}
+::view-transition-new(root) {
+  animation: fade-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes timerPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* ===================================================
+   PREMIUM: AURA PULSE on Avatar + BREATHING TEMPLE
+   =================================================== */
+
+/* Dynamic box-shadow pulse when aura is equipped */
+@keyframes auraPulse {
+  0%   { box-shadow: 0 0 6px 2px var(--avatar-aura-color, rgba(255,215,0,0.3)), inset 0 0 10px rgba(0,0,0,0.8); }
+  50%  { box-shadow: 0 0 28px 10px var(--avatar-aura-color, rgba(255,215,0,0.55)), inset 0 0 10px rgba(0,0,0,0.8); }
+  100% { box-shadow: 0 0 6px 2px var(--avatar-aura-color, rgba(255,215,0,0.3)), inset 0 0 10px rgba(0,0,0,0.8); }
+}
+
+.avatar-aura-active {
+  animation: auraPulse 2.5s ease-in-out infinite;
+  border-color: var(--avatar-aura-color, var(--accent-gold)) !important;
+}
+
+/* Breathing ring: expands during inhale (4s), holds (2s), contracts during exhale (4s), pauses (2s) — 12s loop */
+@keyframes breathExpand {
+  0%, 100% { transform: scale(0.78); opacity: 0.15; }
+  33%       { transform: scale(1.32); opacity: 1.0; }
+  50%       { transform: scale(1.32); opacity: 0.6; }
+  83%       { transform: scale(0.78); opacity: 0.15; }
+}
+
+.breath-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--accent-gold);
+  animation: breathExpand 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes pulseGreen {
+  0% { box-shadow: 0 0 15px rgba(40,167,69,0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 30px rgba(40,167,69,0.85); transform: scale(1.025); }
+  100% { box-shadow: 0 0 15px rgba(40,167,69,0.4); transform: scale(1); }
 }

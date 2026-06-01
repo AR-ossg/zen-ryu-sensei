@@ -21,7 +21,7 @@
   <div id="weather-layer" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:100;"></div>
 
   <!-- ONBOARDING WIZARD -->
-  <div id="onboarding-wizard" class="modal-overlay"
+  <div id="onboarding-wizard" class="modal-overlay hide"
     style=" z-index:20000; background: var(--bg-dark); overflow:hidden;">
     <div class="scanline-bg"></div>
     <div class="wizard-step active-step wizard-card" id="step-1">
@@ -37,84 +37,121 @@
       <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.6; text-align:center;">El acero solo
         nace tras el fuego. Tu llegada al Templo marca el inicio de una transformación; antes de guiar tu camino, el
         Oráculo debe conocer la firmeza de tu raíz. <br><br><b>¿Bajo qué nombre será recordada tu leyenda?</b></p>
-      <input type="text" id="ob-name" class="wizard-input" placeholder="TU TÍTULO AQUÍ">
+      <input type="text" id="ob-name" class="wizard-input" placeholder="TU TÍTULO AQUÍ" style="margin-bottom:15px;">
+      
+      <p style="color:#aaa; font-size:0.8rem; margin-bottom:10px; text-align:center; font-family:'Inter';"><b>Nivel de Experiencia Física:</b></p>
+      <select id="ob-exp" class="wizard-select" style="margin-bottom:25px; background:#111;">
+        <option value="semilla">🌱 Semilla (Principiante - Llevo inactivo o nunca he entrenado)</option>
+        <option value="bambu">🌿 Bambú (Intermedio - Entreno ocasionalmente con peso corporal)</option>
+        <option value="tigre">🐉 Tigre (Avanzado - Entreno duro, domino flexiones y dominadas)</option>
+      </select>
+      
       <button class="btn-primary" onclick="playSysSound(); nextWizardStep(1)" style="letter-spacing:2px;">INICIAR
         SENDA</button>
     </div>
 
-    <!-- FASE 2: Fuerza -->
+    <!-- FASE 2: Equipamiento -->
     <div class="wizard-step hidden-step wizard-card" id="step-2">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: FIRMEZA 2/6</div>
-      <h2 class="system-title">FUERZA DE LA MONTAÑA</h2>
-      <img src="./img/techniques/str_2.png" class="holo-image"
-        onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">La montaña no se
-        mueve ante el viento.<br>Desciende y asciende hasta que tu voluntad se imponga al cuerpo. ¿Cuántas
-        <b>flexiones estricas</b> resistes?
+        CALIBRACIÓN: EL TEMPLO 2/6</div>
+      <h2 class="system-title">ARMAMENTO DISPONIBLE</h2>
+      <div style="font-size:5rem; margin-bottom:15px; text-shadow:0 0 20px rgba(255,215,0,0.3);">⛩️</div>
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:20px; line-height:1.5; text-align:center;">
+        ¿Con qué herramientas cuentas para forjar tu templo físico hoy?<br><span style="font-size:0.75rem; color:#888;">(El Oráculo calibrará los ejercicios según tu equipo real)</span>
       </p>
-      <input type="number" id="ob-str" class="wizard-input" placeholder="Repeticiones" min="0">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR VOLUNTAD</button>
+      <select id="ob-equip" class="wizard-select" style="margin-bottom:30px; background:#111;">
+        <option value="none">🛏️ Solo suelo (Sin equipamiento, peso corporal)</option>
+        <option value="bar">🪵 Suelo + Barra de dominadas (Barra en puerta o parque)</option>
+        <option value="dojo">⛩️ Dojo completo (Tengo barra, paralelas y anillas)</option>
+      </select>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(2)">REGISTRAR ENTORNO</button>
     </div>
 
-    <!-- FASE 3: Velocidad -->
+    <!-- FASE 3: Fuerza Empuje -->
     <div class="wizard-step hidden-step wizard-card" id="step-3">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: EL RAYO 3/6</div>
-      <h2 class="system-title">VELOCIDAD DE LA SOMBRA</h2>
-      <img src="./img/techniques/spd_3.png" class="holo-image"
-        onerror="this.src='https://c.tenor.com/_qZ3B7tA45wAAAAC/burpee-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El rayo precede
-        al trueno. La explosividad es la clave.<br>Durante 60 latidos, descubre cuántos <b>Burpees con salto</b> puedes ejecutar.</p>
-      <input type="number" id="ob-spd" class="wizard-input" placeholder="Burpees Totales" min="0">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR VELOCIDAD</button>
+        CALIBRACIÓN: EL ESCUDO 3/6</div>
+      <h2 class="system-title">FUERZA DE EMPUJE (PUSH)</h2>
+      <img src="./img/techniques/str_2.png" class="holo-image"
+        onerror="this.src='https://c.tenor.com/gI-8qCUEko8AAAAC/pushup.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:20px; line-height:1.5; text-align:center;">
+        Baja y empuja. ¿Cuál es tu verdadera capacidad al empujar contra la gravedad?<br><span style="font-size:0.75rem; color:#888;">(Selecciona tu progresión máxima estricta)</span>
+      </p>
+      <select id="ob-str-push" class="wizard-select" style="margin-bottom:30px; background:#111;">
+        <option value="aprendiz">🌱 Aprendiz (No hago flexiones estrictas o las hago de rodillas)</option>
+        <option value="guerrero">🌿 Guerrero (Hago de 5 a 15 flexiones clásicas estrictas)</option>
+        <option value="campeon">🎋 Campeón (Hago más de 15 flexiones clásicas impecables)</option>
+        <option value="maestro">🐉 Maestro (Domino flexiones pliométricas o a una mano)</option>
+      </select>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(3)">REGISTRAR EMPUJE</button>
     </div>
 
-    <!-- FASE 4: Piernas -->
+    <!-- FASE 4: Fuerza Tracción -->
     <div class="wizard-step hidden-step wizard-card" id="step-4">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: RAÍCES 4/6</div>
-      <h2 class="system-title">RAÍCES DE HIERRO</h2>
-      <img src="./img/techniques/str_16.png" class="holo-image"
-        onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHYzeHh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpx927361Fvi/giphy.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">Sin raíces profundas, el roble cae.<br>Desciende rompiendo el paralelo en cada <b>sentadilla</b>. ¿Cuántas logras en un minuto?</p>
-      <input type="number" id="ob-legs" class="wizard-input" placeholder="Sentadillas Totales" min="0">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR RAÍZ</button>
+        CALIBRACIÓN: LA GARRA 4/6</div>
+      <h2 class="system-title">FUERZA DE TRACCIÓN (PULL)</h2>
+      <img src="./img/techniques/str_10.png" class="holo-image"
+        onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHYzeHh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1n/3o7TKMGpx927361Fvi/giphy.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:20px; line-height:1.5; text-align:center;">
+        Tira de tu propio peso para dominar el cielo. ¿Cómo responde tu espalda?<br><span style="font-size:0.75rem; color:#888;">(Selecciona tu nivel de jalón en barra o mesa)</span>
+      </p>
+      <select id="ob-str-pull" class="wizard-select" style="margin-bottom:30px; background:#111;">
+        <option value="aprendiz">🌱 Aprendiz (No hago dominadas, uso remos invertidos en mesa/suelo)</option>
+        <option value="guerrero">🌿 Guerrero (Logro hacer dominadas excéntricas o 1 a 3 estrictas)</option>
+        <option value="campeon">🎋 Campeón (Hago de 4 a 10 dominadas estrictas completas)</option>
+        <option value="maestro">🐉 Maestro (Hago más de 10 dominadas perfectas o a un brazo)</option>
+      </select>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(4)">REGISTRAR TRACCIÓN</button>
     </div>
 
-    <!-- FASE 5: Resistencia (Plancha) -->
+    <!-- FASE 5: Resistencia Core -->
     <div class="wizard-step hidden-step wizard-card" id="step-5">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: EL TEMPLO 5/6</div>
-      <h2 class="system-title">FORTALEZA VIVA</h2>
+        CALIBRACIÓN: EL NÚCLEO 5/6</div>
+      <h2 class="system-title">NÚCLEO INMÓVIL</h2>
       <img src="./img/techniques/end_2.png" class="holo-image"
-        onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eHh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpx927361Fvi/giphy.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El centro es donde reside el poder inmóvil.<br>Mantén tu cuerpo como una vara de acero. ¿Cuántos <b>segundos</b> resistes en plancha?</p>
-      <input type="number" id="ob-end" class="wizard-input" placeholder="Segundos Totales" min="0">
-      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(5)">REGISTRAR TEMPLO</button>
+        onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eXh6eHh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1n/3o7TKMGpx927361Fvi/giphy.gif'">
+      <p style="color:#ccc; font-size:0.9rem; margin-bottom:20px; line-height:1.5; text-align:center;">
+        El poder del centro. ¿Durante cuántos latidos eres capaz de sostener tu cuerpo recto como una vara de acero?
+      </p>
+      <select id="ob-core" class="wizard-select" style="margin-bottom:30px; background:#111;">
+        <option value="1">🌱 Iniciado (Menos de 20 segundos en plancha clásica)</option>
+        <option value="10">🌿 Guerrero (De 20 a 60 segundos manteniendo firmeza)</option>
+        <option value="20">🎋 Campeón (De 1 a 2 minutos con postura impecable)</option>
+        <option value="30">🐉 Maestro (Más de 2 minutos de plancha o hollow body)</option>
+      </select>
+      <button class="btn-primary" onclick="playSysSound(); nextWizardStep(5)">REGISTRAR NÚCLEO</button>
     </div>
 
-    <!-- FASE 6: Flexibilidad -->
+    <!-- FASE 6: Flexibilidad y Lesiones -->
     <div class="wizard-step hidden-step wizard-card" id="step-6">
       <div
         style="font-size:0.7rem; color:var(--accent-gold); letter-spacing:2px; margin-bottom:25px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:8px; font-weight:700; text-transform:uppercase; width:100%; text-align:center;">
-        CALIBRACIÓN: EL BAMBÚ 6/6</div>
-      <h2 class="system-title">FLUIDEZ DEL ESPÍRITU</h2>
-      <img src="./img/techniques/flex_1.png" class="holo-image"
-        onerror="this.src='https://c.tenor.com/7L4C0E3jS2kAAAAC/stretching-exercise.gif'">
-      <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px; line-height:1.5; text-align:center;">El bambú que no
-        se dobla, se rompe.<br>Alcanza la tierra con tus manos descubriendo tu límite de elasticidad.</p>
-      <select id="ob-flex" class="wizard-select">
+        CALIBRACIÓN: LA FLEXIBILIDAD Y RAÍZ 6/6</div>
+      <h2 class="system-title">FLUIDEZ Y SALUD DEL TEMPLO</h2>
+      
+      <p style="color:#aaa; font-size:0.8rem; margin-bottom:8px; text-align:center;"><b>Flexibilidad del Espíritu:</b></p>
+      <select id="ob-flex" class="wizard-select" style="margin-bottom:15px; background:#111;">
         <option value="1">🌱 Inflexible (No llego a las rodillas)</option>
         <option value="10">🌿 Rígido (Llego a las espinillas)</option>
         <option value="20">🎋 Flexible (Toco mis pies)</option>
         <option value="30">🐉 Maestro (Palmas al suelo)</option>
       </select>
-      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:10px;">FORJAR EL ACCESO</button>
+      
+      <p style="color:#aaa; font-size:0.8rem; margin-bottom:8px; text-align:center;"><b>¿Tienes molestias o lesiones activas hoy?</b><br><span style="font-size:0.65rem; color:#666;">(El Oráculo adaptará los ejercicios para proteger estas zonas)</span></p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; text-align:left; margin-bottom:20px; font-size:0.75rem; color:#ccc; padding:0 15px;">
+        <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ob-injury" value="wrist" style="width:auto; margin-right:8px; margin-top:0; height:auto;">Muñecas 🖐️</label>
+        <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ob-injury" value="shoulder" style="width:auto; margin-right:8px; margin-top:0; height:auto;">Hombros 🦾</label>
+        <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ob-injury" value="knee" style="width:auto; margin-right:8px; margin-top:0; height:auto;">Rodillas 🦵</label>
+        <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ob-injury" value="back" style="width:auto; margin-right:8px; margin-top:0; height:auto;">Espalda Baja 🧘‍♂️</label>
+      </div>
+      
+      <button class="btn-primary pulse-glow" onclick="playSysSound(); finishWizard()" style="margin-top:0;">FORJAR EL ACCESO</button>
     </div>
   </div>
 
@@ -258,13 +295,13 @@
         <button class="radio-btn" id="audio-synth" style="display:none;"
           data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3">SYNTH 🎹</button>
         <button class="radio-btn" id="audio-ambient" style="display:none;"
-          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3">NIEBLA 🌫️</button>
+          data-url="https://cdn.freesound.org/previews/730/730265_10983022-hq.mp3">NIEBLA 🌫️</button>
         <button class="radio-btn" id="audio-epic" style="display:none;"
-          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">ÉPICA ⚔️</button>
+          data-url="https://cdn.freesound.org/previews/621/621296_13749321-hq.mp3">ÉPICA ⚔️</button>
         <button class="radio-btn" id="audio-lofi" style="display:none;"
-          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3">LO-FI 🎧</button>
+          data-url="https://cdn.freesound.org/previews/511/511279_8462944-hq.mp3">LO-FI 🎧</button>
         <button class="radio-btn" id="audio-tribal" style="display:none;"
-          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3">TRIBAL 🪘</button>
+          data-url="https://cdn.freesound.org/previews/648/648393_13315998-hq.mp3">TRIBAL 🪘</button>
         <button id="radio-stop" class="radio-btn stop">⏹</button>
       </div>
       <audio id="audio-player" src="" preload="none" loop></audio>
@@ -363,6 +400,49 @@
       <!-- Inyectado por JS -->
     </div>
 
+    <!-- Beautiful Fullscreen Rest Overlay -->
+    <div id="rest-timer-hud" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,5,5,0.94); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border:none; z-index:99999; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px; box-sizing:border-box;">
+      <div style="max-width:400px; width:100%; display:flex; flex-direction:column; align-items:center;">
+        <!-- Header -->
+        <div id="rest-timer-label" style="font-family:'Cinzel', serif; font-size:0.8rem; color:var(--accent-gold); letter-spacing:3px; text-transform:uppercase; margin-bottom:15px; text-shadow:0 0 10px rgba(255,215,0,0.4);">⏸️ TIEMPO DE RECUPERACIÓN</div>
+        
+        <!-- Next Exercise Preview Card -->
+        <div id="rest-next-preview" style="width:100%; background:rgba(255,255,255,0.02); border:1px solid rgba(255,215,0,0.15); border-radius:12px; padding:15px; margin-bottom:30px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          <div style="font-size:0.6rem; color:#888; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px;">Siguiente Acto</div>
+          <div id="rest-next-name" style="font-family:'Cinzel', serif; font-size:1.1rem; color:#fff; font-weight:bold; line-height:1.2; margin-bottom:4px;">Flexiones Clásicas</div>
+          <div id="rest-next-details" style="font-size:0.75rem; color:var(--accent-gold); font-weight:800; letter-spacing:1px;">3 SERIES ✕ 12 REPS</div>
+        </div>
+
+        <!-- Giant Radial Pulsing Timer -->
+        <div style="position:relative; width:180px; height:180px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+          <!-- Breathing Ring (expands 4s inhale, holds 2s, contracts 4s exhale, pauses 2s) -->
+          <div class="breath-ring"></div>
+          <!-- Pulse rings behind -->
+          <div class="timer-pulse-ring" style="position:absolute; width:100%; height:100%; border-radius:50%; border:2px solid rgba(255,215,0,0.15); animation: timerPulse 2s infinite ease-out;"></div>
+          <!-- Real circular borders -->
+          <div style="position:absolute; width:160px; height:160px; border-radius:50%; border:3px solid rgba(255,215,0,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);"></div>
+          
+          <div id="rest-timer-seconds" style="font-family:monospace; font-size:4.5rem; font-weight:900; color:#fff; text-shadow:0 0 20px rgba(255,255,255,0.4); z-index:2; position:relative;">60</div>
+          <div style="position:absolute; bottom:30px; font-size:0.65rem; color:#666; font-family:'Inter'; letter-spacing:1px; z-index:2;">SEGUNDOS</div>
+        </div>
+
+        <!-- Breathing Phase Label -->
+        <div id="breath-label" style="font-size:1.3rem; font-weight:900; letter-spacing:5px; color:#fff; text-shadow:0 0 15px var(--accent-gold), 0 0 5px #fff; text-transform:uppercase; margin-bottom:18px; min-height:24px; transition:opacity 0.5s ease;"></div>
+
+        <!-- Zen Quote Area -->
+        <div id="rest-zen-quote" style="font-family:'Inter', sans-serif; font-size:0.8rem; color:#ccc; line-height:1.6; margin-bottom:40px; padding:0 10px; font-style:italic; min-height:50px;">
+          "El hierro se afila con hierro, el espíritu con disciplina."
+        </div>
+
+        <!-- Adjust and Skip controls -->
+        <div style="display:flex; gap:15px; width:100%; max-width:320px;">
+          <button class="btn-secondary" onclick="adjustRestTimer(-10)" style="margin:0; font-size:0.8rem; padding:12px 0; flex:1; border-color:#333; border-radius:8px; background:rgba(255,255,255,0.01); color:#888;">-10s</button>
+          <button class="btn-primary" onclick="skipRestTimer()" style="margin:0; font-size:0.85rem; padding:12px 0; flex:1.5; background:linear-gradient(135deg, var(--accent-green), #2e8b57); border-color:var(--accent-green); color:#000; font-weight:900; border-radius:8px; box-shadow:0 5px 15px rgba(0,255,0,0.15);">OMITIR</button>
+          <button class="btn-secondary" onclick="adjustRestTimer(10)" style="margin:0; font-size:0.8rem; padding:12px 0; flex:1; border-color:#333; border-radius:8px; background:rgba(255,255,255,0.01); color:#888;">+10s</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Finalización -->
     <div id="focus-finish-container"
       style="display:none; padding: 20px; text-align:center; position:fixed; top:0; left:0; width:100%; height:100%; z-index:100000; background:rgba(0,0,0,0.95); flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);">
@@ -378,24 +458,28 @@
         <h2 class="system-title" style="font-size:2.4rem; text-transform:uppercase; margin-bottom:15px;">
           ESPÍRITU<br>FORJADO</h2>
         <div id="victory-rewards"
-          style="margin-bottom: 25px; padding: 12px; background: rgba(0,0,0,0.6); border: 1px solid var(--accent-gold); border-radius: 12px; display:flex; gap:20px; justify-content:center; align-items:center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
-          <div style="text-align:center; line-height:1.2;">
+          style="margin-bottom: 25px; padding: 16px 24px; background: rgba(15, 15, 15, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 14px; display:flex; gap:30px; justify-content:center; align-items:center; box-shadow: 0 10px 30px rgba(0,0,0,0.7), inset 0 0 15px rgba(255, 215, 0, 0.05);">
+          <div style="text-align:center; line-height:1.2; display:flex; flex-direction:column; align-items:center;">
             <span class="golden-coin"
-              style="width:36px; height:36px; font-size:1.2rem; filter:drop-shadow(0 0 8px rgba(255,215,0,0.6)); margin-bottom: 5px;">Z</span><br>
+              style="width:38px; height:38px; font-size:1.3rem; filter:drop-shadow(0 0 8px rgba(255,215,0,0.6)); margin-bottom: 6px; animation: float 2.5s ease-in-out infinite;">Z</span>
             <span id="reward-coins"
-              style="color:var(--accent-gold); font-weight:900; font-size:1.2rem; font-family:monospace;">+0</span>
+              style="color:#fff; font-weight:900; font-size:1.4rem; font-family:'Cinzel', serif; text-shadow:0 0 10px var(--accent-gold);">+0</span>
           </div>
-          <div style="width:1px; height:35px; background:rgba(255,215,0,0.2);"></div>
-          <div style="text-align:center; line-height:1.2;">
-            <span id="reward-streak-icon" style="font-size:1.6rem;">🔥</span><br>
+          <div style="width:1px; height:45px; background:linear-gradient(to bottom, transparent, rgba(255,215,0,0.4), transparent);"></div>
+          <div style="text-align:center; line-height:1.2; display:flex; flex-direction:column; align-items:center;">
+            <span id="reward-streak-icon" style="font-size:1.8rem; margin-bottom: 4px; display:inline-block; animation: float 3s ease-in-out infinite;">🔥</span>
             <span id="reward-streak"
-              style="color:#ff5555; font-weight:900; font-size:0.8rem; letter-spacing:1px; text-transform:uppercase;">Racha
-              x1</span>
+              style="color:#ff4444; font-weight:900; font-size:0.9rem; font-family:'Inter'; letter-spacing:1px; text-transform:uppercase; text-shadow:0 0 10px rgba(255,68,68,0.4);">Racha x1</span>
           </div>
         </div>
+        <!-- Feedback del Discípulo — IA Adaptativa -->
+        <div style="width:100%; margin-bottom:16px;">
+          <div style="font-size:0.52rem; color:#888; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; text-align:left;">⚡ ESTADO DEL DISCÍPULO — LA IA ADAPTARÁ TU PRÓXIMA RUTINA</div>
+          <textarea id="feedback-input" placeholder="¿Cómo respondió tu cuerpo hoy? (ej: piernas cansadas, mucha energía, dolor de espalda...)" style="width:100%; background:rgba(0,0,0,0.5); color:#ddd; border:1px solid rgba(255,215,0,0.15); border-radius:8px; padding:10px 12px; font-size:0.78rem; font-family:'Inter'; resize:none; height:64px; outline:none; line-height:1.5; box-sizing:border-box;"></textarea>
+          <button onclick="saveWorkoutFeedback()" style="width:100%; margin-top:6px; background:rgba(255,215,0,0.06); color:rgba(255,215,0,0.8); border:1px solid rgba(255,215,0,0.2); border-radius:6px; padding:8px; font-size:0.65rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.3s ease;">💾 GUARDAR ESTADO PARA LA IA</button>
+        </div>
         <button id="btn-finish-routine" class="btn-complete-massive"
-          style="background:var(--accent-green); color:#000; box-shadow: 0 0 30px rgba(40,167,69,0.8); text-shadow:0 0 2px #fff;">✔️
-          RECLAMAR VICTORIA</button>
+          style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color:#fff; border: 1px solid rgba(40,167,69,0.4); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); box-shadow: 0 0 25px rgba(40,167,69,0.4), inset 0 1px 0 rgba(255,255,255,0.2); animation: pulseGreen 2.2s infinite; border-radius: 12px; padding: 18px 0; font-size: 1.1rem; width:100%; cursor:pointer;">✔️ RECLAMAR VICTORIA</button>
       </div>
     </div>
   </main>
@@ -436,9 +520,9 @@
         style="color: var(--accent-gold); margin-bottom: 15px; font-size:1.3rem; font-family:'Cinzel'; text-transform:uppercase;">
       </h2>
       <div id="info-img-container" style="margin-bottom: 15px;"></div>
-      <p id="info-desc"
-        style="font-size: 0.9rem; margin-bottom: 20px; color:#ddd; font-style:italic; line-height: 1.5; border-left:2px solid var(--accent-red); padding-left:12px; text-align: left;">
-      </p>
+      <div id="info-desc"
+        style="font-size: 0.9rem; margin-bottom: 20px; color:#ddd; line-height: 1.5; text-align: left;">
+      </div>
       <button id="info-close" class="btn-primary">ESTUDIADO</button>
     </div>
   </div>
@@ -580,7 +664,33 @@
       </div>
       <div id="tab-lore" class="profile-tab-content"
         style="padding:20px; flex:1; overflow-y:auto; display:none;">
-        <!-- Lore Injected here -->
+        
+        <!-- Mapa de Calor de Constancia -->
+        <div id="heatmap-container" style="background:#111; border:1px solid #222; border-radius:10px; padding:15px; margin-bottom:20px; box-shadow:inset 0 0 10px rgba(0,0,0,0.8);">
+          <div style="font-family:'Cinzel'; color:var(--accent-gold); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; font-weight:bold; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span class="dot" style="background:var(--accent-gold); box-shadow:0 0 5px var(--accent-gold);"></span> CALENDARIO DE GESTAS
+          </div>
+          <div id="heatmap-grid" class="heatmap-grid" style="display:grid; grid-auto-flow:column; grid-template-rows:repeat(7, 1fr); gap:3px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none;">
+            <!-- Celdas inyectadas por JS -->
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.55rem; color:#555; margin-top:8px; font-family:'Inter';">
+            <span>Hace 1 año</span>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <span>Menos</span>
+              <div style="width:8px; height:8px; background:#161616; border:1px solid #222; border-radius:1px;"></div>
+              <div style="width:8px; height:8px; background:#4a1010; border-radius:1px;"></div>
+              <div style="width:8px; height:8px; background:#8a1515; border-radius:1px;"></div>
+              <div style="width:8px; height:8px; background:#cc1a1a; border-radius:1px;"></div>
+              <div style="width:8px; height:8px; background:var(--accent-gold); border-radius:1px;"></div>
+              <span>Más</span>
+            </div>
+            <span>Hoy</span>
+          </div>
+        </div>
+
+        <div id="tab-lore-items-container">
+          <!-- Lore Injected here -->
+        </div>
       </div>
       <div id="tab-relics" class="profile-tab-content"
         style="padding:20px; flex:1; overflow-y:auto; display:none; text-align:center;">
@@ -615,10 +725,80 @@
   </div>
 
   <div id="settings-modal" class="modal-overlay" style=" z-index:45000;">
-    <div class="modal-content" style="text-align:center;">
+    <div class="modal-content" style="text-align:center; max-height:85vh; overflow-y:auto;">
       <h2 style="color:var(--accent-gold); margin-bottom: 10px; font-family:'Cinzel';">SISTEMA PWA</h2>
       <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Respalda tu progreso para que nunca pierdas años de
         entrenamiento físico.</p>
+      
+      <!-- Switch de Voz del Sensei -->
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:8px; border:1px solid #222; text-align:left;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.8rem; color:#ccc; font-weight:bold;">Voz del Sensei (TTS) 🗣️</span>
+          <label class="switch" style="position:relative; display:inline-block; width:44px; height:24px;">
+            <input type="checkbox" id="voice-toggle" style="opacity:0; width:0; height:0;">
+            <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#333; transition:0.3s; border-radius:24px; border:1px solid #555;"></span>
+          </label>
+        </div>
+        <div id="voice-selector-container" style="display:none; margin-top:5px;">
+
+
+          <!-- System Voice Dropdown Container -->
+          <div id="system-voice-dropdown-container">
+            <label style="font-size:0.65rem; color:#888; display:block; margin-bottom:3px;">Selecciona la voz del Maestro:</label>
+            <select id="voice-select" style="width:100%; background:#111; border:1px solid #333; color:#ccc; font-size:0.75rem; padding:6px; border-radius:5px; margin-bottom:8px;"></select>
+            
+            <!-- Pitch Slider -->
+            <div style="margin-bottom:8px; display:flex; flex-direction:column; gap:2px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#888;">
+                <span>Tono de Voz:</span>
+                <span id="voice-pitch-val" style="color:var(--accent-gold); font-family:monospace;">1.00</span>
+              </div>
+              <input type="range" id="voice-pitch-slider" min="0.5" max="1.5" step="0.05" value="1.0" style="width:100%; accent-color:var(--accent-gold); background:#333; height:4px; border-radius:2px; cursor:pointer;">
+            </div>
+
+            <!-- Rate Slider -->
+            <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:2px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#888;">
+                <span>Velocidad:</span>
+                <span id="voice-rate-val" style="color:var(--accent-gold); font-family:monospace;">0.95</span>
+              </div>
+              <input type="range" id="voice-rate-slider" min="0.5" max="1.5" step="0.05" value="0.95" style="width:100%; accent-color:var(--accent-gold); background:#333; height:4px; border-radius:2px; cursor:pointer;">
+            </div>
+          </div>
+
+          <button id="btn-test-voice" class="btn-secondary" style="margin:0 0 10px 0; font-size:0.65rem; padding:6px; width:100%; border-color:#444;">🔊 ESCUCHAR PRUEBA</button>
+
+          <!-- System Voice Help Section -->
+          <div id="system-voice-help" style="background:rgba(255,255,255,0.01); border:1px solid #222; border-radius:6px; padding:6px; font-size:0.58rem; color:#888; line-height:1.35; text-align:left;">
+            <div style="color:var(--accent-gold); font-weight:bold; margin-bottom:3px; font-family:'Cinzel', serif;">💡 ¿Voz robótica o femenina? Mejórala:</div>
+            <ul style="margin:0; padding-left:12px;">
+              <li><b>iOS / macOS:</b> Ve a Ajustes → Accesibilidad → Contenido Leído → Voces → Español y descarga <b>"Jorge (Mejorada)"</b> o <b>"Diego (Mejorada)"</b> para un tono de maestro natural.</li>
+              <li><b>Android:</b> Ajustes → Accesibilidad → Salida de síntesis de voz → Ajustes de Google TTS → Instalar datos de voz → Español y descarga las voces de alta fidelidad.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuración del Oráculo AI -->
+      <div style="margin-bottom:20px; padding:15px; background:rgba(255,215,0,0.02); border:1px solid rgba(255,215,0,0.1); border-radius:8px; text-align:left;">
+        <label style="font-size:0.75rem; color:var(--accent-gold); font-family:'Cinzel'; letter-spacing:1px; display:block; margin-bottom:5px; font-weight:bold;">🔮 ORÁCULO AI (GEMINI)</label>
+        <p style="font-size:0.65rem; color:#888; margin-bottom:12px; line-height:1.4;">Introduce tu clave API de Google AI Studio para activar entrenamientos generativos 100% personalizados basados en tu estado físico actual.</p>
+        <div style="position:relative; margin-bottom:10px;">
+          <input type="password" id="gemini-key" placeholder="Introduce tu API Key..." style="margin:0 0 5px 0; text-align:left; font-size:0.8rem; padding-right:40px; background:#070707; font-family:monospace; border-color:#333;">
+          <span id="gemini-status-badge" style="position:absolute; right:12px; top:12px; font-size:0.8rem; cursor:help;" title="Oráculo Offline">🔴</span>
+        </div>
+        <!-- Instrucciones y Enlace Directo para obtener la API Key -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid #222; border-radius:6px; padding:8px 10px; font-size:0.65rem; color:#aaa; line-height:1.4;">
+          <div style="color:var(--accent-gold); font-weight:bold; margin-bottom:4px; font-family:'Cinzel';">¿Cómo obtener tu clave gratis?</div>
+          <ol style="margin:0; padding-left:15px;">
+            <li>Ve a <a href="https://aistudio.google.com/" target="_blank" style="color:var(--accent-gold); text-decoration:underline; font-weight:bold;">Google AI Studio</a>.</li>
+            <li>Inicia sesión con tu cuenta de Google.</li>
+            <li>Haz clic en el botón <b>"Create API key"</b>.</li>
+            <li>Copia la clave generada y pégala arriba.</li>
+          </ol>
+        </div>
+      </div>
+
       <button class="btn-secondary" onclick="exportSave()"
         style="margin-bottom:10px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR
         DATOS</button>
@@ -759,11 +939,11 @@
       onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
   </div>
 
-  <script src="./database.js?v=10"></script>
-  <script src="./app.js?v=10"></script>
+  <script src="./database.js?v=13"></script>
+  <script src="./app.js?v=18"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10').catch(e => { }));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=18').catch(e => { }));
     }
   </script>
   <!-- RANK ASCENSION MODAL -->
@@ -787,6 +967,46 @@
   </div>
 
   <div id="global-lightbox" onclick="closeLightbox()"><img id="global-lightbox-img" src=""></div>
+  
+  <!-- Canvas de Confetti de Victoria -->
+  <canvas id="victory-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:100001; display:none;"></canvas>
+
+  <!-- MODAL DE CHECK-IN DIARIO -->
+  <div id="checkin-modal" class="modal-overlay" style="z-index: 52000;">
+    <div class="modal-content" style="max-width: 400px; padding: 25px; text-align:center;">
+      <h2 style="color:var(--accent-gold); font-family:'Cinzel', serif; font-size: 1.5rem; margin-bottom: 5px;">CHECK-IN DIARIO</h2>
+      <div style="font-size:0.55rem; color:#888; letter-spacing:2px; font-weight:bold; margin-bottom:20px; text-transform:uppercase;">Evaluación del Oráculo</div>
+      
+      <div style="text-align:left; margin-bottom:15px;">
+        <label style="font-size:0.75rem; color:#aaa; display:block; margin-bottom:6px; font-family:'Inter'; font-weight:600;">¿Cómo está tu energía hoy? ⚡</label>
+        <select id="ci-energy" class="wizard-select" style="background:#111; border-color:#333;">
+          <option value="5">🔥 Plena Fuerza (Cuerpo y mente al 100%)</option>
+          <option value="4">⚡ Enérgico (Listo para sudar y forjar)</option>
+          <option value="3" selected>💪 Normal (Fuerzas estables)</option>
+          <option value="2">💤 Fatigado (Falta de sueño o fatiga leve)</option>
+          <option value="1">💀 Exhausto (Se recomienda sesión ligera)</option>
+        </select>
+      </div>
+
+      <div style="text-align:left; margin-bottom:15px;">
+        <label style="font-size:0.75rem; color:#aaa; display:block; margin-bottom:6px; font-family:'Inter'; font-weight:600;">¿Tienes fatiga muscular / agujetas? 🥊</label>
+        <select id="ci-soreness" class="wizard-select" style="background:#111; border-color:#333;">
+          <option value="none" selected>🟢 Sin dolor (Músculos recuperados)</option>
+          <option value="light">🟡 Fatiga leve (Espíritu dispuesto, cuerpo cansado)</option>
+          <option value="heavy">🔴 Agujetas intensas (Gran destrucción de fibras)</option>
+        </select>
+      </div>
+
+      <div style="text-align:left; margin-bottom:25px;">
+        <label style="font-size:0.75rem; color:#aaa; display:block; margin-bottom:6px; font-family:'Inter'; font-weight:600;">Dolores locales o especificaciones del dojo: ✍️</label>
+        <input type="text" id="ci-notes" placeholder="Ej: Dolor de rodilla, sin barra, solo 15 min..." style="margin:0; text-align:left; font-size:0.85rem; background:#070707; border-color:#333;">
+      </div>
+
+      <button class="btn-primary" onclick="submitCheckin()" style="letter-spacing:1px; margin-bottom:10px;">FORJAR ENTRENAMIENTO</button>
+      <button class="btn-secondary" onclick="closeModal('checkin-modal')" style="margin-top:0;">RETIRARSE</button>
+    </div>
+  </div>
+
   <script>
     window.openModal = function (id) {
       if (window.UISoundEngine) window.UISoundEngine.playSwoosh();
@@ -798,7 +1018,7 @@
     };
     let currentNotiCallback = null;
     let currentNotiCancelCallback = null;
-
+    
     function showNotification(msg, title, callback = null, showCancel = false, cancelCallback = null) {
       document.getElementById('noti-title').innerText = title || "NOTIFICACIÓN";
       document.getElementById('noti-msg').innerText = msg;
@@ -841,14 +1061,6 @@
       document.getElementById('global-lightbox').classList.add('show');
     };
     window.closeLightbox = function () { document.getElementById('global-lightbox').classList.remove('show'); };
-
-    window.debugSystem = function () {
-      showConfirm("El sistema buscará la versión más reciente del Códice y reiniciará la app para aplicarla. Tu progreso no sufrirá cambios. ¿Proceder?", "ACTUALIZACIÓN", () => { window.location.reload(); });
-    };
-    window.playCompleteSound = function () {
-      const audio = document.getElementById('sys-complete-sound');
-      if (audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Audio play prevented:", e)); }
-    };
   </script>
 </body>
 

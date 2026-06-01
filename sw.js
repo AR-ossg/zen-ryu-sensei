@@ -1,15 +1,15 @@
 // ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
 // para forzar la actualización en los teléfonos que ya tienen la app instalada.
 // Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
-const CACHE_NAME = 'zen-ryu-pwa-v40';
+const CACHE_NAME = 'zen-ryu-pwa-v55';
 
 // Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
   './',
   './index.html',
   './style.css',
-  './app.js?v=10',
-  './database.js?v=10',
+  './app.js?v=18',
+  './database.js?v=13',
   './manifest.json',
   './icon.png',
   './icon-192.png',
@@ -41,7 +41,19 @@ self.addEventListener('activate', event => {
 
 // ─── FETCH: estrategia híbrida ────────────────────────────────────────────
 self.addEventListener('fetch', event => {
+  // 1. IGNORAR peticiones que no sean GET (como POST de la API de Gemini)
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   const url = new URL(event.request.url);
+
+  // 2. IGNORAR peticiones de orígenes externos (como Hugging Face, CDN de jsdelivr, Google API)
+  // Esto evita problemas de CORS, Range Requests parciales (ONNX) y desconexiones
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
   const isImage = IMAGE_EXTS.some(ext => url.pathname.endsWith(ext));
 
   if (isImage) {
