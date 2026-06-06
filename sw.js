@@ -1,20 +1,40 @@
 // ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
 // para forzar la actualización en los teléfonos que ya tienen la app instalada.
 // Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
-const CACHE_NAME = 'zen-ryu-pwa-v55';
+const CACHE_NAME = 'zen-ryu-pwa-v58';
 
 // Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
   './',
   './index.html',
   './style.css',
-  './app.js?v=18',
+  './app.js?v=19',
   './database.js?v=13',
   './manifest.json',
   './icon.png',
   './icon-192.png',
   './icon-512.png',
   './victory_coin.png',
+  // Librería EPUB (local para funcionar offline)
+  './lib/jszip.min.js',
+  './lib/epub.min.js',
+  // Libros EPUB
+  './books/arte_guerra.epub',
+  './books/meditaciones.epub',
+  './books/tao_te_ching.epub',
+  './books/enquiridion.epub',
+  './books/dhammapada.epub',
+  './books/analectas.epub',
+  // Audios Locales
+  './audio/meditar.mp3',
+  './audio/fuego.mp3',
+  './audio/combate.mp3',
+  './audio/taiko.mp3',
+  './audio/synth.mp3',
+  './audio/niebla.mp3',
+  './audio/epica.mp3',
+  './audio/lofi.mp3',
+  './audio/tribal.mp3',
 ];
 
 // Imágenes — se cachean la primera vez que se usan (Cache-First)

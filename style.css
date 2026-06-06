@@ -1763,3 +1763,85 @@ body.theme-sangre .glass-panel {
   50% { box-shadow: 0 0 30px rgba(40,167,69,0.85); transform: scale(1.025); }
   100% { box-shadow: 0 0 15px rgba(40,167,69,0.4); transform: scale(1); }
 }
+
+/* ===================================================
+   Lector EPUB & Reliquias Equipadas
+   =================================================== */
+
+#book-viewer iframe {
+  border: none !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@keyframes relicGlow {
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4), inset 0 0 10px rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8), inset 0 0 15px rgba(255, 215, 0, 0.3); border-color: var(--accent-gold); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4), inset 0 0 10px rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.5); }
+}
+
+.relic-equipped-card {
+  animation: relicGlow 2.5s ease-in-out infinite !important;
+  background: rgba(255, 215, 0, 0.03) !important;
+  border-width: 1.5px !important;
+}
+
+/* Page Flip Animation (Realistic Overlay Slide) */
+.reader-page-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--reader-bg-color, #121212);
+  z-index: 10;
+  pointer-events: none;
+  transform: translateX(100%);
+  will-change: transform;
+}
+
+.reader-page-overlay.flip-next-active {
+  animation: pageFlipNext 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.reader-page-overlay.flip-prev-active {
+  animation: pageFlipPrev 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes pageFlipNext {
+  0% {
+    transform: translateX(100%);
+    box-shadow: -15px 0 25px rgba(0,0,0,0.4);
+  }
+  45% {
+    transform: translateX(0%);
+    box-shadow: -15px 0 25px rgba(0,0,0,0.4);
+  }
+  55% {
+    transform: translateX(0%);
+    box-shadow: 15px 0 25px rgba(0,0,0,0.4);
+  }
+  100% {
+    transform: translateX(-100%);
+    box-shadow: 15px 0 25px rgba(0,0,0,0.4);
+  }
+}
+
+@keyframes pageFlipPrev {
+  0% {
+    transform: translateX(-100%);
+    box-shadow: 15px 0 25px rgba(0,0,0,0.4);
+  }
+  45% {
+    transform: translateX(0%);
+    box-shadow: 15px 0 25px rgba(0,0,0,0.4);
+  }
+  55% {
+    transform: translateX(0%);
+    box-shadow: -15px 0 25px rgba(0,0,0,0.4);
+  }
+  100% {
+    transform: translateX(100%);
+    box-shadow: -15px 0 25px rgba(0,0,0,0.4);
+  }
+}

@@ -16,6 +16,8 @@
     lastWorkoutDate: null,
     unlockedItems: [],
     activeAura: null,
+    equippedRelic: null, // Reliquia equipada activa
+    readingProgress: {}, // Progreso de lectura por libro { bookId: lastCfi }
     unlockedBadges: [],
     equippedBadges: [null, null, null],
     // 6.0 Extensions
@@ -88,21 +90,22 @@
     { id: 'mus_lofi', type: 'music', name: 'Lo-fi del Guerrero', desc: 'Beats relajados para sesiones de estiramiento y recuperación.', price: 250, icon: '🎧', meta: 'audio-lofi' },
     { id: 'mus_tribal', type: 'music', name: 'Ritual Primordial', desc: 'Percusión tribal ancestral que despierta el instinto de combate.', price: 350, icon: '🪘', meta: 'audio-tribal' },
 
-    // ===== DIARIO / LORE =====
-    { id: 'lore_v1', type: 'lore', name: 'Tomo I: La Caída', desc: 'Lee el primer fragmento del Maestro Dragón ZEN.', price: 200, icon: '📜', meta: 'La historia comienza cuando mi cuerpo dejó de doler y empezó a arder. No hablo de un ardor poético, hablo del ácido láctico devorando los filamentos de mi músculo hasta la parálisis. Me llamaban prodigio, pero el prodigio es solo una excusa de los mediocres para no entrenar hasta sangrar. El templo original no cayó por un asedio, cayó porque nadie más pudo mantener el ritmo. Cuando logres mil flexiones al alba, entenderás por qué.' },
-    { id: 'lore_v2', type: 'lore', name: 'Tomo II: El Arte Vacío', desc: 'Secretos prohibidos de la respiración en letargo.', price: 400, icon: '📜', meta: 'Cuando el pulmón colapsa, la mente intenta sobrevivir. La "Respiración Vacía", el secreto peor guardado del linaje, no consiste en inhalar más aire, sino en aceptar la falta de él. Cuando cuelgas de una barra, tu corazón late a 180 pulsaciones. Es ahí donde encuentras el silencio. Si tu espíritu flaquea antes que tu agarre, ya estabas muerto antes de empezar.' },
-    { id: 'lore_v3', type: 'lore', name: 'Tomo III: La Forja Interior', desc: 'La verdad sobre el dolor como herramienta de evolución.', price: 500, icon: '📜', meta: 'El dolor no es tu enemigo; es el único maestro que nunca miente. Aprendí esto la noche en que mi rodilla cedió durante el centésimo salto. No lloré por la lesión, lloré porque sabía que tendría que empezar de nuevo. Y ahí radica el secreto: cada reconstrucción te hace más fuerte que el original. Los huesos se sueldan más densos, los tendones se adaptan, y el espíritu... el espíritu se vuelve inquebrantable. No le temas al suelo; témele a la cobardía de no volver a levantarte.' },
-    { id: 'lore_v4', type: 'lore', name: 'Tomo IV: El Abismo del Ego', desc: 'Revelaciones sobre la vanidad del guerrero moderno.', price: 600, icon: '📜', meta: 'El ego es la enfermedad silenciosa que corroe al guerrero desde dentro. He visto a titanes caer no por debilidad muscular, sino porque su reflejo en el espejo se convirtió en su único oponente. El verdadero Maestro entrena en la oscuridad, donde nadie aplaude, donde nadie observa. La disciplina que nace del aplauso muere con el silencio. Pero la disciplina que nace del vacío... esa es eterna. Destruye tu necesidad de validación y encontrarás una fuerza que ningún suplemento podrá darte jamás.' },
-    { id: 'lore_v5', type: 'lore', name: 'Tomo V: El Último Sendero', desc: 'El capítulo final del Manuscrito Prohibido.', price: 800, icon: '📜', meta: 'Si estás leyendo esto, has caminado más lejos que el noventa y nueve por ciento. Pero el último sendero no tiene mapa. No hay rutina, no hay programa, no hay gurú que pueda guiarte aquí. Es el territorio donde el cuerpo se convierte en templo y la mente se funde con el movimiento. Cada repetición es una oración. Cada gota de sudor es una ofrenda. No entrenas para vivir más, sino para vivir con más intensidad. El dragón no nace; se forja. Y tú, que has llegado hasta aquí, ya sientes sus escamas bajo tu piel.' },
+    // ===== BIBLIOTECA DE SABIDURÍA (EPUBs) =====
+    { id: 'book_art_of_war', type: 'book', name: 'El Arte de la Guerra', desc: 'Sun Tzu. La maestría táctica del General Supremo.', price: 400, icon: '📖', meta: './books/arte_guerra.epub' },
+    { id: 'book_meditations', type: 'book', name: 'Meditaciones', desc: 'Marco Aurelio. Las reflexiones del Emperador Filósofo.', price: 500, icon: '📖', meta: './books/meditaciones.epub' },
+    { id: 'book_tao_te_ching', type: 'book', name: 'Tao Te Ching', desc: 'Lao Tzu. El camino del flujo y el silencio interior.', price: 300, icon: '📖', meta: './books/tao_te_ching.epub' },
+    { id: 'book_enquiridion', type: 'book', name: 'Enquiridión', desc: 'Epicteto. El manual práctico de la resiliencia estoica.', price: 300, icon: '📖', meta: './books/enquiridion.epub' },
+    { id: 'book_dhammapada', type: 'book', name: 'Dhammapada', desc: 'Buda. Sentencias y aforismos para la elevación mental.', price: 400, icon: '📖', meta: './books/dhammapada.epub' },
+    { id: 'book_analectas', type: 'book', name: 'Las Analectas', desc: 'Confucio. Los diálogos y máximas de la sabiduría oriental.', price: 400, icon: '📖', meta: './books/analectas.epub' },
 
     // ===== RELIQUIAS =====
-    { id: 'relic_oni', type: 'relic', name: 'Máscara Oni Destrozada', desc: 'Reliquia coleccionable de altísimo prestigio.', price: 1000, icon: '👹', meta: '' },
-    { id: 'relic_blade', type: 'relic', name: 'Hoja Ancestral Oxidada', desc: 'Un testigo silencioso de innumerables batallas y sudor.', price: 1000, icon: '🗡️', meta: '' },
-    { id: 'relic_scroll', type: 'relic', name: 'Pergamino del Fundador', desc: 'El manuscrito original con las 36 formas del puño vacío.', price: 1200, icon: '📋', meta: '' },
-    { id: 'relic_magatama', type: 'relic', name: 'Magatama del Abismo', desc: 'Joya curvada usada por los generales de la sombra como talismán.', price: 1500, icon: '🌀', meta: '' },
-    { id: 'relic_incense', type: 'relic', name: 'Incienso del Templo Perdido', desc: 'Aromas de un dojo destruido hace mil años que aún persisten.', price: 800, icon: '🕯️', meta: '' },
-    { id: 'relic_fang', type: 'relic', name: 'Colmillo del Primer Dragón', desc: 'El mito dice que quien lo posea jamás sentirá miedo ante la fatiga.', price: 2000, icon: '🦷', meta: '' },
-    { id: 'relic_crown', type: 'relic', name: 'Corona del Monarca Caído', desc: 'Solo los que dominan las cuatro disciplinas son dignos de portarla.', price: 2500, icon: '👑', meta: '' }
+    { id: 'relic_oni', type: 'relic', name: 'Máscara Oni Destrozada', desc: 'Efecto pasivo: +15% XP en ejercicios de Fuerza (str).', price: 1000, icon: '👹', meta: '' },
+    { id: 'relic_blade', type: 'relic', name: 'Hoja Ancestral Oxidada', desc: 'Efecto pasivo: +15% XP en ejercicios de Resistencia (end).', price: 1000, icon: '🗡️', meta: '' },
+    { id: 'relic_scroll', type: 'relic', name: 'Pergamino del Fundador', desc: 'Efecto pasivo: El Oráculo te prescribe 1 serie extra por ejercicio.', price: 1200, icon: '📋', meta: '' },
+    { id: 'relic_magatama', type: 'relic', name: 'Magatama del Abismo', desc: 'Efecto pasivo: +25% de monedas en cada sesión completada.', price: 1500, icon: '🌀', meta: '' },
+    { id: 'relic_incense', type: 'relic', name: 'Incienso del Templo Perdido', desc: 'Efecto pasivo: El multiplicador de racha se duplica.', price: 800, icon: '🕯️', meta: '' },
+    { id: 'relic_fang', type: 'relic', name: 'Colmillo del Primer Dragón', desc: 'Salvaguarda de racha: Protege tu racha diaria si fallas un día.', price: 2000, icon: '🦷', meta: '' },
+    { id: 'relic_crown', type: 'relic', name: 'Corona del Monarca Caído', desc: 'Efecto pasivo: +20% global a toda ganancia de XP y Monedas.', price: 2500, icon: '👑', meta: '' }
   ];
 
   let workoutHistory = [];
@@ -462,6 +465,30 @@
   });
 
   window.addEventListener('load', () => {
+    // EPUB.js Error/Rejection Isolation
+    window.addEventListener('unhandledrejection', function (event) {
+      const reason = event.reason;
+      if (reason && (
+        (reason.stack && reason.stack.includes('epub')) ||
+        (reason.message && reason.message.includes('epub')) ||
+        (reason.message && reason.message.includes('rendition')) ||
+        (reason.message && reason.message.includes('ReadingSystem'))
+      )) {
+        console.warn("ZenRyu: Isolated unhandled rejection from epub.js:", reason);
+        event.preventDefault();
+      }
+    });
+
+    const originalOnError = window.onerror;
+    window.onerror = function (message, source, lineno, colno, error) {
+      if (source && (source.includes('epub') || source.includes('jszip'))) {
+        console.warn("ZenRyu: Isolated global error from epub.js/jszip:", message, "at", source);
+        return true;
+      }
+      if (originalOnError) return originalOnError.apply(this, arguments);
+      return false;
+    };
+
     let btnInstall = document.getElementById('btn-install-pwa');
     let gate = document.getElementById('install-gate');
 
@@ -1304,6 +1331,12 @@
         if (type === 'mobility') numSets = 2;
         if (isExam) numSets += 1;
 
+        // relic_scroll passive effect: +1 set (max 5)
+        if (player.equippedRelic === 'relic_scroll') {
+          numSets += 1;
+        }
+        numSets = Math.min(5, numSets);
+
         return {
           id: ex.id,
           n: `${ex.n} (${ex.real})`,
@@ -1799,11 +1832,28 @@
     if (statAlias.toLowerCase().includes("flex")) s = "flex";
     if (statAlias.toLowerCase().includes("end")) s = "end";
 
-    const xp = (typeof xpReward === 'number' && xpReward > 0) ? xpReward : 20;
+    let xp = (typeof xpReward === 'number' && xpReward > 0) ? xpReward : 20;
+
+    // Apply equipped relic bonuses to XP
+    let xpBonusDesc = "";
+    if (player.equippedRelic === 'relic_oni' && s === 'str') {
+      let bonus = Math.round(xp * 0.15);
+      xp += bonus;
+      xpBonusDesc = ` (+${bonus} XP Máscara Oni 👹)`;
+    } else if (player.equippedRelic === 'relic_blade' && s === 'end') {
+      let bonus = Math.round(xp * 0.15);
+      xp += bonus;
+      xpBonusDesc = ` (+${bonus} XP Hoja Ancestral 🗡️)`;
+    } else if (player.equippedRelic === 'relic_crown') {
+      let bonus = Math.round(xp * 0.20);
+      xp += bonus;
+      xpBonusDesc = ` (+${bonus} XP Corona Monarca 👑)`;
+    }
+
     gainXP(xp, s);
 
     if (!window.sessionState || !window.sessionState.active) {
-      showNotification(`Tu disciplina ha forjado +${xp} XP en ${STAT_LABELS[s]}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
+      showNotification(`Tu disciplina ha forjado +${xp} XP en ${STAT_LABELS[s]}${xpBonusDesc}.\n\nEl dolor es debilidad abandonando el cuerpo.`, "🥊 Esfuerzo Honrado");
     }
 
     let currentCard = document.getElementById(`ex-${index}`);
@@ -1836,31 +1886,81 @@
         }
       }
 
+      let rachaSalvada = false;
       if (lastWorkoutDateStr === todayStr) {
         // Ya entrenó hoy, la racha no cambia
       } else if (lastWorkoutDateStr === yesterdayStr || lastWorkoutDateStr === "") {
         // Entrenó ayer o es su primer entrenamiento, incrementa la racha
         player.streak = (player.streak || 0) + 1;
       } else {
-        // Rompió la racha (más de 1 día sin entrenar), reinicia a 1
-        player.streak = 1;
+        // Rompió la racha (más de 1 día sin entrenar)
+        // Lógica de Salvaguarda de Racha (relic_fang)
+        if (player.equippedRelic === 'relic_fang') {
+          player.equippedRelic = null;
+          player.unlockedItems = player.unlockedItems.filter(i => i !== 'relic_fang');
+          rachaSalvada = true;
+          player.streak = (player.streak || 0) + 1;
+        } else {
+          player.streak = 1;
+        }
       }
 
       // ─── CALCULAR Y ENSEÑAR MONEDAS GANADAS ──────────────────────────────
       const baseCoins = 50 + (currentRoutine.length * 15);
-      const streakBonus = Math.min(50, (player.streak || 0) * 10);
-      const coinsEarned = baseCoins + streakBonus;
+      
+      // relic_incense doubles streak bonuses
+      let streakBonusMultiplier = 10;
+      let incenseGlow = "";
+      if (player.equippedRelic === 'relic_incense') {
+        streakBonusMultiplier = 20;
+        incenseGlow = " 🕯️";
+      }
+      
+      const streakBonus = Math.min(player.equippedRelic === 'relic_incense' ? 100 : 50, (player.streak || 0) * streakBonusMultiplier);
+      let coinsEarned = baseCoins + streakBonus;
+      let relicBonusCoins = 0;
+      let relicBonusDesc = "";
+
+      // Relics multipliers
+      if (player.equippedRelic === 'relic_magatama') {
+        relicBonusCoins = Math.round(coinsEarned * 0.25);
+        coinsEarned += relicBonusCoins;
+        relicBonusDesc = ` (+${relicBonusCoins} por Magatama 🌀)`;
+      } else if (player.equippedRelic === 'relic_crown') {
+        relicBonusCoins = Math.round(coinsEarned * 0.20);
+        coinsEarned += relicBonusCoins;
+        relicBonusDesc = ` (+${relicBonusCoins} por Corona 👑)`;
+      }
 
       player.coins = (player.coins || 0) + coinsEarned;
 
-      // Actualizar visuales del modal de victoria
+      // Update victory UI
       const rewardCoinsEl = document.getElementById('reward-coins');
-      if (rewardCoinsEl) rewardCoinsEl.textContent = `+${coinsEarned}`;
+      if (rewardCoinsEl) {
+        rewardCoinsEl.textContent = `+${coinsEarned}`;
+        
+        let detailEl = document.getElementById('reward-coins-detail');
+        if (!detailEl) {
+          detailEl = document.createElement('div');
+          detailEl.id = 'reward-coins-detail';
+          detailEl.style.fontSize = '0.55rem';
+          detailEl.style.color = '#888';
+          detailEl.style.marginTop = '4px';
+          rewardCoinsEl.parentNode.appendChild(detailEl);
+        }
+        detailEl.innerHTML = `Base ${baseCoins} + Racha ${streakBonus}${relicBonusDesc}`;
+      }
       
       const rewardStreakEl = document.getElementById('reward-streak');
-      if (rewardStreakEl) rewardStreakEl.textContent = `Racha x${player.streak || 1}`;
+      if (rewardStreakEl) {
+        rewardStreakEl.textContent = `Racha x${player.streak || 1}${incenseGlow}`;
+      }
 
-      savePlayer(); // Persistir monedas y racha de inmediato
+      savePlayer(); // Persistir de inmediato
+
+      if (rachaSalvada) {
+        showNotification("El Colmillo del Primer Dragón se ha sacrificado para proteger tu racha. ¡No descuides tu entrenamiento!", "🛡️ Racha Salvada");
+      }
 
       // Release Wake Lock & celebrate
       releaseWakeLock();
@@ -2004,9 +2104,12 @@
         actionBtn = `<button class="btn-primary" onclick="buyStoreItem('${item.id}')" style="width:100%; font-size:0.8rem; background:#333; color:var(--accent-gold); border-color:var(--accent-gold);">🪙 COMPRAR (${item.price})</button>`;
       } else {
         if (item.type === 'aura') {
-          actionBtn = `<button class="btn-secondary" onclick="equipAura('${item.id}')" style="width:100%; font-size:0.8rem; background:${isEquipped ? 'var(--accent-gold)' : '#111'}; color:${isEquipped ? '#000' : 'var(--accent-gold)'};">${isEquipped ? 'EQUIPADA' : 'EQUIPAR'}</button>`;
-        } else if (item.type === 'lore') {
-          actionBtn = `<button class="btn-secondary" onclick="readLore('${item.id}')" style="width:100%; font-size:0.8rem; border-color:#00ffff; color:#00ffff;">LEER TOMO</button>`;
+          actionBtn = `<button class="btn-secondary" onclick="equipAura('${item.id}'); renderStore();" style="width:100%; font-size:0.8rem; background:${isEquipped ? 'var(--accent-gold)' : '#111'}; color:${isEquipped ? '#000' : 'var(--accent-gold)'};">${isEquipped ? 'EQUIPADA' : 'EQUIPAR'}</button>`;
+        } else if (item.type === 'book') {
+          actionBtn = `<button class="btn-secondary" onclick="openBookReader('${item.id}', 'store-modal');" style="width:100%; font-size:0.8rem; border-color:#00ffff; color:#00ffff;">LEER LIBRO 📖</button>`;
+        } else if (item.type === 'relic') {
+          let isEq = player.equippedRelic === item.id;
+          actionBtn = `<button class="btn-secondary" onclick="toggleRelic('${item.id}'); renderStore();" style="width:100%; font-size:0.8rem; background:${isEq ? 'var(--accent-gold)' : '#111'}; color:${isEq ? '#000' : 'var(--accent-gold)'}; border-color:${isEq ? 'var(--accent-gold)' : '#555'};">${isEq ? 'EQUIPADA' : 'EQUIPAR'}</button>`;
         } else if (item.type === 'music') {
           actionBtn = `<button class="btn-secondary" disabled style="width:100%; font-size:0.8rem; opacity:0.8; cursor:default; background:#000; border-color:#555; color:#888;">USAR EN EMISORA ASTRAL</button>`;
         } else {
@@ -2059,6 +2162,22 @@
     savePlayer();
     applyInventory();
     renderStore();
+  };
+
+  window.toggleRelic = function (id) {
+    if (player.equippedRelic === id) {
+      player.equippedRelic = null;
+      showNotification("Reliquia desequipada. Los efectos pasivos ya no tienen vigor.", "⚗️ Vitrina de Reliquias");
+    } else {
+      player.equippedRelic = id;
+      let r = STORE_ITEMS.find(item => item.id === id);
+      let name = r ? r.name : "Reliquia";
+      showNotification(`${name} equipada. Sus efectos pasivos se activarán en tus entrenamientos.`, "⚗️ Reliquia Activa");
+    }
+    savePlayer();
+    applyInventory();
+    renderStore();
+    if (window.renderProfileVault) renderProfileVault();
   };
 
   window.applyInventory = function () {
@@ -2146,13 +2265,367 @@
     if (tribalBtn) tribalBtn.style.display = player.unlockedItems.includes('mus_tribal') ? 'inline-block' : 'none';
   };
 
-  window.readLore = function (id) {
-    let item = STORE_ITEMS.find(i => i.id === id);
-    if (item) {
-      document.getElementById('lore-title').innerText = item.name.toUpperCase();
-      document.getElementById('lore-body').innerHTML = '<p>' + item.meta.replace(/\n/g, '<br><br>') + '</p>';
-      openModal('lore-modal');
+  // ====== SISTEMA DE LECTURA EPUB (EPUB.JS) ======
+  let currentBook = null;
+  let currentRendition = null;
+  let currentBookId = null;
+  let currentBookTheme = 'dark';
+  let openedFromModal = null;
+  let isBookLoading = false;
+  let isPageTurning = false;
+
+  window.closeBookReader = function () {
+    isBookLoading = false;
+    isPageTurning = false;
+
+    // Immediately close modal and restore previous modal to make navigation instantaneous
+    try {
+      closeModal('reader-modal');
+    } catch(e) {
+      console.error("ZenRyu: error calling closeModal in closeBookReader:", e);
     }
+
+    if (openedFromModal) {
+      try {
+        openModal(openedFromModal);
+      } catch(e) {
+        console.error("ZenRyu: error opening previous modal in closeBookReader:", e);
+      }
+      openedFromModal = null;
+    }
+
+    // Clean up viewer DOM immediately so user doesn't see old book content next time
+    const viewer = document.getElementById('book-viewer');
+    if (viewer) {
+      viewer.innerHTML = '';
+      viewer.className = '';
+    }
+
+    // Secure loading indicator check
+    const loadingEl = document.getElementById('reader-loading');
+    if (loadingEl) {
+      loadingEl.style.display = 'none';
+    }
+
+    // Destroy book asynchronously to prevent blocking the UI thread or crashes during closing transition
+    if (currentBook) {
+      const bookToDestroy = currentBook;
+      currentBook = null;
+      currentRendition = null;
+      setTimeout(() => {
+        try {
+          bookToDestroy.destroy();
+        } catch(e) {
+          console.warn("ZenRyu: non-blocking error destroying book asynchronously:", e);
+        }
+      }, 100);
+    }
+  };
+
+  window.openBookReader = function (bookId, fromModal) {
+    if (isBookLoading) return; // Prevent concurrent opens
+    
+    let item = STORE_ITEMS.find(i => i.id === bookId);
+    if (!item) return;
+
+    openedFromModal = fromModal || null;
+    currentBookId = bookId;
+    isBookLoading = true;
+    
+    const titleEl = document.getElementById('reader-book-title');
+    if (titleEl) titleEl.innerText = item.name.toUpperCase();
+    
+    const loadingEl = document.getElementById('reader-loading');
+    if (loadingEl) loadingEl.style.display = 'block';
+
+    if (openedFromModal) {
+      closeModal(openedFromModal);
+    }
+
+    // Clear previous book
+    if (currentBook) {
+      try { currentBook.destroy(); } catch(e) {
+        console.error("ZenRyu: error destroying previous book:", e);
+      }
+      currentBook = null;
+      currentRendition = null;
+    }
+
+    // Clear previous view container and recreate the page-turn overlay
+    const viewer = document.getElementById('book-viewer');
+    if (viewer) {
+      viewer.innerHTML = '';
+      const overlay = document.createElement('div');
+      overlay.id = 'reader-page-overlay';
+      overlay.className = 'reader-page-overlay';
+      viewer.appendChild(overlay);
+    }
+    
+    openModal('reader-modal');
+
+    function initEpubFromBuffer(arrayBuffer) {
+      try {
+        currentBook = ePub(arrayBuffer, { type: 'binary' });
+
+        currentRendition = currentBook.renderTo(viewer, {
+          width: "100%",
+          height: "100%",
+          spread: "none",
+          flow: "paginated"
+        });
+
+        // Restore reading progress if available
+        let savedPosition = player.readingProgress ? player.readingProgress[bookId] : null;
+        if (savedPosition) {
+          currentRendition.display(savedPosition)
+            .then(() => { isBookLoading = false; })
+            .catch(() => {
+              currentRendition.display().finally(() => { isBookLoading = false; });
+            });
+        } else {
+          currentRendition.display().finally(() => { isBookLoading = false; });
+        }
+
+        // Hide loading on first render
+        currentRendition.on("rendered", () => {
+          const loadEl = document.getElementById('reader-loading');
+          if (loadEl) loadEl.style.display = 'none';
+          applyReaderStyles();
+          changeReaderTheme(currentBookTheme);
+        });
+
+        // Read TOC for chapter navigation
+        currentBook.loaded.navigation.then(nav => {
+          const select = document.getElementById('reader-chapter-select');
+          if (select) {
+            select.innerHTML = '<option value="">— Capítulos —</option>';
+            nav.toc.forEach(chapter => {
+              let opt = document.createElement('option');
+              opt.value = chapter.href;
+              opt.innerText = chapter.label.trim();
+              select.appendChild(opt);
+            });
+            select.onchange = function () {
+              if (select.value) currentRendition.display(select.value);
+            };
+          }
+        }).catch(e => console.log("ZenRyu: TOC load failed:", e));
+
+        // Save position + update progress on page turn
+        currentRendition.on("relocated", location => {
+          if (!player.readingProgress) player.readingProgress = {};
+          player.readingProgress[bookId] = location.start.cfi;
+          savePlayer();
+
+          if (currentBook.locations && typeof currentBook.locations.length === 'function' && currentBook.locations.length() > 0) {
+            let pct = Math.round(currentBook.locations.percentageFromCfi(location.start.cfi) * 100);
+            const pctEl = document.getElementById('reader-progress-percent');
+            if (pctEl) pctEl.innerText = `Progreso: ${pct}%`;
+          }
+
+          const chTitleEl = document.getElementById('reader-chapter-title');
+          if (chTitleEl && location.start.index !== undefined) {
+            chTitleEl.innerText = "Sección " + (location.start.index + 1);
+          }
+
+          const select = document.getElementById('reader-chapter-select');
+          if (select && location.start.href) {
+            let matchingOpt = Array.from(select.options).find(o => o.value && location.start.href.includes(o.value));
+            if (matchingOpt) select.value = matchingOpt.value;
+          }
+        });
+
+        // Generate locations for percentage tracking
+        currentBook.ready.then(() => currentBook.locations.generate(1024))
+          .catch(e => console.log("ZenRyu: locations generation failed:", e));
+
+      } catch (err) {
+        console.error("ZenRyu: Error rendering EPUB:", err);
+        isBookLoading = false;
+        const loadEl = document.getElementById('reader-loading');
+        if (loadEl) loadEl.style.display = 'none';
+        if (viewer) {
+          viewer.innerHTML = '<p style="color:#f44;text-align:center;padding:40px;font-size:0.9rem;">No se pudo renderizar el libro.<br>Intenta cerrar y volver a abrir.</p>';
+        }
+      }
+    }
+
+    // Fetch the EPUB as ArrayBuffer (evita problemas de CORS y parsing por ruta relativa)
+    fetch(item.meta)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then(buffer => {
+        initEpubFromBuffer(buffer);
+      })
+      .catch(err => {
+        console.error("ZenRyu: Failed to fetch EPUB:", err);
+        isBookLoading = false;
+        const loadEl = document.getElementById('reader-loading');
+        if (loadEl) loadEl.style.display = 'none';
+        if (viewer) {
+          viewer.innerHTML = `<p style="color:#f44;text-align:center;padding:40px;font-size:0.9rem;">No se pudo cargar "<strong>${item.name}</strong>".<br><small style="color:#888;">${err.message}</small></p>`;
+        }
+        showNotification("Error al cargar el tomo. Asegúrate de estar conectado o reinicia la app.", "⚠️ Error de Lectura");
+      });
+  };
+
+  window.applyReaderStyles = function () {
+    if (!currentRendition) return;
+    const fontEl = document.getElementById('reader-font-select');
+    const sizeEl = document.getElementById('reader-size-select');
+    if (!fontEl || !sizeEl) return;
+    
+    const font = fontEl.value;
+    const size = sizeEl.value;
+
+    currentRendition.themes.font(font);
+    currentRendition.themes.fontSize(size);
+  };
+
+  window.changeReaderTheme = function (theme) {
+    currentBookTheme = theme;
+    const viewer = document.getElementById('book-viewer');
+    const viewport = document.getElementById('reader-viewport');
+    const modalContent = document.querySelector('#reader-modal .modal-content');
+    
+    let bgColor = '#121212'; // Page color
+    let vpColor = '#070707'; // Desk/viewport color
+    let textColor = '#e0e0e0';
+    let borderColor = 'rgba(255, 215, 0, 0.15)'; // gold border for page
+
+    if (theme === 'sepia') {
+      bgColor = '#fdf6e3';
+      vpColor = '#eee8d5';
+      textColor = '#5c4033';
+      borderColor = 'rgba(92, 64, 51, 0.15)';
+    } else if (theme === 'light') {
+      bgColor = '#ffffff';
+      vpColor = '#f0f0f0';
+      textColor = '#2c2c2c';
+      borderColor = 'rgba(0, 0, 0, 0.1)';
+    }
+
+    if (viewer) {
+      viewer.style.backgroundColor = bgColor;
+      viewer.style.borderColor = borderColor;
+    }
+    if (viewport) {
+      viewport.style.backgroundColor = vpColor;
+    }
+    if (modalContent) {
+      modalContent.style.backgroundColor = vpColor;
+      modalContent.style.color = textColor;
+    }
+
+    // Set CSS custom variable on root for page-turn overlay background color
+    document.documentElement.style.setProperty('--reader-bg-color', bgColor);
+
+    // Apply active borders to toolbar theme buttons
+    const darkBtn = document.getElementById('theme-btn-dark');
+    const sepiaBtn = document.getElementById('theme-btn-sepia');
+    const lightBtn = document.getElementById('theme-btn-light');
+    if (darkBtn && sepiaBtn && lightBtn) {
+      darkBtn.style.border = '1px solid #333';
+      sepiaBtn.style.border = '1px solid #333';
+      lightBtn.style.border = '1px solid #333';
+      darkBtn.style.boxShadow = 'none';
+      sepiaBtn.style.boxShadow = 'none';
+      lightBtn.style.boxShadow = 'none';
+
+      if (theme === 'dark') {
+        darkBtn.style.border = '1.5px solid var(--accent-gold)';
+        darkBtn.style.boxShadow = '0 0 8px var(--accent-gold-glow)';
+      } else if (theme === 'sepia') {
+        sepiaBtn.style.border = '1.5px solid #8b5a2b';
+        sepiaBtn.style.boxShadow = '0 0 8px rgba(139, 90, 43, 0.3)';
+      } else if (theme === 'light') {
+        lightBtn.style.border = '1.5px solid #111';
+        lightBtn.style.boxShadow = '0 0 8px rgba(0, 0, 0, 0.1)';
+      }
+    }
+
+    if (currentRendition) {
+      currentRendition.themes.default({
+        body: {
+          background: bgColor + ' !important',
+          color: textColor + ' !important',
+          'font-family': "inherit !important",
+          'padding': '0 25px !important'
+        },
+        p: {
+          color: textColor + ' !important',
+          'line-height': '1.6 !important',
+          'margin-bottom': '1.2em !important'
+        },
+        h1: { color: 'var(--accent-gold) !important', 'font-family': "'Cinzel', serif !important" },
+        h2: { color: 'var(--accent-gold) !important', 'font-family': "'Cinzel', serif !important" },
+        h3: { color: 'var(--accent-gold) !important', 'font-family': "'Cinzel', serif !important" }
+      });
+      // Re-apply typography adjustments
+      applyReaderStyles();
+    }
+  };
+
+  window.readerNextPage = function () {
+    if (!currentRendition || isPageTurning || isBookLoading) return;
+    
+    const overlay = document.getElementById('reader-page-overlay');
+    if (!overlay) {
+      currentRendition.next();
+      return;
+    }
+
+    isPageTurning = true;
+    overlay.classList.remove('flip-next-active', 'flip-prev-active');
+    void overlay.offsetWidth; // force reflow
+    overlay.classList.add('flip-next-active');
+
+    setTimeout(() => {
+      if (!currentRendition) {
+        isPageTurning = false;
+        return;
+      }
+      currentRendition.next().catch(err => {
+        console.error("ZenRyu: next page load error:", err);
+      });
+    }, 250);
+
+    setTimeout(() => {
+      overlay.classList.remove('flip-next-active');
+      isPageTurning = false;
+    }, 500);
+  };
+
+  window.readerPrevPage = function () {
+    if (!currentRendition || isPageTurning || isBookLoading) return;
+    
+    const overlay = document.getElementById('reader-page-overlay');
+    if (!overlay) {
+      currentRendition.prev();
+      return;
+    }
+
+    isPageTurning = true;
+    overlay.classList.remove('flip-next-active', 'flip-prev-active');
+    void overlay.offsetWidth; // force reflow
+    overlay.classList.add('flip-prev-active');
+
+    setTimeout(() => {
+      if (!currentRendition) {
+        isPageTurning = false;
+        return;
+      }
+      currentRendition.prev().catch(err => {
+        console.error("ZenRyu: prev page load error:", err);
+      });
+    }, 250);
+
+    setTimeout(() => {
+      overlay.classList.remove('flip-prev-active');
+      isPageTurning = false;
+    }, 500);
   };
 
   // ====== PERFIL Y BÓVEDA ======
@@ -2174,20 +2647,20 @@
     document.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
     document.getElementById(tabId).style.display = 'block';
 
-    // Render heatmap lazily when the Diary tab opens
-    if (tabId === 'tab-lore' && window.renderHeatmap) window.renderHeatmap();
+    // Render heatmap lazily when the Books tab opens
+    if (tabId === 'tab-books' && window.renderHeatmap) window.renderHeatmap();
   };
 
   window.renderProfileVault = function () {
     const auraCont = document.getElementById('tab-auras');
-    const loreCont = document.getElementById('tab-lore');
+    const booksCont = document.getElementById('tab-books-items-container');
     const relicCont = document.getElementById('tab-relics');
 
-    auraCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">AUSENCIAS Y LUCES</h4>';
-    loreCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">CRÓNICAS DESBLOQUEADAS</h4>';
-    relicCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">RECUERDOS DE BATALLA</h4>';
+    if (auraCont) auraCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">AUSENCIAS Y LUCES</h4>';
+    if (booksCont) booksCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">BIBLIOTECA ADQUIRIDA</h4>';
+    if (relicCont) relicCont.innerHTML = '<h4 style="color:#555; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px; text-align:center;">VITRINA DE ARTEFACTOS</h4>';
 
-    let hasAuras = false, hasLore = false, hasRelics = false;
+    let hasAuras = false, hasBooks = false, hasRelics = false;
 
     STORE_ITEMS.forEach(item => {
       if (!player.unlockedItems.includes(item.id)) return;
@@ -2195,9 +2668,9 @@
       let html = `
       <div style="background:#151515; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:10px; display:flex; align-items:center; gap:12px;">
         <div style="font-size:1.8rem;">${item.icon}</div>
-        <div style="flex:1;">
+        <div style="flex:1; text-align:left;">
           <div style="font-size:0.9rem; color:#eee; font-family:'Cinzel';">${item.name}</div>
-          <div style="font-size:0.7rem; color:#666;">${item.desc.substring(0, 40)}...</div>
+          <div style="font-size:0.7rem; color:#666;">${item.desc.substring(0, 50)}...</div>
         </div>
     `;
 
@@ -2205,21 +2678,22 @@
         hasAuras = true;
         let isEq = player.activeAura === item.id;
         html += `<button class="btn-secondary" onclick="equipAura('${item.id}'); renderProfileVault();" style="font-size:0.6rem; padding:5px 10px; background:${isEq ? 'var(--accent-gold)' : '#000'}; color:${isEq ? '#000' : 'var(--accent-gold)'};">${isEq ? 'ACTIVA' : 'USAR'}</button></div>`;
-        auraCont.innerHTML += html;
-      } else if (item.type === 'lore') {
-        hasLore = true;
-        html += `<button class="btn-secondary" onclick="readLore('${item.id}')" style="font-size:0.6rem; padding:5px 10px; border-color:#00ffff; color:#00ffff;">RELEER</button></div>`;
-        loreCont.innerHTML += html;
+        if (auraCont) auraCont.innerHTML += html;
+      } else if (item.type === 'book') {
+        hasBooks = true;
+        html += `<button class="btn-secondary" onclick="openBookReader('${item.id}', 'profile-modal')" style="font-size:0.6rem; padding:5px 10px; border-color:#00ffff; color:#00ffff;">LEER</button></div>`;
+        if (booksCont) booksCont.innerHTML += html;
       } else if (item.type === 'relic') {
         hasRelics = true;
-        html += `</div>`;
-        relicCont.innerHTML += html;
+        let isEq = player.equippedRelic === item.id;
+        html += `<button class="btn-secondary" onclick="toggleRelic('${item.id}');" style="font-size:0.6rem; padding:5px 10px; background:${isEq ? 'var(--accent-gold)' : '#000'}; color:${isEq ? '#000' : 'var(--accent-gold)'}; border-color:${isEq ? 'var(--accent-gold)' : '#555'};">${isEq ? 'EQUIPADA' : 'EQUIPAR'}</button></div>`;
+        if (relicCont) relicCont.innerHTML += html;
       }
     });
 
-    if (!hasAuras) auraCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">No has adquirido esencias en el Bazar.</p>';
-    if (!hasLore) loreCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">No has recuperado fragmentos de historia.</p>';
-    if (!hasRelics) relicCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">Tu vitrina está vacía.</p>';
+    if (!hasAuras && auraCont) auraCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">No has adquirido esencias en el Bazar.</p>';
+    if (!hasBooks && booksCont) booksCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">No has adquirido tomos de sabiduría en el Bazar.</p>';
+    if (!hasRelics && relicCont) relicCont.innerHTML += '<p style="color:#444; font-size:0.8rem; text-align:center; margin-top:20px;">Tu vitrina está vacía.</p>';
   };
 
   // ====== SISTEMA DE INSIGNIAS ======
@@ -3149,6 +3623,11 @@
       const targetCount = isMobility ? 6 : (player.rankIndex < 4 ? 6 : 8);
       const minCount    = Math.max(4, targetCount - 2);
 
+      let scrollRule = "";
+      if (player.equippedRelic === 'relic_scroll') {
+        scrollRule = "\n- REGLA DEL PERGAMINO ACTIVA: Incrementa en 1 serie (set) cada ejercicio de la rutina (ej: si estimabas 3 sets, prescribe 4).";
+      }
+
       const prompt = `Eres el Sensei Dragón Zen, maestro supremo de la calistenia marcial. Diseña una rutina personalizada AHORA.
 
 PERFIL DEL GUERRERO:
@@ -3171,7 +3650,7 @@ REGLAS:
 - Elige entre ${minCount} y ${targetCount} ejercicios apropiados para el nivel del guerrero.
 - Si energía ≤ 2, reduce a ${minCount} ejercicios de menor intensidad.
 - Si hay agujetas, evita grupos musculares fatigados.
-- Para cada ejercicio indica: id (de la lista), sets (2-4), customVal (reps/segs reales según su nivel).
+- Para cada ejercicio indica: id (de la lista), sets (2-4), customVal (reps/segs reales según su nivel).${scrollRule}
 - El campo "insight" es un mantra filosófico inspirador de máximo 2 frases.
 
 RESPONDE ÚNICAMENTE con este JSON válido (sin texto adicional):
@@ -3250,7 +3729,10 @@ RESPONDE ÚNICAMENTE con este JSON válido (sin texto adicional):
         const factor   = (capLevel - exBase.lvl_min) * exBase.scale;
         const autoVal  = Math.floor(Math.max(exBase.baseVal, exBase.baseVal + factor));
         const finalVal = (item.customVal && item.customVal > 0) ? item.customVal : autoVal;
-        const numSets  = Math.min(Math.max(item.sets || 3, 2), 5);
+        let numSets  = Math.min(Math.max(item.sets || 3, 2), 5);
+        if (player.equippedRelic === 'relic_scroll') {
+          numSets = Math.min(5, numSets + 1);
+        }
 
         routine.push({
           id:      exBase.id,

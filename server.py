@@ -17,6 +17,12 @@ MIME_TYPES = {
     '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon',
     '.webmanifest': 'application/manifest+json',
+    '.epub': 'application/epub+zip',
+    '.mp3': 'audio/mpeg',
+    '.ogg': 'audio/ogg',
+    '.wav': 'audio/wav',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
 }
 
 class ZenRyuHandler(http.server.SimpleHTTPRequestHandler):

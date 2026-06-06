@@ -15,6 +15,10 @@
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
+  
+  <!-- EPUB Reader support libraries (local para funcionar offline) -->
+  <script src="./lib/jszip.min.js"></script>
+  <script src="./lib/epub.min.js"></script>
 </head>
 
 <body>
@@ -286,22 +290,22 @@
       <div class="stats-header"><span class="dot" style="background:#55f; box-shadow:0 0 5px #55f;"></span> EMISORA
         ASTRAL</div>
       <div class="radio-controls">
-        <button class="radio-btn" data-url="https://cdn.freesound.org/previews/467/467316_16058-hq.mp3">MEDITAR</button>
-        <button class="radio-btn" data-url="https://cdn.freesound.org/previews/217/217575_2132540-hq.mp3">FUEGO</button>
+        <button class="radio-btn" data-url="./audio/meditar.mp3">MEDITAR</button>
+        <button class="radio-btn" data-url="./audio/fuego.mp3">FUEGO</button>
         <button class="radio-btn"
-          data-url="https://cdn.freesound.org/previews/519/519067_11264728-hq.mp3">COMBATE</button>
+          data-url="./audio/combate.mp3">COMBATE</button>
         <button class="radio-btn" id="audio-taiko" style="display:none;"
-          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">TAIKO 🥁</button>
+          data-url="./audio/taiko.mp3">TAIKO 🥁</button>
         <button class="radio-btn" id="audio-synth" style="display:none;"
-          data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3">SYNTH 🎹</button>
+          data-url="./audio/synth.mp3">SYNTH 🎹</button>
         <button class="radio-btn" id="audio-ambient" style="display:none;"
-          data-url="https://cdn.freesound.org/previews/730/730265_10983022-hq.mp3">NIEBLA 🌫️</button>
+          data-url="./audio/niebla.mp3">NIEBLA 🌫️</button>
         <button class="radio-btn" id="audio-epic" style="display:none;"
-          data-url="https://cdn.freesound.org/previews/621/621296_13749321-hq.mp3">ÉPICA ⚔️</button>
+          data-url="./audio/epica.mp3">ÉPICA ⚔️</button>
         <button class="radio-btn" id="audio-lofi" style="display:none;"
-          data-url="https://cdn.freesound.org/previews/511/511279_8462944-hq.mp3">LO-FI 🎧</button>
+          data-url="./audio/lofi.mp3">LO-FI 🎧</button>
         <button class="radio-btn" id="audio-tribal" style="display:none;"
-          data-url="https://cdn.freesound.org/previews/648/648393_13315998-hq.mp3">TRIBAL 🪘</button>
+          data-url="./audio/tribal.mp3">TRIBAL 🪘</button>
         <button id="radio-stop" class="radio-btn stop">⏹</button>
       </div>
       <audio id="audio-player" src="" preload="none" loop></audio>
@@ -593,19 +597,19 @@
       <!-- Pestañas del Bazar -->
       <div style="display:flex; border-bottom:1px solid #333; background:#0a0a0a;">
         <div class="store-tab active-tab" onclick="switchStoreTab('aura', this)"
-          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:var(--accent-gold); border-bottom:2px solid var(--accent-gold); cursor:pointer; font-weight:bold;">
+          style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:var(--accent-gold); border-bottom:2px solid var(--accent-gold); cursor:pointer; font-weight:bold;">
           AURAS</div>
         <div class="store-tab" onclick="switchStoreTab('music', this)"
-          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
           MÚSICA</div>
-        <div class="store-tab" onclick="switchStoreTab('lore', this)"
-          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
-          DIARIO</div>
+        <div class="store-tab" onclick="switchStoreTab('book', this)"
+          style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          LIBROS</div>
         <div class="store-tab" onclick="switchStoreTab('relic', this)"
-          style="flex:1; padding:12px; text-align:center; font-size:0.65rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
           RELIQUIAS</div>
       </div>
-
+ 
       <div id="store-items-container" style="padding: 20px; max-height:60vh; overflow-y:auto;">
         <!-- JS Injected Items -->
       </div>
@@ -614,22 +618,82 @@
       </div>
     </div>
   </div>
-
-  <div id="lore-modal" class="modal-overlay" style="z-index: 60000;">
-    <div class="modal-content"
-      style="max-height:90vh; background: #111; border: 1px solid var(--accent-gold); box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 0 20px rgba(255,215,0,0.2);">
-      <div style="text-align:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
-        <div style="font-family:'Cinzel', serif; color:#555; letter-spacing:4px; font-size:0.7rem;">EL DIARIO PROHIBIDO
+ 
+  <!-- READER MODAL (EPUB READER) -->
+  <div id="reader-modal" class="modal-overlay" style="z-index: 60000;">
+    <div class="modal-content" style="max-height:95vh; height:90vh; width:95vw; max-width:700px; padding:0; background:#0f0f0f; border:1px solid var(--accent-gold); display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,215,0,0.02);">
+      <!-- Header of the reader -->
+      <div style="background:#070707; border-bottom:1px solid #222; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+        <div style="text-align:left; flex:1; overflow:hidden; margin-right:10px;">
+          <div style="font-size:0.55rem; color:#666; letter-spacing:2px; text-transform:uppercase;">Biblioteca del Dojo</div>
+          <div id="reader-book-title" style="font-family:'Cinzel', serif; font-size:0.95rem; color:var(--accent-gold); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Cargando...</div>
         </div>
-        <h2 id="lore-title"
-          style="color:var(--accent-gold); font-family:'Cinzel', serif; font-size: 1.4rem; margin-top:5px;">CAPÍTULO #
-        </h2>
+        
+        <!-- Controls: Chapter select -->
+        <div style="display:flex; gap:8px; align-items:center;">
+          <select id="reader-chapter-select" style="background:#111; border:1px solid #333; color:#ccc; font-size:0.7rem; padding:4px 8px; border-radius:4px; max-width:165px; outline:none;"></select>
+        </div>
       </div>
-      <div id="lore-body"
-        style="font-family:'Crimson Text', serif; color:#ddd; font-size:1.1rem; line-height:1.7; text-align:justify; overflow-y:auto; max-height:55vh; padding:0 10px;">
-        <!-- Injected Lore -->
+      
+      <!-- Reader Settings Toolbar (Always Visible) -->
+      <div id="reader-settings-toolbar" style="background:#0a0a0a; border-bottom:1px solid #222; padding:8px 15px; font-size:0.75rem; color:#ccc; flex-shrink:0; display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; text-align:left;">
+        <!-- Font Type -->
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="color:#888; font-size:0.6rem; letter-spacing:0.5px; text-transform:uppercase; white-space:nowrap;">Fuente:</span>
+          <select id="reader-font-select" onchange="applyReaderStyles()" style="background:#151515; border:1px solid #333; color:#eee; padding:3px 6px; border-radius:4px; font-size:0.7rem; outline:none;">
+            <option value="'Crimson Text', Georgia, serif">Serif (Clásico)</option>
+            <option value="'Inter', sans-serif">Sans-serif (Moderno)</option>
+            <option value="monospace">Monospace (Dojo)</option>
+          </select>
+        </div>
+        <!-- Font Size -->
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="color:#888; font-size:0.6rem; letter-spacing:0.5px; text-transform:uppercase; white-space:nowrap;">Tamaño:</span>
+          <select id="reader-size-select" onchange="applyReaderStyles()" style="background:#151515; border:1px solid #333; color:#eee; padding:3px 6px; border-radius:4px; font-size:0.7rem; outline:none;">
+            <option value="14px">Pequeño</option>
+            <option value="17px" selected>Medio</option>
+            <option value="20px">Grande</option>
+            <option value="24px">Muy Grande</option>
+          </select>
+        </div>
+        <!-- Themes -->
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="color:#888; font-size:0.6rem; letter-spacing:0.5px; text-transform:uppercase; white-space:nowrap;">Tema:</span>
+          <div style="display:flex; gap:4px;">
+            <button onclick="changeReaderTheme('dark')" id="theme-btn-dark" style="background:#0f0f0f; border:1px solid var(--accent-gold); color:#eee; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:0.65rem; font-family:'Inter', sans-serif; transition:all 0.2s;">Oscuro</button>
+            <button onclick="changeReaderTheme('sepia')" id="theme-btn-sepia" style="background:#f4ecd8; border:1px solid #333; color:#5c4033; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:0.65rem; font-family:'Inter', sans-serif; transition:all 0.2s;">Sepia</button>
+            <button onclick="changeReaderTheme('light')" id="theme-btn-light" style="background:#fcfcfc; border:1px solid #333; color:#111; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:0.65rem; font-family:'Inter', sans-serif; transition:all 0.2s;">Claro</button>
+          </div>
+        </div>
       </div>
-      <button class="btn-primary" onclick="closeModal('lore-modal')" style="margin-top:20px; width:100%; letter-spacing:2px;">CERRAR TOMO</button>
+      
+      <!-- Book Viewport (Outer container for centering and background contrast) -->
+      <div id="reader-viewport" style="flex:1; display:flex; justify-content:center; align-items:center; background:#070707; padding:15px; overflow:hidden; position:relative; box-sizing:border-box; transition:background-color 0.3s;">
+        
+        <!-- Book Page Container (Styled like a physical page) -->
+        <div id="book-viewer" style="width:100%; max-width:600px; height:100%; background:#0f0f0f; border:1px solid rgba(255,215,0,0.15); box-shadow:0 10px 30px rgba(0,0,0,0.5); border-radius:6px; position:relative; overflow:hidden; box-sizing:border-box; transition:background-color 0.3s, border-color 0.3s;">
+          <!-- epub.js will render the content inside this -->
+        </div>
+
+        <!-- Loading Spinner (Kept outside viewer so it is never deleted by innerHTML = '') -->
+        <div id="reader-loading" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--accent-gold); font-family:'Cinzel'; font-size:1.1rem; text-align:center; z-index:15; pointer-events:none; display:none;">
+          <span style="display:block; font-size:1.8rem; margin-bottom:10px; animation: float 2s infinite;">📖</span>
+          Abriendo pergamino...
+        </div>
+      </div>
+      
+      <!-- Footer controls -->
+      <div style="background:#070707; border-top:1px solid #222; padding:15px; display:flex; flex-direction:column; gap:10px; flex-shrink:0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.65rem; color:#888; font-family:'Inter';">
+          <span id="reader-chapter-title">Sección actual</span>
+          <span id="reader-progress-percent">Progreso: 0%</span>
+        </div>
+        <div style="display:flex; gap:15px; justify-content:space-between;">
+          <button id="reader-prev-btn" class="btn-secondary" style="margin:0; flex:1; border-color:#333; padding:12px; border-radius:8px;" onclick="readerPrevPage()">◀ Anterior</button>
+          <button class="btn-primary" style="margin:0; flex:1; padding:12px; border-radius:8px; border-color:var(--accent-gold); max-width:140px;" onclick="closeBookReader()">CERRAR</button>
+          <button id="reader-next-btn" class="btn-secondary" style="margin:0; flex:1; border-color:#333; padding:12px; border-radius:8px;" onclick="readerNextPage()">Siguiente ▶</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -650,9 +714,9 @@
         <div class="profile-tab active-tab" onclick="switchProfileTab('tab-auras', this)"
           style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:var(--accent-gold); border-bottom:2px solid var(--accent-gold); cursor:pointer;">
           AURAS</div>
-        <div class="profile-tab" onclick="switchProfileTab('tab-lore', this)"
+        <div class="profile-tab" onclick="switchProfileTab('tab-books', this)"
           style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
-          EL DIARIO</div>
+          BIBLIOTECA</div>
         <div class="profile-tab" onclick="switchProfileTab('tab-relics', this)"
           style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
           RELIQUIAS</div>
@@ -662,7 +726,7 @@
         style="padding:20px; flex:1; overflow-y:auto; display:block;">
         <!-- Auras Injected here -->
       </div>
-      <div id="tab-lore" class="profile-tab-content"
+      <div id="tab-books" class="profile-tab-content"
         style="padding:20px; flex:1; overflow-y:auto; display:none;">
         
         <!-- Mapa de Calor de Constancia -->
@@ -688,8 +752,8 @@
           </div>
         </div>
 
-        <div id="tab-lore-items-container">
-          <!-- Lore Injected here -->
+        <div id="tab-books-items-container">
+          <!-- Books Injected here -->
         </div>
       </div>
       <div id="tab-relics" class="profile-tab-content"
@@ -940,10 +1004,10 @@
   </div>
 
   <script src="./database.js?v=13"></script>
-  <script src="./app.js?v=18"></script>
+  <script src="./app.js?v=19"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=18').catch(e => { }));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=19').catch(e => { }));
     }
   </script>
   <!-- RANK ASCENSION MODAL -->
