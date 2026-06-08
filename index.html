@@ -806,11 +806,13 @@
         <div id="voice-selector-container" style="display:none; margin-top:5px;">
 
 
-          <!-- System Voice Dropdown Container -->
           <div id="system-voice-dropdown-container">
-            <label style="font-size:0.65rem; color:#888; display:block; margin-bottom:3px;">Selecciona la voz del Maestro:</label>
-            <select id="voice-select" style="width:100%; background:#111; border:1px solid #333; color:#ccc; font-size:0.75rem; padding:6px; border-radius:5px; margin-bottom:8px;"></select>
-            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+              <label style="font-size:0.65rem; color:#888;">Selecciona la voz del Maestro:</label>
+              <span id="voice-count-badge" style="font-size:0.58rem; color:var(--accent-gold); font-family:monospace; background:rgba(255,215,0,0.08); padding:1px 5px; border-radius:10px;"></span>
+            </div>
+            <select id="voice-select" style="width:100%; background:#111; border:1px solid #333; color:#ccc; font-size:0.75rem; padding:6px; border-radius:5px; margin-bottom:6px;"></select>
+            <button id="btn-reload-voices" onclick="reloadVoices()" style="width:100%; background:rgba(255,255,255,0.04); border:1px solid #333; color:#aaa; font-size:0.6rem; padding:5px; border-radius:5px; cursor:pointer; margin-bottom:8px; letter-spacing:0.5px;">🔄 Recargar Voces</button>
             <!-- Pitch Slider -->
             <div style="margin-bottom:8px; display:flex; flex-direction:column; gap:2px;">
               <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#888;">
@@ -834,10 +836,11 @@
 
           <!-- System Voice Help Section -->
           <div id="system-voice-help" style="background:rgba(255,255,255,0.01); border:1px solid #222; border-radius:6px; padding:6px; font-size:0.58rem; color:#888; line-height:1.35; text-align:left;">
-            <div style="color:var(--accent-gold); font-weight:bold; margin-bottom:3px; font-family:'Cinzel', serif;">💡 ¿Voz robótica o femenina? Mejórala:</div>
+            <div style="color:var(--accent-gold); font-weight:bold; margin-bottom:4px; font-family:'Cinzel', serif;">💡 ¿Solo ves pocas voces o voz robótica?</div>
             <ul style="margin:0; padding-left:12px;">
-              <li><b>iOS / macOS:</b> Ve a Ajustes → Accesibilidad → Contenido Leído → Voces → Español y descarga <b>"Jorge (Mejorada)"</b> o <b>"Diego (Mejorada)"</b> para un tono de maestro natural.</li>
-              <li><b>Android:</b> Ajustes → Accesibilidad → Salida de síntesis de voz → Ajustes de Google TTS → Instalar datos de voz → Español y descarga las voces de alta fidelidad.</li>
+              <li style="margin-bottom:4px;"><b>iOS:</b> Instala voces en <b>Ajustes → Accesibilidad → Contenido Leído → Voces → Español</b>. Descarga <b>"Jorge"</b> o <b>"Diego"</b>. Luego pulsa <b>🔄 Recargar Voces</b> arriba.</li>
+              <li style="margin-bottom:4px;"><b>⚠️ Nota iOS:</b> Las voces "Siri" o "Mejoradas Premium" de Apple no están disponibles en aplicaciones web por restricciones del sistema. Solo las voces estándar descargadas aparecerán aquí.</li>
+              <li><b>Android:</b> Ajustes → Accesibilidad → TTS de Google → Instalar datos → Español (alta calidad).</li>
             </ul>
           </div>
         </div>
