@@ -1003,12 +1003,12 @@
       onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
   </div>
 
-  <script src="./database.js?v=15"></script>
+  <script src="./database.js?v=16"></script>
   <script src="./app.js?v=21"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=24')
+        navigator.serviceWorker.register('./sw.js?v=25')
           .then(reg => {
             reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
