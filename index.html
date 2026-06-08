@@ -7,9 +7,9 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Zen Ryu Sensei 5.0</title>
 
-  <link rel="manifest" href="./manifest.json?v=6">
-  <link rel="apple-touch-icon" href="./icon.png?v=6">
-  <link rel="icon" type="image/png" href="./icon.png?v=6">
+  <link rel="manifest" href="./manifest.json?v=9">
+  <link rel="apple-touch-icon" href="./icon.png?v=9">
+  <link rel="icon" type="image/png" href="./icon.png?v=9">
   <!-- Cinzel and Inter fonts -->
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700;800&display=swap"
@@ -1003,11 +1003,42 @@
       onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
   </div>
 
-  <script src="./database.js?v=13"></script>
-  <script src="./app.js?v=19"></script>
+  <script src="./database.js?v=15"></script>
+  <script src="./app.js?v=21"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=19').catch(e => { }));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=24')
+          .then(reg => {
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    if (window.showConfirm) {
+                      window.showConfirm(
+                        "El Templo se ha actualizado con nuevas técnicas y refinamientos visuales. ¿Deseas recargar la senda para aplicar los cambios?",
+                        "ACTUALIZACIÓN DISPONIBLE",
+                        () => { window.location.reload(); }
+                      );
+                    } else {
+                      window.location.reload();
+                    }
+                  }
+                });
+              }
+            });
+          })
+          .catch(e => { });
+      });
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
     }
   </script>
   <!-- RANK ASCENSION MODAL -->

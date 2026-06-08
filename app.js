@@ -376,9 +376,22 @@
         };
       } else {
         player = Object.assign(player, savedPlayer);
-        if (!player.stats.str.lvl) {
-          player.stats = { str: { lvl: 1, xp: 0 }, spd: { lvl: 1, xp: 0 }, flex: { lvl: 1, xp: 0 }, end: { lvl: 1, xp: 0 } };
-        }
+      }
+      
+      // Asegurar que todos los atributos existan defensivamente
+      if (!player.stats) {
+        player.stats = { 
+          str: { lvl: 1, xp: 0 }, 
+          spd: { lvl: 1, xp: 0 }, 
+          flex: { lvl: 1, xp: 0 }, 
+          end: { lvl: 1, xp: 0 } 
+        };
+      } else {
+        ['str', 'spd', 'flex', 'end'].forEach(s => {
+          if (!player.stats[s]) player.stats[s] = { lvl: 1, xp: 0 };
+          if (typeof player.stats[s].lvl === 'undefined' || player.stats[s].lvl === null) player.stats[s].lvl = 1;
+          if (typeof player.stats[s].xp === 'undefined' || player.stats[s].xp === null) player.stats[s].xp = 0;
+        });
       }
       if (typeof player.workoutCount === 'undefined') player.workoutCount = 0;
       if (typeof player.coins === 'undefined') player.coins = 0;
@@ -2118,11 +2131,11 @@
       }
 
       container.innerHTML += `
-      <div style="background:#151515; border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
-        <div style="font-size:2.5rem; filter:drop-shadow(0 0 10px rgba(255,215,0,0.2));">${item.icon}</div>
-        <div style="flex:1;">
-          <h4 style="color:#eee; margin-bottom:5px; font-family:'Cinzel', serif; font-size:1.1rem;">${item.name}</h4>
-          <p style="color:#888; font-size:0.8rem; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
+      <div class="store-item-card">
+        <div class="store-item-icon">${item.icon}</div>
+        <div class="store-item-details">
+          <h4>${item.name}</h4>
+          <p>${item.desc}</p>
           ${actionBtn}
         </div>
       </div>
@@ -2666,11 +2679,11 @@
       if (!player.unlockedItems.includes(item.id)) return;
 
       let html = `
-      <div style="background:#151515; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:10px; display:flex; align-items:center; gap:12px;">
-        <div style="font-size:1.8rem;">${item.icon}</div>
-        <div style="flex:1; text-align:left;">
-          <div style="font-size:0.9rem; color:#eee; font-family:'Cinzel';">${item.name}</div>
-          <div style="font-size:0.7rem; color:#666;">${item.desc.substring(0, 50)}...</div>
+      <div class="vault-item-card">
+        <div class="vault-item-icon">${item.icon}</div>
+        <div class="vault-item-details">
+          <div class="vault-item-name">${item.name}</div>
+          <div class="vault-item-desc">${item.desc.substring(0, 50)}...</div>
         </div>
     `;
 
