@@ -91,6 +91,27 @@ body {
   box-shadow: var(--shadow-premium), var(--gold-glow);
 }
 
+/* ── Marcos de avatar (cosmético, sumidero de monedas/Jade) ── */
+#avatar.frame-jade {
+  border: 2.5px solid #00cc66 !important;
+  box-shadow: var(--shadow-premium), 0 0 10px rgba(0, 204, 102, 0.5) !important;
+}
+#avatar.frame-crimson {
+  border: 2.5px solid #cc0033 !important;
+  box-shadow: var(--shadow-premium), 0 0 10px rgba(204, 0, 51, 0.5) !important;
+}
+#avatar.frame-obsidian {
+  border: 2.5px dashed #999 !important;
+}
+#avatar.frame-celestial {
+  border: 2.5px solid #ffd700 !important;
+  animation: framePulse 2.2s ease-in-out infinite;
+}
+@keyframes framePulse {
+  0%, 100% { box-shadow: var(--shadow-premium), 0 0 8px rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: var(--shadow-premium), 0 0 22px rgba(255, 215, 0, 1); }
+}
+
 .user-class {
   display: flex;
   flex-direction: column;
@@ -382,6 +403,16 @@ body {
   color: var(--accent-gold);
   margin-top: 5px;
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.stat-eta {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  margin-top: 3px;
+  letter-spacing: 0.3px;
+  min-height: 1em; /* evita saltos de layout cuando aparece/desaparece */
 }
 
 @media (max-width: 480px) {

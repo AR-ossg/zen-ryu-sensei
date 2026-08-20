@@ -1,15 +1,20 @@
 // ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
 // para forzar la actualización en los teléfonos que ya tienen la app instalada.
 // Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
-const CACHE_NAME = 'zen-ryu-pwa-v65';
+const CACHE_NAME = 'zen-ryu-pwa-v93';
 
 // Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
   './',
   './index.html',
   './style.css',
-  './app.js?v=21',
+  './app.js?v=44',
   './database.js?v=16',
+  './js/state.js?v=7',
+  './js/data.js?v=6',
+  './js/store.js?v=5',
+  './js/routine-engine.js?v=1',
+  './js/debug.js?v=2',
   './manifest.json',
   './icon.png',
   './icon-192.png',
@@ -61,7 +66,7 @@ self.addEventListener('activate', event => {
 
 // ─── FETCH: estrategia híbrida ────────────────────────────────────────────
 self.addEventListener('fetch', event => {
-  // 1. IGNORAR peticiones que no sean GET (como POST de la API de Gemini)
+  // 1. IGNORAR peticiones que no sean GET
   if (event.request.method !== 'GET') {
     return;
   }

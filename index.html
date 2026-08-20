@@ -190,6 +190,10 @@
         <span class="golden-coin" style="width:14px; height:14px; font-size:0.5rem; margin-top:-2px;">Z</span>
         <span id="player-coins" style="font-size:0.9rem; color:var(--accent-gold);">0</span>
       </div>
+      <div class="status-box" style="display:flex; align-items:center; gap:3px; background:rgba(0,204,102,0.08); border-color:#00cc66;">
+        <span style="font-size:0.75rem; margin-top:-2px;">💎</span>
+        <span id="player-gems" style="font-size:0.9rem; color:#00cc66;">0</span>
+      </div>
       <div class="status-box" style="display:flex; flex-direction:column; justify-content:center; gap:0;">
         <span style="font-size:0.45rem;">NVL</span>
         <span id="player-level" style="color:var(--accent-gold); margin-top:0;">1</span>
@@ -247,6 +251,7 @@
               style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
             </div>
           </div>
+          <span id="stat-str-eta" class="stat-eta"></span>
         </div>
         <div class="hud-stat" style="position:relative;"><span
             style="font-size:1.2rem; margin-bottom:4px;">⚡</span><span>Velocidad</span> <span id="stat-spd"
@@ -256,6 +261,7 @@
               style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
             </div>
           </div>
+          <span id="stat-spd-eta" class="stat-eta"></span>
         </div>
         <div class="hud-stat" style="position:relative;"><span
             style="font-size:1.2rem; margin-bottom:4px;">🧘‍♂️</span><span>Flexibilidad</span> <span id="stat-flex"
@@ -265,6 +271,7 @@
               style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
             </div>
           </div>
+          <span id="stat-flex-eta" class="stat-eta"></span>
         </div>
         <div class="hud-stat" style="position:relative;"><span
             style="font-size:1.2rem; margin-bottom:4px;">🛡️</span><span>Resistencia</span> <span id="stat-end"
@@ -274,6 +281,7 @@
               style="width:0%; height:100%; background:var(--accent-gold); border-radius:2px; box-shadow:0 0 5px var(--accent-gold);">
             </div>
           </div>
+          <span id="stat-end-eta" class="stat-eta"></span>
         </div>
       </div>
       <div class="xp-section">
@@ -476,11 +484,14 @@
               style="color:#ff4444; font-weight:900; font-size:0.9rem; font-family:'Inter'; letter-spacing:1px; text-transform:uppercase; text-shadow:0 0 10px rgba(255,68,68,0.4);">Racha x1</span>
           </div>
         </div>
-        <!-- Feedback del Discípulo — IA Adaptativa -->
+        <!-- Feedback del Discípulo — el Oráculo local ajusta la próxima sesión según esto -->
         <div style="width:100%; margin-bottom:16px;">
-          <div style="font-size:0.52rem; color:#888; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; text-align:left;">⚡ ESTADO DEL DISCÍPULO — LA IA ADAPTARÁ TU PRÓXIMA RUTINA</div>
-          <textarea id="feedback-input" placeholder="¿Cómo respondió tu cuerpo hoy? (ej: piernas cansadas, mucha energía, dolor de espalda...)" style="width:100%; background:rgba(0,0,0,0.5); color:#ddd; border:1px solid rgba(255,215,0,0.15); border-radius:8px; padding:10px 12px; font-size:0.78rem; font-family:'Inter'; resize:none; height:64px; outline:none; line-height:1.5; box-sizing:border-box;"></textarea>
-          <button onclick="saveWorkoutFeedback()" style="width:100%; margin-top:6px; background:rgba(255,215,0,0.06); color:rgba(255,215,0,0.8); border:1px solid rgba(255,215,0,0.2); border-radius:6px; padding:8px; font-size:0.65rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.3s ease;">💾 GUARDAR ESTADO PARA LA IA</button>
+          <div style="font-size:0.52rem; color:#888; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; text-align:left;">⚡ ¿CÓMO SENTISTE LA SESIÓN? — EL ORÁCULO AJUSTARÁ LA PRÓXIMA</div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="saveWorkoutFeedback('easy')" data-feedback-btn="easy" style="flex:1; background:rgba(255,215,0,0.06); color:rgba(255,215,0,0.8); border:1px solid rgba(255,215,0,0.2); border-radius:6px; padding:10px 4px; font-size:0.68rem; font-weight:700; cursor:pointer;">😌 Fácil</button>
+            <button onclick="saveWorkoutFeedback('ok')" data-feedback-btn="ok" style="flex:1; background:rgba(255,215,0,0.06); color:rgba(255,215,0,0.8); border:1px solid rgba(255,215,0,0.2); border-radius:6px; padding:10px 4px; font-size:0.68rem; font-weight:700; cursor:pointer;">👍 Justo</button>
+            <button onclick="saveWorkoutFeedback('hard')" data-feedback-btn="hard" style="flex:1; background:rgba(255,215,0,0.06); color:rgba(255,215,0,0.8); border:1px solid rgba(255,215,0,0.2); border-radius:6px; padding:10px 4px; font-size:0.68rem; font-weight:700; cursor:pointer;">😩 Muy duro</button>
+          </div>
         </div>
         <button id="btn-finish-routine" class="btn-complete-massive"
           style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color:#fff; border: 1px solid rgba(40,167,69,0.4); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); box-shadow: 0 0 25px rgba(40,167,69,0.4), inset 0 1px 0 rgba(255,255,255,0.2); animation: pulseGreen 2.2s infinite; border-radius: 12px; padding: 18px 0; font-size: 1.1rem; width:100%; cursor:pointer;">✔️ RECLAMAR VICTORIA</button>
@@ -587,11 +598,19 @@
           DEL ORÁCULO</h2>
         <div style="font-size:0.8rem; color:#888; letter-spacing:2px; font-weight:bold; margin-bottom:15px;">INTERCAMBIO
           DE VIRTUDES</div>
-        <div
-          style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,215,0,0.1); border:1px solid var(--accent-gold); padding:5px 15px; border-radius:15px;">
-          <span class="golden-coin" style="width:16px; height:16px; font-size:0.5rem; margin-top:-2px;">Z</span>
-          <span id="store-coin-display"
-            style="color:var(--accent-gold); font-weight:bold; font-family:monospace; font-size:1.1rem;">0</span>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <div
+            style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,215,0,0.1); border:1px solid var(--accent-gold); padding:5px 15px; border-radius:15px;">
+            <span class="golden-coin" style="width:16px; height:16px; font-size:0.5rem; margin-top:-2px;">Z</span>
+            <span id="store-coin-display"
+              style="color:var(--accent-gold); font-weight:bold; font-family:monospace; font-size:1.1rem;">0</span>
+          </div>
+          <div
+            style="display:inline-flex; align-items:center; gap:5px; background:rgba(0,204,102,0.08); border:1px solid #00cc66; padding:5px 15px; border-radius:15px;">
+            <span style="font-size:0.9rem;">💎</span>
+            <span id="store-gem-display"
+              style="color:#00cc66; font-weight:bold; font-family:monospace; font-size:1.1rem;">0</span>
+          </div>
         </div>
       </div>
       <!-- Pestañas del Bazar -->
@@ -608,6 +627,12 @@
         <div class="store-tab" onclick="switchStoreTab('relic', this)"
           style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
           RELIQUIAS</div>
+        <div class="store-tab" onclick="switchStoreTab('frame', this)"
+          style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          MARCOS</div>
+        <div class="store-tab" onclick="switchStoreTab('zodiac', this)"
+          style="flex:1; padding:10px 4px; text-align:center; font-size:0.58rem; color:#888; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
+          ☯️ ZODIACO</div>
       </div>
  
       <div id="store-items-container" style="padding: 20px; max-height:60vh; overflow-y:auto;">
@@ -720,6 +745,9 @@
         <div class="profile-tab" onclick="switchProfileTab('tab-relics', this)"
           style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
           RELIQUIAS</div>
+        <div class="profile-tab" onclick="switchProfileTab('tab-frames', this)"
+          style="flex:1; padding:10px; text-align:center; font-size:0.75rem; color:#888; border-bottom:2px solid transparent; cursor:pointer;">
+          MARCOS</div>
       </div>
 
       <div id="tab-auras" class="profile-tab-content"
@@ -759,6 +787,10 @@
       <div id="tab-relics" class="profile-tab-content"
         style="padding:20px; flex:1; overflow-y:auto; display:none; text-align:center;">
         <!-- Relics Injected here -->
+      </div>
+      <div id="tab-frames" class="profile-tab-content"
+        style="padding:20px; flex:1; overflow-y:auto; display:none; text-align:center;">
+        <!-- Frames Injected here -->
       </div>
 
       <div style="padding: 16px 20px; border-top:1px solid #222; background:#070707; flex-shrink:0;">
@@ -846,26 +878,14 @@
         </div>
       </div>
 
-      <!-- Configuración del Oráculo AI -->
+      <!-- El Oráculo ahora es 100% local: motor de reglas propio, sin API externa -->
       <div style="margin-bottom:20px; padding:15px; background:rgba(255,215,0,0.02); border:1px solid rgba(255,215,0,0.1); border-radius:8px; text-align:left;">
-        <label style="font-size:0.75rem; color:var(--accent-gold); font-family:'Cinzel'; letter-spacing:1px; display:block; margin-bottom:5px; font-weight:bold;">🔮 ORÁCULO AI (GEMINI)</label>
-        <p style="font-size:0.65rem; color:#888; margin-bottom:12px; line-height:1.4;">Introduce tu clave API de Google AI Studio para activar entrenamientos generativos 100% personalizados basados en tu estado físico actual.</p>
-        <div style="position:relative; margin-bottom:10px;">
-          <input type="password" id="gemini-key" placeholder="Introduce tu API Key..." style="margin:0 0 5px 0; text-align:left; font-size:0.8rem; padding-right:40px; background:#070707; font-family:monospace; border-color:#333;">
-          <span id="gemini-status-badge" style="position:absolute; right:12px; top:12px; font-size:0.8rem; cursor:help;" title="Oráculo Offline">🔴</span>
-        </div>
-        <!-- Instrucciones y Enlace Directo para obtener la API Key -->
-        <div style="background:rgba(255,255,255,0.02); border:1px solid #222; border-radius:6px; padding:8px 10px; font-size:0.65rem; color:#aaa; line-height:1.4;">
-          <div style="color:var(--accent-gold); font-weight:bold; margin-bottom:4px; font-family:'Cinzel';">¿Cómo obtener tu clave gratis?</div>
-          <ol style="margin:0; padding-left:15px;">
-            <li>Ve a <a href="https://aistudio.google.com/" target="_blank" style="color:var(--accent-gold); text-decoration:underline; font-weight:bold;">Google AI Studio</a>.</li>
-            <li>Inicia sesión con tu cuenta de Google.</li>
-            <li>Haz clic en el botón <b>"Create API key"</b>.</li>
-            <li>Copia la clave generada y pégala arriba.</li>
-          </ol>
-        </div>
+        <label style="font-size:0.75rem; color:var(--accent-gold); font-family:'Cinzel'; letter-spacing:1px; display:block; margin-bottom:5px; font-weight:bold;">🔮 ORÁCULO LOCAL</label>
+        <p style="font-size:0.65rem; color:#888; margin-bottom:0; line-height:1.4;">Tu entrenador funciona 100% en tu dispositivo, sin conexión ni claves externas. Se adapta a tu check-in diario (energía, fatiga muscular y zonas doloridas), tu historial de entrenamientos y tu equipamiento — siempre disponible, incluso sin internet.</p>
       </div>
 
+      <button class="btn-secondary" onclick="closeModal('settings-modal'); maybeShowInstallGate(true);"
+        style="margin-bottom:10px; border-color:#4da3ff; color:#4da3ff;">📲 INSTALAR LA APP</button>
       <button class="btn-secondary" onclick="exportSave()"
         style="margin-bottom:10px; border-color:var(--accent-gold); color:var(--accent-gold);">💾 EXPORTAR
         DATOS</button>
@@ -903,7 +923,7 @@
     </div>
   </div>
 
-  <div id="exercise-detail-modal" class="modal-overlay" style="z-index:50000;">
+  <div id="exercise-detail-modal" class="modal-overlay" style="z-index:61000;">
     <div class="modal-content" style="text-align:left; max-height:85vh; overflow-y:auto; padding:20px;">
       <div id="exercise-detail-body"><!-- Injected by JS --></div>
     </div>
@@ -915,6 +935,7 @@
       <div class="codex-header">
         <div style="font-size:0.6rem; color:#888; letter-spacing:3px; text-transform:uppercase; font-weight:700;">EL CAMINO DE LA ILUMINACIÓN</div>
         <h2 style="color:var(--accent-gold); font-family:'Cinzel'; font-size:1.6rem; margin:5px 0 0 0; text-shadow:0 0 15px rgba(255,215,0,0.3);">📜 CÓDICE LORE</h2>
+        <div id="codex-prestige-badge" style="display:none; margin-top:6px; font-size:0.75rem; color:#ffd700; letter-spacing:1px;"></div>
       </div>
 
       <!-- Carousel Container -->
@@ -943,6 +964,10 @@
             <!-- History Injected Here -->
           </div>
         </div>
+        <button id="btn-prestige" onclick="performPrestige()"
+          style="display:none; width:100%; margin-bottom:10px; background:linear-gradient(135deg, #1a1a1a, #2a1a00); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:12px; border-radius:8px; font-family:'Cinzel'; font-weight:700; letter-spacing:1px; cursor:pointer; font-size:0.8rem;">
+          🌟 REFORJAR EL CAMINO
+        </button>
         <button class="btn-primary" onclick="closeModal('codex-modal')" style="letter-spacing:2px;">CERRAR CÓDICE</button>
       </div>
     </div>
@@ -970,6 +995,24 @@
         <div class="lib-tab" onclick="switchLibraryTab('end', this)"
           style="flex:1; padding:10px; text-align:center; font-size:0.6rem; color:#666; border-bottom:2px solid transparent; cursor:pointer; font-weight:bold;">
           RESIST.</div>
+      </div>
+
+      <!-- Búsqueda y filtros -->
+      <div style="padding:12px 15px; background:#0a0b0a; border-bottom:1px solid #222; display:flex; flex-direction:column; gap:8px;">
+        <input type="text" id="library-search" oninput="updateLibraryUI()" placeholder="🔍 Buscar técnica..."
+          style="margin:0; font-size:0.8rem; background:#070707; border-color:#333; text-align:left;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <select id="library-equip-filter" onchange="updateLibraryUI()" class="wizard-select"
+            style="flex:1; min-width:120px; margin:0; font-size:0.7rem; background:#070707; border-color:#333; padding:6px;">
+            <option value="all">Todo el equipo</option>
+            <option value="none">Solo sin equipo</option>
+            <option value="bar">Con barra</option>
+          </select>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.65rem; color:#aaa; cursor:pointer; white-space:nowrap;">
+            <input type="checkbox" id="library-hide-injured" onchange="updateLibraryUI()" style="width:auto; margin:0; height:auto;">
+            Ocultar según mis lesiones
+          </label>
+        </div>
       </div>
 
       <div id="library-list" style="padding: 20px; max-height:60vh; overflow-y:auto;">
@@ -1003,15 +1046,22 @@
     </div>
 
     <button class="btn-secondary" style="max-width:300px; margin:0 auto;"
-      onclick="document.getElementById('install-gate').style.display='none'">Continuar en el navegador</button>
+      onclick="dismissInstallGate()">Continuar en el navegador</button>
   </div>
 
   <script src="./database.js?v=16"></script>
-  <script src="./app.js?v=21"></script>
+  <script src="./js/state.js?v=7"></script>
+  <script src="./js/data.js?v=6"></script>
+  <script src="./js/store.js?v=5"></script>
+  <script src="./js/routine-engine.js?v=1"></script>
+  <script src="./js/debug.js?v=2"></script>
+  <script src="./app.js?v=44"></script>
   <script>
     if ('serviceWorker' in navigator) {
+      let _userConfirmedUpdate = false;
+
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=25')
+        navigator.serviceWorker.register('./sw.js?v=26')
           .then(reg => {
             reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
@@ -1022,10 +1072,19 @@
                       window.showConfirm(
                         "El Templo se ha actualizado con nuevas técnicas y refinamientos visuales. ¿Deseas recargar la senda para aplicar los cambios?",
                         "ACTUALIZACIÓN DISPONIBLE",
-                        () => { window.location.reload(); }
+                        () => {
+                          _userConfirmedUpdate = true;
+                          // Tell the waiting SW to activate immediately
+                          newWorker.postMessage({ type: 'SKIP_WAITING' });
+                          // Give the SW a moment to activate, then reload
+                          setTimeout(() => window.location.reload(), 300);
+                        }
                       );
                     } else {
-                      window.location.reload();
+                      // No modal available: reload directly
+                      _userConfirmedUpdate = true;
+                      newWorker.postMessage({ type: 'SKIP_WAITING' });
+                      setTimeout(() => window.location.reload(), 300);
                     }
                   }
                 });
@@ -1035,10 +1094,10 @@
           .catch(e => { });
       });
 
-      let refreshing = false;
+      // controllerchange fires when the new SW takes control.
+      // Only reload here if NOT already handled by the confirm dialog above.
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
+        if (!_userConfirmedUpdate) {
           window.location.reload();
         }
       });
@@ -1058,7 +1117,11 @@
         style="font-style:italic; font-size:0.9rem; line-height:1.6; padding:12px 14px; border-left:3px solid #FFD700; margin-bottom:16px; background:rgba(255,215,0,0.06); border-radius:0 8px 8px 0; text-align:left;">
       </p>
       <p id="asc-rank-lore"
-        style="color:#bbb; font-size:0.85rem; line-height:1.7; margin-bottom:28px; text-align:left;"></p>
+        style="color:#bbb; font-size:0.85rem; line-height:1.7; margin-bottom:20px; text-align:left;"></p>
+      <div id="asc-jade-reward"
+        style="display:none; align-items:center; justify-content:center; gap:6px; margin-bottom:24px; font-size:0.9rem; color:#00cc66; font-weight:700;">
+        💎 <span id="asc-jade-amount"></span> Jade obtenido
+      </div>
       <button class="btn-primary" onclick="closeModal('rank-ascension-modal')"
         style="letter-spacing:3px; font-size:0.85rem;">ACEPTAR EL SENDERO</button>
     </div>
@@ -1095,9 +1158,22 @@
         </select>
       </div>
 
+      <div style="text-align:left; margin-bottom:15px;">
+        <label style="font-size:0.75rem; color:#aaa; display:block; margin-bottom:8px; font-family:'Inter'; font-weight:600;">¿Dolor localizado hoy? (opcional) 🎯</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.75rem; color:#ccc;">
+          <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ci-zone" value="wrist" style="width:auto; margin-right:6px; margin-top:0; height:auto;">Muñecas 🖐️</label>
+          <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ci-zone" value="shoulder" style="width:auto; margin-right:6px; margin-top:0; height:auto;">Hombros 🦾</label>
+          <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ci-zone" value="knee" style="width:auto; margin-right:6px; margin-top:0; height:auto;">Rodillas 🦵</label>
+          <label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" class="ci-zone" value="back" style="width:auto; margin-right:6px; margin-top:0; height:auto;">Espalda Baja 🧘‍♂️</label>
+        </div>
+        <span style="font-size:0.6rem; color:#666; display:block; margin-top:6px;">El Oráculo evitará ejercicios que carguen estas zonas solo por hoy.</span>
+      </div>
+
       <div style="text-align:left; margin-bottom:25px;">
-        <label style="font-size:0.75rem; color:#aaa; display:block; margin-bottom:6px; font-family:'Inter'; font-weight:600;">Dolores locales o especificaciones del dojo: ✍️</label>
-        <input type="text" id="ci-notes" placeholder="Ej: Dolor de rodilla, sin barra, solo 15 min..." style="margin:0; text-align:left; font-size:0.85rem; background:#070707; border-color:#333;">
+        <label style="display:flex; align-items:center; cursor:pointer; font-size:0.75rem; color:#ccc;">
+          <input type="checkbox" id="ci-shorttime" style="width:auto; margin-right:8px; margin-top:0; height:auto;">
+          ⏱️ Tengo poco tiempo hoy (sesión más corta)
+        </label>
       </div>
 
       <button class="btn-primary" onclick="submitCheckin()" style="letter-spacing:1px; margin-bottom:10px;">FORJAR ENTRENAMIENTO</button>
