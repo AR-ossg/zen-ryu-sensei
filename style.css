@@ -429,6 +429,45 @@ body {
   .hud-val {
     font-size: 1.3rem;
   }
+
+  /* Barra de estado superior (racha/monedas/jade/nivel): con 4 cajas ya
+     no cabe con el padding original — se comprime todo proporcionalmente
+     en vez de dejar que "NVL" se salga de la pantalla. */
+  .top-status-bar {
+    padding: 14px 10px;
+  }
+
+  .status-right {
+    gap: 4px;
+  }
+
+  .status-box {
+    padding: 5px 7px;
+    font-size: 0.45rem;
+  }
+
+  .status-box span {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Teléfonos muy angostos (iPhone SE y similares): un paso más de ajuste */
+  .top-status-bar {
+    padding: 12px 6px;
+  }
+
+  .status-right {
+    gap: 2px;
+  }
+
+  .status-box {
+    padding: 4px 5px;
+  }
+
+  .status-box span {
+    font-size: 0.68rem;
+  }
 }
 
 .xp-labels {
