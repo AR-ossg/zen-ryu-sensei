@@ -85,12 +85,6 @@ body {
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-#avatar:hover {
-  transform: scale(1.08) rotate(5deg);
-  border-color: var(--accent-gold);
-  box-shadow: var(--shadow-premium), var(--gold-glow);
-}
-
 /* ── Marcos de avatar (cosmético, sumidero de monedas/Jade) ── */
 #avatar.frame-jade {
   border: 2.5px solid #00cc66 !important;
@@ -157,12 +151,6 @@ body {
   transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.status-box:hover {
-  transform: translateY(-2px);
-  border-color: rgba(212, 175, 55, 0.4);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 215, 0, 0.1);
-}
-
 .status-box span {
   display: block;
   font-size: 0.95rem;
@@ -219,12 +207,6 @@ body {
   cursor: pointer;
 }
 
-.mission-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 215, 0, 0.45);
-  border-color: #fff;
-}
-
 .mission-card:active {
   transform: translateY(-1px) scale(0.98);
   filter: brightness(1.1);
@@ -245,12 +227,6 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   text-transform: uppercase;
   transition: all 0.3s ease;
-}
-
-.mission-card:hover .mission-cta {
-  background: linear-gradient(135deg, #fff, var(--accent-gold));
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-  transform: scale(1.03);
 }
 
 @keyframes pulseGlow {
@@ -342,11 +318,6 @@ body {
   will-change: transform;
   transform: translateZ(0);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.glass-panel:hover {
-  border-color: rgba(212, 175, 55, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 215, 0, 0.08);
 }
 
 .stats-header {
@@ -526,18 +497,10 @@ body {
   padding: 5px;
 }
 
-.nav-item:hover {
-  color: var(--accent-gold);
-}
-
 .nav-icon {
   font-size: 1.2rem;
   opacity: 0.5;
   transition: opacity 0.25s ease;
-}
-
-.nav-item:hover .nav-icon {
-  opacity: 1;
 }
 
 .nav-label {
@@ -636,7 +599,6 @@ body {
 
 /* MODALS */
 
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -677,18 +639,6 @@ body {
   transition: opacity 0.2s;
 }
 
-.hud-stat:hover {
-  color: #fff;
-  text-shadow: 0 0 10px var(--accent-gold);
-  border-color: var(--accent-gold);
-  background: rgba(255, 215, 0, 0.05);
-  transform: translateY(-2px);
-}
-
-.hud-stat:hover::after {
-  opacity: 1;
-}
-
 .hud-stat:active {
   transform: scale(0.95);
 }
@@ -721,7 +671,6 @@ body {
   transform: translateY(0) translateZ(0);
   opacity: 1;
 }
-
 
 .modal-content input {
   width: 100%;
@@ -1290,15 +1239,11 @@ body {
 }
 
 /* INTERACTIVIDAD MANIFIESTO */
-.ov-item:hover {
-  background: rgba(255, 215, 0, 0.08) !important;
-}
 
 .ov-item:active {
   transform: scale(0.98);
   background: rgba(255, 215, 0, 0.15) !important;
 }
-
 
 .ios-step-text {
   font-size: 0.85rem;
@@ -1488,11 +1433,6 @@ body {
   line-height: 1;
   padding: 0;
   padding-bottom: 3px;
-}
-
-.codex-arrow:hover {
-  background: rgba(255,215,0,0.15);
-  box-shadow: 0 0 15px rgba(255,215,0,0.3);
 }
 
 .codex-arrow:active {
@@ -1785,12 +1725,7 @@ body.theme-sangre .glass-panel {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
-.heatmap-cell:hover {
-  transform: scale(1.4);
-  border-color: var(--accent-gold);
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-  z-index: 10;
-}
+
 .heatmap-cell.level-0 { background-color: #161816; }
 .heatmap-cell.level-1 { background-color: #421a1c; }
 .heatmap-cell.level-2 { background-color: #782226; }
@@ -2015,22 +1950,11 @@ body.theme-sangre .glass-panel {
   pointer-events: none;
 }
 
-.store-item-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(212, 175, 55, 0.45);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 14px rgba(255, 215, 0, 0.12);
-}
-
 .store-item-icon {
   font-size: 2.6rem;
   filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
   flex-shrink: 0;
   transition: transform 0.3s ease, filter 0.3s ease;
-}
-
-.store-item-card:hover .store-item-icon {
-  transform: scale(1.12) rotate(-4deg);
-  filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.6));
 }
 
 .store-item-details {
@@ -2064,11 +1988,6 @@ body.theme-sangre .glass-panel {
   gap: 14px;
   transition: all 0.25s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-}
-
-.vault-item-card:hover {
-  border-color: rgba(212, 175, 55, 0.35);
-  background: rgba(20, 22, 20, 0.9);
 }
 
 .vault-item-icon {
@@ -2142,13 +2061,6 @@ body.theme-sangre .glass-panel {
   transition: all 0.25s ease;
 }
 
-.hud-stat:hover {
-  background: rgba(20, 22, 20, 0.9);
-  border-color: rgba(212, 175, 55, 0.35);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 8px rgba(255, 215, 0, 0.08);
-}
-
 /* ── Bottom Nav Premium ───────────────────────────── */
 .bottom-nav {
   background: rgba(7, 8, 7, 0.96) !important;
@@ -2161,10 +2073,6 @@ body.theme-sangre .glass-panel {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nav-item:hover {
-  background: rgba(255, 215, 0, 0.04);
-}
-
 .nav-item:active {
   transform: scale(0.9);
   filter: brightness(1.2);
@@ -2172,10 +2080,6 @@ body.theme-sangre .glass-panel {
 
 .nav-icon {
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.nav-item:hover .nav-icon {
-  transform: translateY(-3px) scale(1.15);
 }
 
 /* ── Micro-animaciones Premium ───────────────────── */
@@ -2212,12 +2116,6 @@ body.theme-sangre .glass-panel {
 }
 
 /* ── Botón Táctico Gold – hover shimmer ──────────── */
-.btn-tactical-gold:hover {
-  background: rgba(255, 215, 0, 0.08);
-  border-color: var(--accent-gold);
-  box-shadow: var(--gold-glow);
-  transform: translateY(-2px);
-}
 
 /* ── Btn Primary – rojo carmesí refinado ─────────── */
 .btn-primary {
@@ -2225,11 +2123,6 @@ body.theme-sangre .glass-panel {
   border: 1px solid rgba(188, 0, 45, 0.6) !important;
   box-shadow: 0 5px 15px rgba(188, 0, 45, 0.35) !important;
   transition: all 0.3s ease !important;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 22px rgba(188, 0, 45, 0.5), var(--crimson-glow) !important;
 }
 
 /* ── XP Bar shimmer ──────────────────────────────── */
@@ -2261,12 +2154,6 @@ body.theme-sangre .glass-panel {
   transition: all 0.25s ease !important;
 }
 
-.exercise-card:hover {
-  border-color: rgba(212, 175, 55, 0.5) !important;
-  border-left-color: var(--accent-gold) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.1) !important;
-}
-
 .exercise-header {
   font-family: var(--font-heading) !important;
   color: var(--text-white) !important;
@@ -2279,3 +2166,129 @@ body.theme-sangre .glass-panel {
   border-radius: var(--rounded-sm) !important;
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+   Efectos de :hover — solo para dispositivos con mouse de verdad.
+   En pantallas táctiles (iOS/Android) no existe un evento real de
+   'quitar el mouse', así que :hover se queda pegado tras tocar un
+   elemento (el brillo/elevación crece y nunca vuelve a su estado
+   normal). Encerrar estas reglas en (hover: hover) hace que el
+   navegador solo las aplique cuando de verdad hay un puntero fino
+   capaz de 'salir' del elemento — en touch, simplemente no se activan,
+   así que no hay nada que se quede pegado.
+   ───────────────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  #avatar:hover {
+    transform: scale(1.08) rotate(5deg);
+    border-color: var(--accent-gold);
+    box-shadow: var(--shadow-premium), var(--gold-glow);
+  }
+
+  .status-box:hover {
+    transform: translateY(-2px);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 215, 0, 0.1);
+  }
+
+  .mission-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 215, 0, 0.45);
+    border-color: #fff;
+  }
+
+  .mission-card:hover .mission-cta {
+    background: linear-gradient(135deg, #fff, var(--accent-gold));
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    transform: scale(1.03);
+  }
+
+  .glass-panel:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 215, 0, 0.08);
+  }
+
+  .nav-item:hover {
+    color: var(--accent-gold);
+  }
+
+  .nav-item:hover .nav-icon {
+    opacity: 1;
+  }
+
+  .hud-stat:hover {
+    color: #fff;
+    text-shadow: 0 0 10px var(--accent-gold);
+    border-color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.05);
+    transform: translateY(-2px);
+  }
+
+  .hud-stat:hover::after {
+    opacity: 1;
+  }
+
+  .ov-item:hover {
+    background: rgba(255, 215, 0, 0.08) !important;
+  }
+
+  .codex-arrow:hover {
+    background: rgba(255,215,0,0.15);
+    box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  }
+
+  .heatmap-cell:hover {
+    transform: scale(1.4);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    z-index: 10;
+  }
+
+  .store-item-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(212, 175, 55, 0.45);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 14px rgba(255, 215, 0, 0.12);
+  }
+
+  .store-item-card:hover .store-item-icon {
+    transform: scale(1.12) rotate(-4deg);
+    filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.6));
+  }
+
+  .vault-item-card:hover {
+    border-color: rgba(212, 175, 55, 0.35);
+    background: rgba(20, 22, 20, 0.9);
+  }
+
+  .hud-stat:hover {
+    background: rgba(20, 22, 20, 0.9);
+    border-color: rgba(212, 175, 55, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 8px rgba(255, 215, 0, 0.08);
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 215, 0, 0.04);
+  }
+
+  .nav-item:hover .nav-icon {
+    transform: translateY(-3px) scale(1.15);
+  }
+
+  .btn-tactical-gold:hover {
+    background: rgba(255, 215, 0, 0.08);
+    border-color: var(--accent-gold);
+    box-shadow: var(--gold-glow);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 22px rgba(188, 0, 45, 0.5), var(--crimson-glow) !important;
+  }
+
+  .exercise-card:hover {
+    border-color: rgba(212, 175, 55, 0.5) !important;
+    border-left-color: var(--accent-gold) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.1) !important;
+  }
+
+}
