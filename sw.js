@@ -1,19 +1,19 @@
 // ⚠️ IMPORTANTE: incrementa esta versión en CADA deploy a GitHub
 // para forzar la actualización en los teléfonos que ya tienen la app instalada.
 // Ejemplo: 'zen-ryu-pwa-v5', 'zen-ryu-pwa-v6', etc.
-const CACHE_NAME = 'zen-ryu-pwa-v95';
+const CACHE_NAME = 'zen-ryu-pwa-v96';
 
 // Archivos del "shell" de la app — se cachean en install
 const STATIC_URLS = [
   './',
   './index.html',
   './style.css',
-  './app.js?v=44',
+  './app.js?v=45',
   './database.js?v=16',
   './js/state.js?v=7',
   './js/data.js?v=6',
   './js/store.js?v=5',
-  './js/routine-engine.js?v=1',
+  './js/routine-engine.js?v=2',
   './js/debug.js?v=2',
   './manifest.json',
   './icon.png',

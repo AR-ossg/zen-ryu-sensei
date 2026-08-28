@@ -798,7 +798,7 @@
       const safeImg = (ex.m && (ex.m.startsWith('http') || ex.m.startsWith('./'))) ? ex.m : '';
 
       html += `
-         <div class="ov-item" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:10px; cursor:pointer; transition: background 0.2s;">
+         <div class="ov-item" onclick="openInfoModal('${safeN}', '${safeDesc}')" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:10px; cursor:pointer; transition: background 0.2s;">
            <div style="padding-right:10px; flex:1;">
              <div style="color:#fff; font-weight:600; font-size:0.85rem; line-height:1.2;">${ex.n}</div>
              <div style="color:#555; text-transform:uppercase; font-size:0.65rem; letter-spacing:1px; margin-top:2px;">Atributo: ${STAT_LABELS[ex.s] || 'Base'}</div>
@@ -882,8 +882,17 @@
         dotsHtml += `<div class="set-dot ${s === 0 ? 'active' : ''}" id="ex-${index}-set-${s}"></div>`;
       }
 
+      // Imagen del ejercicio directamente en la tarjeta principal — antes solo
+      // se veía el nombre y había que abrir "Instrucciones" para reconocer
+      // visualmente la técnica. Con esto, un vistazo alcanza.
+      const cardImgHtml = safeImg
+        ? `<img src="${safeImg}" class="zoomable-image" onclick="openLightbox(this.src)" style="width:100%; max-width:220px; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--accent-gold); margin-bottom:10px; cursor:zoom-in;" onerror="this.style.display='none';">`
+        : `<div style="width:100%; max-width:220px; height:100px; background:#111; border-radius:8px; border:1px dashed #444; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.65rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">[ Sin Transmisión Visual ]</div>`;
+
       fullHtml += `
         <div class="exercise-card focus-card" id="ex-${index}" style="position:absolute; width:100%; height:100%; left:0; top:0; background:none; border:none; box-shadow:none; padding:10px; opacity: ${index === 0 ? 1 : 0}; pointer-events: ${index === 0 ? 'all' : 'none'}; transform: ${index === 0 ? 'translateX(0)' : 'translateX(50px)'}; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease; display:flex; flex-direction:column; align-items:center; text-align:center; box-sizing:border-box; justify-content:center;">
+
+          ${cardImgHtml}
 
           <div style="font-size:1.4rem; color:var(--accent-gold); font-family:'Cinzel'; margin-bottom:5px; text-shadow:0 0 10px rgba(255,215,0,0.3); font-weight:bold; line-height:1.2;">${ex.n}</div>
           <div style="background:#111; color:var(--accent-gold); padding:4px 10px; border-radius:4px; font-size:0.7rem; font-family:'Inter'; letter-spacing:1px; margin-bottom:12px; border:1px solid #333; font-weight:bold;">${STAT_LABELS[ex.s || 'str']}</div>
@@ -899,7 +908,7 @@
           
           <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:350px;">
             ${timerBtn}
-            <button class="btn-secondary" style="width:100%; border-color:#333; padding:12px 0; font-weight:800; margin-top:0;" onclick="openInfoModal('${safeN}', '${safeDesc}', '${safeImg}')">👁️ INSTRUCCIONES</button>
+            <button class="btn-secondary" style="width:100%; border-color:#333; padding:12px 0; font-weight:800; margin-top:0;" onclick="openInfoModal('${safeN}', '${safeDesc}')">👁️ INSTRUCCIONES</button>
             ${altBtn}
             
             <div style="margin-top: 10px;">

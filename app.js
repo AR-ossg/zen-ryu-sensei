@@ -850,7 +850,7 @@
   };
 
 
-  window.openInfoModal = function (name, desc, imgUrl) {
+  window.openInfoModal = function (name, desc) {
     if (!name) name = "Técnica Ancestral";
     if (typeof desc !== 'string') desc = "No hay descripción detallada registrada para esta técnica.";
 
@@ -890,22 +890,10 @@
       `;
     }
     document.getElementById('info-desc').innerHTML = listHtml;
-
-    let imgContainer = document.getElementById('info-img-container');
-    if (imgUrl && (imgUrl.startsWith('http') || imgUrl.startsWith('./'))) {
-      imgContainer.innerHTML = `
-        <img src="${imgUrl}" class="zoomable-image" onclick="openLightbox(this.src)" style="width:100%; border-radius:8px; border:1px solid var(--accent-gold);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <div style="display:none; width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>
-        <div style="font-size:0.65rem; color:#666; text-align:center; margin-top:8px; font-family:'Inter';">Cámaras del Códice - Toca la imagen para Ampliar/Reducir.</div>
-      `;
-    } else {
-      imgContainer.innerHTML = `<div style="width:100%; height:180px; background:#111; border-radius:8px; border:1px dashed #444; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.8rem; font-family:'Inter'; text-transform:uppercase; letter-spacing:1px; text-align:center; padding:10px;">[ Transmisión Visual Dañada ]</div>`;
-    }
     openModal('info-modal');
   }
   document.getElementById('info-close').addEventListener('click', () => {
     closeModal('info-modal');
-    document.getElementById('info-img-container').innerHTML = '';
   });
 
   // ====== BIBLIOTECA MARCIAL ======
